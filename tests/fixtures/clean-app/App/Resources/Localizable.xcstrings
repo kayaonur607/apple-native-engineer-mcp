@@ -1,0 +1,24 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Home" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Home" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Ana Sayfa" } }
+      }
+    },
+    "Settings" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Settings" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Ayarlar" } }
+      }
+    },
+    "Recent" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Recent" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Son Kullanılanlar" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}

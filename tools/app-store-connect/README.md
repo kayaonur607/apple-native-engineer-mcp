@@ -1,38 +1,56 @@
-# App Store Connect Toolkit
+# App Store Connect (read-only)
 
-CLI and Python client for interacting with the official Apple App Store Connect REST API:
-- **Connection Diagnostics**: Verifies API keys, Issuer ID, and ES256 authentication.
-- **Application & Version Inspection**: Lists registered applications, inspects submission states, and reads localizations.
-- **Build Monitoring**: Inspects TestFlight and App Store build processing status.
-- **Mock Mode**: Supports `--mock` for local developer testing and CI environments without live API credentials.
+Read-only App Store Connect inspection with explicit auth.
 
----
-
-## Configuration
-
-Copy `.env.example` to `.env` or set environment variables:
-```bash
-cp .env.example .env
-```
-Populate:
-- `ASC_KEY_ID`: Your 10-character Key ID from App Store Connect.
-- `ASC_ISSUER_ID`: Your Issuer ID UUID.
-- `ASC_PRIVATE_KEY_PATH`: Path to your downloaded `AuthKey_XXXX.p8` private key file.
-
----
+Part of [apple-native-engineer-mcp](../../README.md). Exposed over MCP as a matching tool.
 
 ## Usage
 
 ```bash
-# Verify connection
-./tools/app-store-connect/cli.py verify
-
-# List applications
-./tools/app-store-connect/cli.py list-apps
-
-# Inspect version status for an app
-./tools/app-store-connect/cli.py inspect-version --app 1672348910
-
-# Run in mock mode (safe for testing without real credentials)
-./tools/app-store-connect/cli.py --mock list-apps
+python3 tools/app-store-connect/cli.py verify
+python3 tools/app-store-connect/cli.py list-apps
+python3 tools/app-store-connect/cli.py versions --app 1234567890
 ```
+
+Every tool accepts `--json` (stable envelope, see below), `--strict` (warnings become failures) and
+`--color auto|always|never`.
+
+## What it checks
+
+- ES256 JWT signing via `cryptography` (no fake signatures)
+- hard failure when credentials are missing — never a silent mock
+- 429 rate-limit aware with backoff
+- read-only: only GET requests are issued
+
+## Findings
+
+| Code | Meaning |
+| :--- | :--- |
+| `ASC001` | missing credentials |
+| `ASC010` | explicit mock mode |
+| `ASC013` | expired builds |
+
+## Output contract
+
+`--json` prints one object and nothing else:
+
+```json
+{
+  "schema_version": "2.0",
+  "tool": "app-store-connect",
+  "tool_version": "2.0.0",
+  "target": "/absolute/path",
+  "status": "pass | warn | fail",
+  "summary": {"critical": 0, "error": 0, "warning": 0, "info": 0, "total": 0},
+  "findings": [{"code": "...", "severity": "...", "message": "...", "file": "...", "line": 0, "hint": "..."}],
+  "data": {}
+}
+```
+
+## Exit codes
+
+| Code | Meaning |
+| ---: | :--- |
+| 0 | pass (or warnings without `--strict`) |
+| 1 | warnings with `--strict` |
+| 2 | at least one error or critical finding |

@@ -16,7 +16,7 @@ Guides the creation, validation, and Xcode asset cataloging of production-grade 
 3. **Technical Validation**:
    Run the asset validator to ensure exact 1024x1024 dimensions and zero alpha channel transparency:
    ```bash
-   ./tools/asset-validator/validate_assets.py --icon /path/to/icon.png
+   python3 tools/asset-validator/validate_assets.py --icon /path/to/icon.png
    ```
 
 4. **Asset Catalog Integration**:

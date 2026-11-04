@@ -12,7 +12,7 @@ Drafts, checks, and validates App Store listing copy against character limits an
 2. **Automated Validation**:
    Run the metadata validator:
    ```bash
-   ./tools/metadata-validator/validate_metadata.py /path/to/metadata.json
+   python3 tools/metadata-validator/validate_metadata.py /path/to/metadata.json
    ```
 
 3. **Keyword Optimization**:

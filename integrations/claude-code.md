@@ -20,10 +20,10 @@ Claude Code discovers skills placed in either of two locations:
 ### Method A: Automated via Vercel Skills CLI (Recommended)
 ```bash
 # Install to current project
-npx skills add kayaonur607/apple-native-engineer -a claude-code
+npx skills add kayaonur607/apple-native-engineer-mcp -a claude-code
 
 # Install globally to user profile
-npx skills add kayaonur607/apple-native-engineer -g -a claude-code
+npx skills add kayaonur607/apple-native-engineer-mcp -g -a claude-code
 ```
 
 ### Method B: Native Symlink / Clone (Fastest for Local Development)

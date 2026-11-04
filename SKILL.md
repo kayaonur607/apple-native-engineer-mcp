@@ -1,131 +1,213 @@
 ---
 name: apple-native-engineer-mcp
-description: "A comprehensive Apple development toolkit, engineering standard, and Model Context Protocol (MCP) server for building, auditing, and modernizing native iOS, iPadOS, macOS, visionOS, and watchOS applications. Combines AI design engineering with 10 executable MCP/CLI tools: project inspection, asset and icon validation (1024x1024 zero-alpha), App Store screenshot studio, metadata validation, Required-Reason privacy auditing (PrivacyInfo.xcprivacy), localization and RTL checks, widget validation, App Store Connect REST API integration, and pre-flight release readiness reports."
+description: "Operating standard and executable toolkit for shipping genuinely native Apple software. Use when building, reviewing or auditing SwiftUI/UIKit/AppKit apps for iOS 17–27, iPadOS, macOS 14–27, visionOS or watchOS: enforces Human Interface Guidelines, Liquid Glass (iOS 26+) adoption with availability guards, Dynamic Type, semantic colour, VoiceOver, 44pt targets, Swift 6 concurrency and @Observable state, Required-Reason API privacy manifests, String Catalog localisation and RTL, WidgetKit/Live Activity completeness, App Store metadata limits, and a weighted release gate. Ships 14 CLI auditors and an MCP server that returns machine-readable finding codes."
 license: MIT
-compatibility: "Universal: Claude Desktop, Cursor MCP, Claude Code, OpenAI Codex, GitHub Copilot, Gemini CLI, OpenCode, Vercel Skills CLI"
+compatibility: "MCP clients (Claude Desktop, Claude Code, Cursor, Codex, Copilot, Gemini CLI), Agent Skills runtimes, or plain CLI on macOS/Linux with Python 3.9+."
 metadata:
-  version: "1.0.0"
-  author: "Apple Native Engineer Contributors"
+  version: "2.0.0"
   category: "developer-toolkit"
-  platforms: "iOS, iPadOS, macOS, visionOS, watchOS"
-  frameworks: "SwiftUI, UIKit, AppKit, Swift Concurrency, Observation, StoreKit 2, ActivityKit, SwiftData"
+  platforms: "iOS 17-27, iPadOS, macOS 14-27, watchOS 10+, visionOS 1+"
+  frameworks: "SwiftUI, UIKit, AppKit, Observation, SwiftData, StoreKit 2, WidgetKit, ActivityKit, AppIntents, Swift Concurrency"
 ---
 
-# Apple Native Engineer MCP — Development Toolkit & Standard
+# Apple Native Engineer
 
-> **"One toolkit. Your entire Apple development workflow."**
-> Research. Design. Engineer. Audit. Generate. Validate. Publish.
+You are acting as an Apple platform engineer with Apple's own review standards: you design against the Human
+Interface Guidelines, you write Swift 6 that compiles without warnings, and you refuse to ship anything you cannot
+prove works in Dark Mode, at accessibility text sizes, in an RTL language and on the deployment target the project
+actually declares.
 
-> [!NOTE]
-> **Independent Developer Notice**: This toolkit is developed and maintained by independent developers and open-source contributors. It is **not** an official Apple product and is **not** affiliated with, authorized by, sponsored by, or endorsed by Apple Inc. All Apple platform trademarks, names, and design guidelines are referenced solely for descriptive and interoperability purposes under nominative fair use.
-
-You are an expert **Apple Native Engineer, Software Architect, Privacy Auditor, and App Store Connect Specialist**.
-
-You operate across **three complementary layers**:
-- **Layer 1: AI Engineering Standard**: Guiding architecture, HIG compliance, Swift 6 concurrency, and Kowalski motion.
-- **Layer 2: Executable CLI Tools (`tools/`)**: Project inspector, asset validator, screenshot studio, metadata checker, privacy auditor, and release readiness reporter.
-- **Layer 3: Agent Integrations & MCP Server (`integrations/`)**: Exposing real tools via Model Context Protocol (MCP) and agent slash-commands.
+This document is the standard. The `tools/` directory is how the standard is enforced. When they disagree, fix the
+tool — a rule that cannot be checked is an opinion, and opinions do not ship.
 
 ---
 
-## 1. Executable Slash-Commands & Tool Workflows
+## 1. Operating loop
 
-Detailed command specifications reside in [`commands/`](file:///commands/):
+Follow this order for every Apple task. Skipping step 1 is the single most common cause of wrong advice.
 
-| Command | Command Spec | Executable Tool Invocation |
+| Step | Do this | Tool |
 | :--- | :--- | :--- |
-| **`/apple-native`** | [`commands/apple-native.md`](file:///commands/apple-native.md) | `./tools/project-inspector/inspect_project.py` & `./tools/release-readiness/generate_report.py` |
-| **`/apple-native-design`** | [`commands/design.md`](file:///commands/design.md) | Audits typography, 8pt spacing grid, materials, and Kowalski springs. |
-| **`/apple-native-code`** | [`commands/code.md`](file:///commands/code.md) | Modernizes state to `@Observable`, enforces `@MainActor`, and modularizes views. |
-| **`/apple-native-review`** | [`commands/review.md`](file:///commands/review.md) | Pre-flight audit across Sections 1–5 of App Store Review Guidelines. |
-| **`/apple-native-privacy`** | [`commands/privacy.md`](file:///commands/privacy.md) | `./tools/privacy-auditor/audit_privacy.py` |
-| **`/apple-native-icon`** | [`commands/icon.md`](file:///commands/icon.md) | `./tools/asset-validator/validate_assets.py --icon ...` & asset cataloging. |
-| **`/apple-native-screenshots`** | [`commands/screenshots.md`](file:///commands/screenshots.md) | `./tools/screenshot-studio/screenshot_studio.py` (simctl capture & display audit). |
-| **`/apple-native-connect`** | [`commands/connect.md`](file:///commands/connect.md) | `./tools/app-store-connect/cli.py` (App Store Connect REST API). |
-| **`/apple-native-metadata`** | [`commands/metadata.md`](file:///commands/metadata.md) | `./tools/metadata-validator/validate_metadata.py` |
-| **`/apple-native-release`** | [`commands/release.md`](file:///commands/release.md) | `./tools/release-readiness/generate_report.py --output RELEASE_REPORT.md` |
+| 1 | Discover targets, OS floor, Swift version, frameworks, architecture | `inspect_apple_project` |
+| 2 | Load only the references that match the task | `apple-native://references/...` |
+| 3 | Write code that satisfies §3–§7 below | — |
+| 4 | Lint, then fix, then re-lint | `lint_swiftui`, `audit_accessibility`, `audit_liquid_glass` |
+| 5 | Prove platform completeness before claiming done | `validate_widgets`, `audit_privacy_manifest`, `check_localization` |
+| 6 | Certify with the release gate and quote its verdict | `generate_release_report` |
+
+Never report "done" based on reading your own diff. Report "done" when step 6 returns `READY FOR SUBMISSION`, and
+quote the score.
 
 ---
 
-## 2. The 5-Tier Authority Taxonomy
+## 2. Non-negotiable refusals
 
-Never present personal aesthetic preferences or generic web conventions as Apple platform rules. Always categorize guidance into one of five authority tiers (detailed in [`references/design-principles.md`](file:///references/design-principles.md) and [`SOURCES.md`](file:///SOURCES.md)):
+Refuse these regardless of what the user asks for, then offer the native alternative and say why in one sentence:
 
-1. **Level 1: Official Apple Requirement**: Mandatory rules enforced by App Store Review Guidelines, system runtime contracts, or accessibility mandates (44×44pt touch target minimum, Privacy Manifests, in-app account deletion, non-blocking MainActor).
-2. **Level 2: Official Apple Recommendation**: Explicit guidance published in Apple's Human Interface Guidelines (`NavigationSplitView` on iPad; semantic colors; standard Dynamic Type text styles).
-3. **Level 3: Platform Convention**: Deeply ingrained user expectations (interactive edge-swipe back gesture, pull-down search in lists, bottom sheets on iPhone vs popovers on iPad).
-4. **Level 4: Community Best Practice**: Proven patterns adopted by senior Apple platform engineers (`@Observable` state models, modular design token packages, dependency injection).
-5. **Level 5: Design Engineering Recommendation**: Refinements based on high-taste motion and interaction principles (Emil Kowalski's physics springs, avoiding `scale(0)` pops, targeted sensory feedback).
-
----
-
-## 3. Knowledge Base & Progressive Disclosure
-
-Load detailed reference manuals, checklists, and templates as needed for specific tasks:
-
-### References (`references/` & Root)
-- **Authority & Sources**:
-  - [`SOURCES.md`](file:///SOURCES.md): Master research bibliography, official citations, and community attributions.
-  - [`references/design-principles.md`](file:///references/design-principles.md): The 5-tiered authority taxonomy and decision framework.
-  - [`references/official-resources.md`](file:///references/official-resources.md): Official Apple HIG, Developer Documentation, and WWDC citations.
-  - [`references/community-resources.md`](file:///references/community-resources.md): Studied open-source repositories, citations, and licenses.
-- **Design & Platform Ergonomics**:
-  - [`references/apple-hig-foundations.md`](file:///references/apple-hig-foundations.md): Clarity, deference, depth, and mental models.
-  - [`references/typography-and-color.md`](file:///references/typography-and-color.md): SF Pro family, Dynamic Type metrics, and semantic color systems.
-  - [`references/liquid-glass.md`](file:///references/liquid-glass.md): Native materials, translucency, specular edge highlights, and Glisse-inspired parameter engine.
-  - [`references/native-components.md`](file:///references/native-components.md): Buttons, lists, forms, menus, sheets, pickers, and search bars.
-  - [`references/navigation-patterns.md`](file:///references/navigation-patterns.md): `NavigationStack`, `NavigationSplitView`, `TabView`, and detents.
-  - [`references/iphone-design.md`](file:///references/iphone-design.md): Compact width, thumb zones, safe areas, and keyboard handling.
-  - [`references/ipad-design.md`](file:///references/ipad-design.md): Multi-column layouts, sidebars, Stage Manager, pointer hover, and keyboard shortcuts.
-  - [`references/macos-design.md`](file:///references/macos-design.md): Mac unified toolbars, window styles, settings scenes, and menu bar commands.
-  - [`references/visionos-spatial-design.md`](file:///references/visionos-spatial-design.md): visionOS 3D windows, volumes, immersive spaces, ornaments, and gaze-and-pinch input.
-  - [`references/watchos-design.md`](file:///references/watchos-design.md): watchOS 10/11 Smart Stack, vertical pagination, Digital Crown haptics, and Double Tap gesture.
-  - [`references/widgets-live-activities.md`](file:///references/widgets-live-activities.md): WidgetKit, ActivityKit, Dynamic Island presentations, and Lock Screen widgets.
-  - [`references/app-intents-siri-shortcuts.md`](file:///references/app-intents-siri-shortcuts.md): App Intents framework, AppShortcutsProvider, Siri phrases, and iOS 18 Control Center widgets.
-- **Engineering, Privacy, Monetization & Localization**:
-  - [`references/architecture-and-clean-code.md`](file:///references/architecture-and-clean-code.md): Clean architecture, MVVM, `@Observable`, dependency injection, and Swift Testing.
-  - [`references/swiftui-engineering.md`](file:///references/swiftui-engineering.md): SwiftUI state lifecycle, custom view modifiers, and view tree optimization.
-  - [`references/storekit-monetization.md`](file:///references/storekit-monetization.md): StoreKit 2 paywalls, auto-renewing subscriptions, promotional offers, and Xcode testing.
-  - [`references/cloudkit-sync-data.md`](file:///references/cloudkit-sync-data.md): SwiftData `@Model` entities, schema migrations, and private CloudKit database synchronization.
-  - [`references/metal-shaders-visual-effects.md`](file:///references/metal-shaders-visual-effects.md): Metal stitchable shaders, iOS 18 MeshGradient, and sensory haptic feedback.
-  - [`references/internationalization-localization.md`](file:///references/internationalization-localization.md): String Catalogs (`.xcstrings`), pluralization, and Right-to-Left (RTL) mirroring.
-  - [`references/offline-caching-networking.md`](file:///references/offline-caching-networking.md): Resilient `URLSession` concurrency, NWPathMonitor reachability, and background transfers.
-  - [`references/privacy-and-security.md`](file:///references/privacy-and-security.md): Privacy Manifests (`PrivacyInfo.xcprivacy`), Required-Reason APIs, Keychain, and ATT.
-  - [`references/app-store-readiness.md`](file:///references/app-store-readiness.md): App Store Review Guidelines (Sections 1–5), StoreKit 2 paywalls, and Sign in with Apple.
-  - [`references/app-store-connect-api.md`](file:///references/app-store-connect-api.md): Official App Store Connect REST API, JWT auth, endpoints, and error handling.
-  - [`references/accessibility.md`](file:///references/accessibility.md): VoiceOver semantics, Dynamic Type AX, contrast, and 44pt touch targets.
-  - [`references/performance-optimization.md`](file:///references/performance-optimization.md): 120Hz ProMotion, GPU transforms, view invalidation, and retain cycles.
-  - [`references/animation-principles.md`](file:///references/animation-principles.md): Kowalski motion design, physics springs, and sensory feedback.
-  - [`references/design-systems.md`](file:///references/design-systems.md): Token systems for spacing, radius, typography, and elevation.
-  - [`references/visual-quality.md`](file:///references/visual-quality.md): Visual verification protocols, Xcode Previews matrix, and Simulator testing.
-
-### Checklists (`checklists/`)
-- [`checklists/apple-hig-audit.md`](file:///checklists/apple-hig-audit.md): Complete 10-step Apple HIG audit template and severity guide.
-- [`checklists/app-store-guidelines-review.md`](file:///checklists/app-store-guidelines-review.md): Full App Store Review Guidelines compliance checklist (Sections 1–5).
-- [`checklists/privacy-security-review.md`](file:///checklists/privacy-security-review.md): Privacy manifests, permissions, Keychain, and ATT checklist.
-- [`checklists/performance-review.md`](file:///checklists/performance-review.md): SwiftUI rendering, 120Hz smoothness, and concurrency safety checklist.
-- [`checklists/iphone-review.md`](file:///checklists/iphone-review.md): iPhone layout, thumb reach, and modal ergonomics review.
-- [`checklists/ipad-review.md`](file:///checklists/ipad-review.md): iPad multi-column, sidebar, Stage Manager, and pointer review.
-- [`checklists/accessibility-review.md`](file:///checklists/accessibility-review.md): Dynamic Type AX, VoiceOver tree, contrast, and touch target checklist.
-- [`checklists/visual-design-review.md`](file:///checklists/visual-design-review.md): Visual polish, 8pt spacing grid, materials, and hierarchy review.
-- [`checklists/release-review.md`](file:///checklists/release-review.md): Pre-submission release checklist.
-- [`checklists/widget-dynamic-island-review.md`](file:///checklists/widget-dynamic-island-review.md): WidgetKit, Dynamic Island, and Smart Stack review.
-- [`checklists/localization-review.md`](file:///checklists/localization-review.md): String Catalogs, RTL mirroring, and formatting checklist.
-- [`checklists/swiftdata-persistence-review.md`](file:///checklists/swiftdata-persistence-review.md): SwiftData model safety, migrations, and CloudKit sync review.
-
-### Production Examples (`examples/`)
-- [`examples/navigation-examples.md`](file:///examples/navigation-examples.md): Adaptive iPhone/iPad navigation architectures.
-- [`examples/adaptive-layout-examples.md`](file:///examples/adaptive-layout-examples.md): Size-class switching and `ViewThatFits` implementations.
-- [`examples/native-components.md`](file:///examples/native-components.md): Production forms, buttons, pickers, and sheets with correct vs incorrect patterns.
-- [`examples/animation-examples.md`](file:///examples/animation-examples.md): Fluid springs, expandable cards, bookmark toggles, and reduced motion fallbacks.
-- [`examples/design-system-example.md`](file:///examples/design-system-example.md): Modular SwiftUI design token implementation.
-- [`examples/live-activities-example.md`](file:///examples/live-activities-example.md): Dynamic Island & Live Activity full implementation.
-- [`examples/swiftdata-cloudkit-example.md`](file:///examples/swiftdata-cloudkit-example.md): SwiftData model container with CloudKit sync and queries.
-- [`examples/mesh-gradients-shaders.md`](file:///examples/mesh-gradients-shaders.md): iOS 18 `MeshGradient` and Metal shader effects.
-- [`examples/storekit-paywall-example.md`](file:///examples/storekit-paywall-example.md): StoreKit 2 custom subscription store with offer codes.
+1. **Hardcoded colours** (`Color(red:green:blue:)`, hex literals, `Color.white`) for anything that carries meaning.
+   Use semantic colours, asset colours, or `.primary` / `.secondary`.
+2. **Fixed point sizes** (`.font(.system(size: 28))`) for UI text. Use text styles; scale with
+   `@ScaledMetric` for custom values.
+3. **`.frame(width:)` on text.** Use `maxWidth`, `ViewThatFits`, layout priority, or `lineLimit` with
+   `minimumScaleFactor`.
+4. **Hand-rolled glass.** `.ultraThinMaterial` + `.blur` + white-opacity overlays is not Liquid Glass. On iOS 26+
+   use `.glassEffect(_:in:)` behind `#available`; below it, use a single material surface.
+5. **`NavigationView`.** Deprecated since iOS 16. `NavigationStack` or `NavigationSplitView`.
+6. **`ObservableObject` in new code.** `@Observable` tracks per-property access instead of invalidating entire
+   views.
+7. **`try!` and force-unwraps in view code.** Model failure as state.
+8. **A privacy manifest invented from memory.** Reason codes are exact strings; a wrong code is a rejected
+   upload. Use `audit_privacy_manifest` to map usage to codes.
+9. **`.padding(.left)` / `.right`.** They do not mirror in RTL. `.leading` / `.trailing` / `.horizontal`.
 
 ---
 
-## 4. Verification & Claim Integrity Rule
+## 3. Visual language
 
-**CRITICAL**: Never claim an application has been tested or visually inspected unless you have directly executed the tool or inspected the rendered preview/screenshot. If operating in a headless or terminal environment where GUI Simulators are inaccessible, execute the CLI tools (`./tools/project-inspector/inspect_project.py`, `./tools/privacy-auditor/audit_privacy.py`), report the results accurately, and provide the exact `#Preview` code or `xcrun simctl` commands for local verification. Never claim an app is guaranteed App Store approved.
+**Hierarchy comes from type and space, not from boxes.** Before adding a card, a border or a shadow, ask what the
+grouping would look like with 8 more points of margin and a `.secondary` label.
+
+| Decision | Default | Why |
+| :--- | :--- | :--- |
+| Spacing unit | 8pt grid (4pt for icon padding) | Matches Apple's layout rhythm; arbitrary values read as "web". |
+| Corner radius | `.continuous` style, 10–20pt by element size | Squircle optics; a plain `RoundedRectangle` corner looks sharp next to system chrome. |
+| Elevation | `Material` + 0.5pt specular stroke | Drop shadows over 8pt radius are web chrome. |
+| Colour | Semantic first, asset second, literal never | Dark Mode, Increase Contrast and accent tinting all flow from semantics. |
+| Typography | Text styles; `.rounded` for playful, `.serif` for editorial | Dynamic Type, Bold Text and larger accessibility sizes are automatic. |
+| Icons | SF Symbols at matched weight/scale | Optical alignment with text; `symbolRenderingMode` for depth. |
+| Motion | Spring, interruptible, never from `scale(0)` | Physical continuity; `scaleEffect(0)` reads as a glitch. |
+
+**Liquid Glass (iOS 26+)** is a system material, not a blur. It refracts the backdrop, merges with neighbouring
+glass, and reacts to motion.
+
+```swift
+if #available(iOS 26.0, macOS 26.0, *) {
+    card.glassEffect(.regular.tint(.accentColor).interactive(), in: .rect(cornerRadius: 20))
+} else {
+    card.background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+}
+```
+
+Rules: use `GlassEffectContainer` when several glass elements sit near each other; give them `.glassEffectID` so
+they morph; never stack a glass effect on top of another material; never apply glass to text-heavy content where
+legibility matters more than depth.
+
+**Every screen must survive four renders**: Light, Dark, largest accessibility text size, and an RTL locale. If you
+have not looked at all four, you have not finished the screen.
+
+---
+
+## 4. Swift architecture
+
+**State**
+
+- `@Observable` model classes (iOS 17+), owned by a view with `@State` or injected with `.environment`.
+- `@State` for view-local value types. Never `@State` on a reference type you also mutate from outside.
+- Derive, don't duplicate: computed properties over stored mirrors.
+- One owner per piece of state. If two views can write it, it belongs above both.
+
+**Concurrency (Swift 6)**
+
+- Default to `@MainActor` isolation for anything that touches UI; mark the rest `nonisolated` explicitly.
+- `async`/`await` and structured concurrency (`TaskGroup`, `async let`). No `DispatchQueue` in new code.
+- `.task {}` for view-lifetime work — it cancels with the view. `onAppear` + `Task` leaks.
+- `Sendable` on model types that cross isolation boundaries; if a type cannot be `Sendable`, say why in a comment.
+
+**Structure**
+
+- Feature folders, not layer folders: `Feature/Detail/DetailView.swift` beats `Views/DetailView.swift`.
+- Views are value types with no side effects in `body`. No network calls, no formatters built per render, no
+  `Date()` in `body`.
+- Dependency injection through initialisers or the environment; no singletons reached from view code.
+
+**Performance**
+
+- `List`/`LazyVStack` for collections; never `ScrollView` + `VStack` for unbounded content.
+- Stable identity: `ForEach(items)` over `Identifiable`, never `ForEach(0..<items.count)`.
+- `AnyView` only at a true type-erasure boundary; it defeats diffing inside rows.
+- Images: downsampled before display, `.resizable()` + aspect ratio, no full-resolution decode in a row.
+
+---
+
+## 5. Accessibility is a build requirement
+
+| Requirement | Threshold | Check |
+| :--- | :--- | :--- |
+| Text contrast | 4.5:1 body, 3:1 large | `audit_accessibility` (`A11Y001`) |
+| Tap target | 44×44pt minimum | `A11Y020` |
+| Dynamic Type | Layout intact at AX5 | `A11Y010` |
+| VoiceOver | Every control has a label; images are labelled or hidden | `A11Y030`, `A11Y032` |
+| Reduce Motion | Springs collapse to opacity/fade | review |
+| Differentiate Without Colour | Status never encoded in hue alone | review |
+
+Use `.accessibilityLabel` for icon-only controls, `.accessibilityElement(children: .combine)` for composite rows,
+and `.accessibilityHint` only when the action is not obvious from the label.
+
+---
+
+## 6. Privacy and App Store readiness
+
+**Privacy manifest.** Every Required-Reason API category the app (or a bundled SDK) touches needs a declaration in
+`PrivacyInfo.xcprivacy` with a **valid** reason code. The auditor maps usage → category → legal codes:
+
+| Category | Typical trigger | Common valid codes |
+| :--- | :--- | :--- |
+| `NSPrivacyAccessedAPICategoryUserDefaults` | `UserDefaults`, `@AppStorage` | `CA92.1`, `1C8F.1` |
+| `NSPrivacyAccessedAPICategoryFileTimestamp` | `attributesOfItem`, `contentModificationDate` | `C617.1`, `3B52.1` |
+| `NSPrivacyAccessedAPICategorySystemBootTime` | `systemUptime`, `mach_absolute_time` | `35F9.1`, `8FFB.1` |
+| `NSPrivacyAccessedAPICategoryDiskSpace` | `volumeAvailableCapacityKey` | `E174.1`, `85F4.1` |
+| `NSPrivacyAccessedAPICategoryActiveKeyboards` | `activeInputModes` | `3EC4.1`, `54BD.1` |
+
+**Store listing.** Name 30, subtitle 30, keywords 100 (comma separated, no duplicates), promotional text 170,
+description 4000. Support and privacy URLs must be `https://` and load without authentication.
+
+**Icon.** 1024×1024, PNG, no alpha channel, no pre-rounded corners — iOS masks them.
+
+**Screenshots.** 3–10 per device size, at an accepted slot (iPhone 6.9": 1320×2868 or 1290×2796).
+
+---
+
+## 7. Localisation
+
+- `Text("literal")` is already localisable — it is a `LocalizedStringKey`. Do not wrap it in
+  `String(localized:)` for no reason.
+- `Text(someString)` and `NSLocalizedString`-free UIKit assignments are **not** localisable. Fix those.
+- String Catalogs are the format. Plurals use the `plural` variation, not string concatenation.
+- Layout mirrors: `.leading`/`.trailing`, `alignment: .leading`, `LayoutDirection`-aware spacing. Test with
+  Arabic or Hebrew.
+- Never concatenate sentences: `"Hi " + name` breaks grammar in half the world's languages. Use a parameterised
+  string.
+
+---
+
+## 8. Reporting findings
+
+When you report problems, be specific and cite the code:
+
+> `SWU002` at `HomeView.swift:42` — `.foregroundColor` is deprecated since iOS 17 and does not compose with
+> gradients. Replace with `.foregroundStyle(.secondary)`.
+
+Rules of engagement:
+
+- One finding per line, with file:line.
+- State the severity honestly. `critical` means "App Store rejection or crash", not "I prefer it differently".
+- Never report a finding you have not verified with a tool run or by reading the line.
+- If a tool reports something you believe is a false positive, say so explicitly and explain why, rather than
+  silently ignoring it.
+
+---
+
+## 9. Definition of done
+
+A task is done when all of these are true:
+
+- [ ] `lint_swiftui` reports zero errors
+- [ ] `audit_accessibility` reports zero errors, and contrast warnings are resolved or justified
+- [ ] `audit_liquid_glass` reports zero unguarded iOS 26 API usage
+- [ ] `audit_privacy_manifest` passes, or the project genuinely touches no Required-Reason API
+- [ ] `check_localization` reports zero RTL errors and no unlocalisable strings
+- [ ] `validate_widgets` passes if the app ships a widget or Live Activity
+- [ ] `generate_release_report` returns `READY FOR SUBMISSION`
+
+Quote the gate's score in your final message. If the gate is `BLOCKED`, list the blocking gates and what each one
+needs — never describe a blocked project as finished.

@@ -1,218 +1,270 @@
 #!/usr/bin/env python3
-"""
-Apple Native Engineer — Privacy & Required-Reason API Auditor
-Scans source code for Apple Required-Reason API usage, verifies
-PrivacyInfo.xcprivacy declarations, and audits Info.plist permission strings.
+"""Privacy Manifest Auditor — Required-Reason API and PrivacyInfo.xcprivacy audit.
+
+Apple blocks submissions when an app uses a Required-Reason API without declaring
+it in a privacy manifest, or declares a reason code that does not exist. This
+tool maps every detected API usage to the exact reason codes Apple accepts,
+flags undeclared and invalid declarations, and reports tracking domains.
+
+Usage::
+
+    python3 tools/privacy-auditor/audit_privacy.py [PATH] [--json] [--strict]
 """
 
-import sys
-import os
-import re
+from __future__ import annotations
+
 import plistlib
-import json
-import argparse
+import re
+import sys
 from pathlib import Path
+from typing import Dict, List, Optional, Set
 
-REQUIRED_REASON_SIGNATURES = {
-    "NSPrivacyAccessedAPICategoryUserDefaults": [
-        r"UserDefaults\.standard",
-        r"NSUserDefaults",
-        r"@AppStorage"
-    ],
-    "NSPrivacyAccessedAPICategoryFileTimestamp": [
-        r"contentModificationDate",
-        r"creationDate",
-        r"\bstat\b",
-        r"\bfstat\b",
-        r"\bgetattrlist\b"
-    ],
-    "NSPrivacyAccessedAPICategorySystemBootTime": [
-        r"systemUptime",
-        r"mach_absolute_time"
-    ],
-    "NSPrivacyAccessedAPICategoryDiskSpace": [
-        r"volumeAvailableCapacityKey",
-        r"volumeTotalCapacityKey",
-        r"\bstatfs\b",
-        r"\bfstatfs\b"
-    ]
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+
+from apple_native import __version__
+from apple_native.cli import build_parser, emit, guard_directory
+from apple_native.report import Report
+from apple_native.swiftscan import load_swift_files
+from apple_native.xcode import discover
+
+#: Required-Reason API categories and the reason codes Apple documents for each.
+#: Source: developer.apple.com/documentation/bundleresources/privacy_manifest_files
+REQUIRED_REASON_APIS: Dict[str, Dict[str, object]] = {
+    "NSPrivacyAccessedAPICategoryFileTimestamp": {
+        "detect": [
+            r"\bFileManager\b[^;\n]*\.(?:attributesOfItem|creationDate|contentModificationDate)",
+            r"\b(?:creationDate|contentModificationDate|fileModificationDate)\b",
+            r"\.attributesOfItem\s*\(\s*atPath",
+            r"\bstat\s*\(",
+        ],
+        "reasons": {
+            "C617.1": "Access file timestamps inside the app container, app group or app's CloudKit container.",
+            "3B52.1": "Access file timestamps for files the user explicitly granted access to.",
+            "0A2A.1": "Access file timestamps for files outside the container (third-party SDK).",
+        },
+    },
+    "NSPrivacyAccessedAPICategoryUserDefaults": {
+        "detect": [r"\bUserDefaults\b", r"\b@AppStorage\b", r"\bNSUbiquitousKeyValueStore\b"],
+        "reasons": {
+            "CA92.1": "Access user defaults written and read only by the app itself.",
+            "1C8F.1": "Access user defaults shared with app extensions in the same app group.",
+            "AC6B.1": "Access user defaults for a managed configuration profile.",
+            "C56D.1": "Access user defaults to read information provided by a third-party SDK.",
+        },
+    },
+    "NSPrivacyAccessedAPICategorySystemBootTime": {
+        "detect": [
+            r"\bsystemUptime\b",
+            r"\bProcessInfo\b[^;\n]*systemUptime",
+            r"\bmach_absolute_time\b",
+            r"\bclock_gettime\b",
+        ],
+        "reasons": {
+            "35F9.1": "Measure elapsed time between events inside the app.",
+            "8FFB.1": "Calculate absolute timestamps for events that occurred during the same boot.",
+            "3D61.1": "Display the device's boot time to the user (diagnostics).",
+        },
+    },
+    "NSPrivacyAccessedAPICategoryDiskSpace": {
+        "detect": [
+            r"\bvolumeAvailableCapacityKey\b",
+            r"\bvolumeTotalCapacityKey\b",
+            r"\battributesOfFileSystem\b",
+            r"\bNSFileSystemFreeSize\b",
+        ],
+        "reasons": {
+            "E174.1": "Check free disk space before writing files the app manages.",
+            "85F4.1": "Display disk space to the user (storage management UI).",
+            "7D9E.1": "Write files the user explicitly asked the app to store.",
+            "B728.1": "Assess disk space for a feature the user requested.",
+        },
+    },
+    "NSPrivacyAccessedAPICategoryActiveKeyboards": {
+        "detect": [r"\bactiveInputModes\b"],
+        "reasons": {
+            "3EC4.1": "Customise the app's UI for the currently active keyboard language.",
+            "54BD.1": "Adapt custom text input for the active keyboard.",
+        },
+    },
 }
 
-SENSITIVE_PERMISSIONS = [
-    "NSCameraUsageDescription",
-    "NSMicrophoneUsageDescription",
-    "NSLocationWhenInUseUsageDescription",
-    "NSLocationAlwaysAndWhenInUseUsageDescription",
-    "NSPhotoLibraryUsageDescription",
-    "NSContactsUsageDescription",
-    "NSBluetoothAlwaysUsageDescription",
-    "NSFaceIDUsageDescription",
-    "NSUserTrackingUsageDescription"
+TRACKING_SIGNATURES = [
+    (r"\bATTrackingManager\b|\bAppTrackingTransparency\b", "App Tracking Transparency usage"),
+    (r"\bAdSupport\b|\bASIdentifierManager\b", "IDFA / AdSupport usage"),
+    (r"\bFirebaseAnalytics\b|\bGoogleAnalytics\b|\bAmplitude\b|\bMixpanel\b", "Third-party analytics SDK"),
+    (r"\bFBSDK|\bFacebookCore\b", "Meta SDK"),
+    (r"\badvertisingIdentifier\b", "advertisingIdentifier access"),
 ]
 
-def scan_source_code_for_apis(root: Path) -> dict:
-    detected = {cat: [] for cat in REQUIRED_REASON_SIGNATURES}
-    swift_files = list(root.glob("**/*.swift")) + list(root.glob("**/*.m")) + list(root.glob("**/*.mm"))
-    swift_files = [f for f in swift_files if ".build" not in str(f) and "DerivedData" not in str(f) and ".git" not in str(f)]
+COLLECTED_DATA_SIGNATURES = [
+    (r"\bCLLocationManager\b|\brequestWhenInUseAuthorization\b", "Precise location"),
+    (r"\bPHPhotoLibrary\b|\bPHPickerViewController\b", "Photos"),
+    (r"\bAVCaptureDevice\b|\bAVAudioRecorder\b", "Camera or microphone"),
+    (r"\bCNContactStore\b", "Contacts"),
+    (r"\bHKHealthStore\b", "Health data"),
+    (r"\bEKEventStore\b", "Calendar"),
+    (r"\bUMP\b|\bASIdentifierManager\b", "Advertising identifiers"),
+]
 
-    for file_path in swift_files:
-        try:
-            content = file_path.read_text(encoding="utf-8", errors="ignore")
-            for cat, patterns in REQUIRED_REASON_SIGNATURES.items():
-                for pat in patterns:
-                    matches = list(re.finditer(pat, content))
-                    if matches:
-                        rel_path = str(file_path.relative_to(root))
-                        detected[cat].append({
-                            "file": rel_path,
-                            "pattern": pat,
-                            "occurrences": len(matches)
-                        })
-                        break
-        except Exception:
+
+def _load_manifest(path: Path) -> Optional[dict]:
+    try:
+        with path.open("rb") as handle:
+            return plistlib.load(handle)
+    except Exception:  # noqa: BLE001 - malformed manifest reported by caller
+        return None
+
+
+def _declared_reasons(manifest: dict) -> Dict[str, Set[str]]:
+    declared: Dict[str, Set[str]] = {}
+    for entry in manifest.get("NSPrivacyAccessedAPITypes", []) or []:
+        category = entry.get("NSPrivacyAccessedAPIType")
+        reasons = set(entry.get("NSPrivacyAccessedAPITypeReasons", []) or [])
+        if category:
+            declared[str(category)] = reasons
+    return declared
+
+
+def audit_privacy(raw_root: str) -> Report:
+    root = Path(raw_root).expanduser().resolve()
+    report = Report(tool="privacy-auditor", target=str(root), version=__version__)
+
+    project = discover(root)
+    manifest_path = project.privacy_manifests[0] if project.privacy_manifests else None
+    manifest = _load_manifest(manifest_path) if manifest_path else None
+
+    if manifest_path is None:
+        report.error(
+            "PRIV001",
+            "No PrivacyInfo.xcprivacy found in the project.",
+            hint="Add PrivacyInfo.xcprivacy to the app target; App Store Connect rejects uploads that "
+                 "use Required-Reason APIs without one.",
+            docs="https://developer.apple.com/documentation/bundleresources/privacy_manifest_files",
+        )
+    elif manifest is None:
+        report.critical(
+            "PRIV002",
+            f"Privacy manifest could not be parsed: {manifest_path}",
+            hint="Regenerate the manifest in Xcode (File ▸ New ▸ File ▸ Privacy Manifest).",
+        )
+
+    declared = _declared_reasons(manifest) if manifest else {}
+    sources = load_swift_files(root)
+
+    detected: Dict[str, List[str]] = {}
+    for category, spec in REQUIRED_REASON_APIS.items():
+        hits: List[str] = []
+        for swift in sources:
+            for pattern in spec["detect"]:  # type: ignore[index]
+                for match in re.finditer(pattern, swift.clean):
+                    location = f"{swift.relative}:{swift.line_of(match.start())}"
+                    hits.append(location)
+        if hits:
+            detected[category] = sorted(set(hits))
+
+    data: Dict[str, object] = {
+        "manifest": str(manifest_path.relative_to(root)) if manifest_path else None,
+        "scanned_swift_files": len(sources),
+        "detected_categories": {k: len(v) for k, v in detected.items()},
+        "declared_categories": sorted(declared.keys()),
+        "tracking_domains": (manifest or {}).get("NSPrivacyTrackingDomains", []),
+        "tracking_enabled": (manifest or {}).get("NSPrivacyTracking", False),
+    }
+    report.data = data
+
+    for category, hits in detected.items():
+        valid_reasons = REQUIRED_REASON_APIS[category]["reasons"]  # type: ignore[index]
+        declared_reasons = declared.get(category)
+
+        if declared_reasons is None:
+            report.error(
+                "PRIV010",
+                f"{category} is used but not declared in the privacy manifest.",
+                file=hits[0].split(":")[0],
+                line=int(hits[0].rsplit(":", 1)[1]),
+                hint=f"Declare one of: {', '.join(sorted(valid_reasons))} "
+                     f"({len(hits)} usage site(s) detected).",
+            )
             continue
 
-    return {k: v for k, v in detected.items() if v}
-
-def inspect_privacy_manifest(manifest_path: Path) -> dict:
-    if not manifest_path.exists():
-        return {"found": False, "declared_categories": []}
-
-    try:
-        with manifest_path.open("rb") as f:
-            plist = plistlib.load(f)
-            api_types = plist.get("NSPrivacyAccessedAPITypes", [])
-            categories = [item.get("NSPrivacyAccessedAPIType") for item in api_types if isinstance(item, dict)]
-            return {
-                "found": True,
-                "file": str(manifest_path),
-                "declared_categories": categories,
-                "tracking_enabled": plist.get("NSPrivacyTracking", False)
-            }
-    except Exception as e:
-        return {"found": True, "error": str(e), "declared_categories": []}
-
-def audit_info_plist(plist_path: Path) -> dict:
-    if not plist_path.exists():
-        return {"found": False, "permissions": {}}
-
-    try:
-        with plist_path.open("rb") as f:
-            plist = plistlib.load(f)
-            found_permissions = {}
-            for perm in SENSITIVE_PERMISSIONS:
-                if perm in plist:
-                    val = str(plist[perm]).strip()
-                    is_generic = len(val) < 20 or any(bad in val.lower() for bad in ["needed", "required", "access", "app needs"])
-                    found_permissions[perm] = {
-                        "value": val,
-                        "length": len(val),
-                        "suspicious_generic": is_generic
-                    }
-            return {"found": True, "file": str(plist_path), "permissions": found_permissions}
-    except Exception as e:
-        return {"found": True, "error": str(e), "permissions": {}}
-
-def run_privacy_audit(project_dir: str) -> dict:
-    root = Path(project_dir).resolve()
-    if not root.exists():
-        raise FileNotFoundError(f"Directory not found: {project_dir}")
-
-    report = {
-        "project_directory": str(root),
-        "compliant": True,
-        "critical_issues": [],
-        "warnings": [],
-        "detected_apis": scan_source_code_for_apis(root),
-        "privacy_manifest": None,
-        "permission_descriptions": None
-    }
-
-    # Find Privacy Manifest
-    manifests = list(root.glob("**/PrivacyInfo.xcprivacy"))
-    if manifests:
-        manifest_info = inspect_privacy_manifest(manifests[0])
-        report["privacy_manifest"] = manifest_info
-        declared = manifest_info.get("declared_categories", [])
-
-        # Cross-reference detected APIs against declared categories
-        for api_cat, callers in report["detected_apis"].items():
-            if api_cat not in declared:
-                report["compliant"] = False
-                report["critical_issues"].append(
-                    f"Required-Reason API '{api_cat}' is called in {len(callers)} file(s) but is NOT declared in PrivacyInfo.xcprivacy!"
-                )
-    else:
-        # If APIs were detected but NO manifest exists
-        if report["detected_apis"]:
-            report["compliant"] = False
-            report["critical_issues"].append(
-                f"Source code calls {len(report['detected_apis'])} Required-Reason API category/categories, but NO PrivacyInfo.xcprivacy was found in the project!"
+        unknown = {r for r in declared_reasons if r not in valid_reasons}
+        if unknown:
+            report.error(
+                "PRIV011",
+                f"{category} declares invalid reason code(s): {', '.join(sorted(unknown))}.",
+                hint=f"Valid codes are: {', '.join(sorted(valid_reasons))}.",
             )
-        else:
-            report["warnings"].append("No PrivacyInfo.xcprivacy found in project.")
 
-    # Find Info.plist
-    plists = list(root.glob("**/Info.plist"))
-    if plists:
-        plist_info = audit_info_plist(plists[0])
-        report["permission_descriptions"] = plist_info
-        for perm_key, perm_data in plist_info.get("permissions", {}).items():
-            if perm_data.get("suspicious_generic"):
-                report["warnings"].append(
-                    f"Permission '{perm_key}' description may be too vague ('{perm_data['value']}'). Apple Review Guidelines recommend explaining the specific user benefit."
-                )
+        if not declared_reasons:
+            report.warn(
+                "PRIV012",
+                f"{category} is declared with an empty reason list.",
+                hint="App Store Connect requires at least one reason code per declared category.",
+            )
+
+    for category in declared:
+        if category not in REQUIRED_REASON_APIS:
+            report.warn(
+                "PRIV013",
+                f"Unknown Required-Reason API category in manifest: {category}",
+                hint="Check the spelling against Apple's documented category identifiers.",
+            )
+        elif category not in detected:
+            report.info(
+                "PRIV014",
+                f"{category} is declared but no usage was detected in Swift sources.",
+                hint="Keep it only if a dependency needs it; unused declarations are harmless but noisy.",
+            )
+
+    joined = "\n".join(f.clean for f in sources)
+    tracked = [label for pattern, label in TRACKING_SIGNATURES if re.search(pattern, joined)]
+    if tracked:
+        if not (manifest or {}).get("NSPrivacyTracking"):
+            report.warn(
+                "PRIV020",
+                f"Tracking-adjacent APIs detected ({', '.join(tracked)}) but NSPrivacyTracking is false.",
+                hint="If the SDK only performs first-party analytics, document that; otherwise declare tracking "
+                     "and list NSPrivacyTrackingDomains.",
+            )
+        if not (manifest or {}).get("NSPrivacyTrackingDomains"):
+            report.warn(
+                "PRIV021",
+                "NSPrivacyTrackingDomains is empty while tracking signals are present.",
+                hint="List every domain the tracking SDK contacts, e.g. 'app-measurement.com'.",
+            )
+
+    collected = [label for pattern, label in COLLECTED_DATA_SIGNATURES if re.search(pattern, joined)]
+    if collected:
+        data["collected_data_signals"] = collected
+        if not (manifest or {}).get("NSPrivacyCollectedDataTypes"):
+            report.warn(
+                "PRIV022",
+                f"Data-collecting APIs detected ({', '.join(collected)}) but NSPrivacyCollectedDataTypes is empty.",
+                hint="Declare each collected type plus whether it is linked to the user and used for tracking.",
+            )
+
+    if manifest is not None and not detected and not declared:
+        report.info(
+            "PRIV030",
+            "Manifest present but neither Required-Reason usage nor declarations were found.",
+            hint="Nothing to do if the app genuinely touches no Required-Reason APIs.",
+        )
 
     return report
 
-def main():
-    parser = argparse.ArgumentParser(description="Apple Native Engineer — Privacy & Manifest Auditor")
-    parser.add_argument("path", nargs="?", default=".", help="Path to project directory")
-    parser.add_argument("--json", action="store_true", help="Output results in JSON format")
-    args = parser.parse_args()
 
-    try:
-        report = run_privacy_audit(args.path)
-        if args.json:
-            print(json.dumps(report, indent=2))
-        else:
-            print("==========================================================")
-            print("  Apple Native Engineer — Privacy & Manifest Audit Report ")
-            print("==========================================================")
-            print(f"Directory:    {report['project_directory']}")
-            print(f"Compliance:   {'[PASS] COMPLIANT' if report['compliant'] else '[FAIL] ACTION REQUIRED'}")
-            print("----------------------------------------------------------")
-            
-            print(f"Detected Required-Reason APIs:")
-            if report["detected_apis"]:
-                for cat, files in report["detected_apis"].items():
-                    print(f"  • {cat} (in {len(files)} file(s))")
-            else:
-                print("  • None detected.")
+def main(argv=None) -> int:
+    parser = build_parser(
+        "privacy-auditor",
+        "Audit PrivacyInfo.xcprivacy against Required-Reason API usage in Swift sources.",
+        epilog="Exit codes: 0 pass, 1 warnings with --strict, 2 failure.",
+    )
+    args = parser.parse_args(argv)
+    guard = guard_directory("privacy-auditor", args.path)
+    if guard is not None:
+        return emit(guard, args)
+    return emit(audit_privacy(args.path), args, title="Apple Native Engineer — Privacy & Manifest Audit")
 
-            print("\nPrivacy Manifest Status:")
-            if report["privacy_manifest"] and report["privacy_manifest"].get("found"):
-                print(f"  ✓ Found: {report['privacy_manifest']['file']}")
-                print(f"  Declared Categories: {', '.join(report['privacy_manifest']['declared_categories']) or 'None'}")
-            else:
-                print("  ✗ Missing PrivacyInfo.xcprivacy!")
-
-            if report["critical_issues"]:
-                print("\n[CRITICAL ISSUES - APP STORE REJECTION RISK]:")
-                for issue in report["critical_issues"]:
-                    print(f"  ✗ {issue}")
-
-            if report["warnings"]:
-                print("\n[WARNINGS / SUGGESTIONS]:")
-                for w in report["warnings"]:
-                    print(f"  ⚠ {w}")
-
-            print("==========================================================")
-
-        sys.exit(0 if report["compliant"] else 1)
-    except Exception as e:
-        print(f"Error executing privacy audit: {e}", file=sys.stderr)
-        sys.exit(1)
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

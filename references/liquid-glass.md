@@ -1,277 +1,146 @@
-# Liquid Glass & Native Materials
+# Liquid Glass
 
-Apple's design language has evolved towards a sophisticated interplay of optical refraction, background materials, and physical depth—culminating in the visionOS spatial aesthetic and iOS 18 / macOS Sequoia translucent "Liquid Glass" interfaces.
+Liquid Glass is the system material language introduced with **iOS 26, iPadOS 26, macOS 26 (Tahoe), watchOS 26
+and tvOS 26**. It is a real optical material — it refracts and reflects the content behind it, reacts to device
+motion, and merges with neighbouring glass — not a blur you can approximate with stacked `.ultraThinMaterial`
+views.
 
-This document details how to implement native Apple materials and avoid fake, un-native "glassmorphism" web tropes, featuring an advanced configurable parameter engine inspired by research into optical glass simulation (such as `0kzh/glisse`).
-
----
-
-## 1. Native SwiftUI Material Hierarchy
-
-SwiftUI provides native materials that leverage hardware-accelerated Metal shaders. These automatically sample the backdrop, calculate real-time optical blur, and inject Apple's proprietary vibrancy filter into foreground elements.
-
-| Material | Blur Intensity | Translucency | Recommended Use Cases |
-| :--- | :--- | :--- | :--- |
-| `.ultraThinMaterial` | Minimal | Highest | Floating controls, HUD overlays, translucent player controls over video |
-| `.thinMaterial` | Light | High | Toolbars, segmented controls, contextual cards |
-| `.regularMaterial` | Moderate | Balanced | Standard modal sheets, popovers, floating dock-style navigation bars |
-| `.thickMaterial` | Heavy | Low | Content panels requiring high text legibility over busy photo backdrops |
-| `.ultraThickMaterial` | Maximum | Minimal | Large sidebars, background sheets, persistent utility panels |
+> **Availability verified against the iOS 27.2 SDK** (`SwiftUICore.swiftinterface`). Everything below is checked
+> by `tools/liquid-glass-auditor/audit_liquid_glass.py` on every CI run.
 
 ---
 
-## 2. Implementing Native Liquid Glass in SwiftUI
+## 1. The API, exactly
 
-### The Anatomy of Authentic Apple Glass
-Authentic Apple glass is **not** just a semi-transparent box. It consists of three synchronized layers:
-1. **The Material Backdrop**: Real-time Gaussian blur with luminance adjustment.
-2. **The Specular Rim (Edge Highlight)**: A microscopic 0.5pt to 1pt stroke along the perimeter simulating light catching the edge of chamfered glass.
-3. **Vibrant Foreground Content**: Using `.foregroundStyle(.primary | .secondary)` so text and SF Symbols pull luminance through the glass.
-
-```swift
-// ✅ Authentic Apple Native Liquid Glass Card
-struct LiquidGlassCard<Content: View>: View {
-    @Environment(\.colorScheme) private var colorScheme
-    @ViewBuilder var content: Content
-    
-    var body: some View {
-        content
-            .padding(16)
-            .background {
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(.regularMaterial)
-                    .overlay {
-                        // Specular lighting edge
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .strokeBorder(
-                                LinearGradient(
-                                    colors: colorScheme == .dark
-                                        ? [Color.white.opacity(0.25), Color.white.opacity(0.05)]
-                                        : [Color.white.opacity(0.65), Color.black.opacity(0.05)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 0.5
-                            )
-                    }
-                    // Soft, ambient shadow (never harsh black)
-                    .shadow(
-                        color: colorScheme == .dark ? Color.black.opacity(0.3) : Color.black.opacity(0.06),
-                        radius: 12,
-                        x: 0,
-                        y: 4
-                    )
-            }
-    }
-}
-```
-
----
-
-## 3. Web-Slop "Glassmorphism" vs. Apple Native Materials
-
-Many AI coding assistants generate brittle CSS-like glass that fails on native Apple platforms. Avoid these common anti-patterns:
-
-| Aspect | ❌ Web-Slop Anti-Pattern | ✅ Apple Native Standard |
+| Declaration | Availability | Notes |
 | :--- | :--- | :--- |
-| **Backdrop Blur** | Stacking arbitrary opacity colors: `Color.white.opacity(0.1)` with no material filter. | Using SwiftUI `.regularMaterial` or `.ultraThinMaterial`. |
-| **Borders** | Thick solid 2pt or 3pt borders with high opacity (`Color.white.opacity(0.5)`). | Hairline (0.5pt) subtle gradient stroke simulating light refraction. |
-| **Shadows** | Huge muddy black shadows (`.shadow(color: .black, radius: 30)`). | Subtle, multi-tiered ambient shadows with very low opacity (5% - 15%). |
-| **Foreground Text** | Hardcoded white or black text that becomes invisible when backdrop changes. | Semantic foreground styles (`.foregroundStyle(.primary)`) which automatically adopt system vibrancy. |
-| **Corner Radius** | Circular or geometric corners (`CornerRadius(16)` without continuous curve). | Continuous squircle corners (`style: .continuous`). |
+| `.glassEffect(_ glass: Glass = .regular, in shape: some Shape = DefaultGlassEffectShape())` | iOS 26.0+, macOS 26.0+ | **unavailable on visionOS** |
+| `.glassEffectID(_:in:)` | iOS 26.0+ | Stable identity for morph animations inside a container |
+| `.glassEffectUnion(id:namespace:)` | iOS 26.0+ | Merge adjacent glass into one optical surface |
+| `.glassEffectTransition(_:)` | iOS 26.0+ | `.materialize`, `.matchedGeometry` |
+| `GlassEffectContainer { }` | iOS 26.0+ | Required for merging/morphing sibling glass |
+| `Glass.regular` / `.clear` / `.identity` | iOS 26.0+ | `.clear` is for media-rich backdrops; `.identity` is a no-op used for symmetric animation |
+| `.tint(_ color: Color?)` | iOS 26.0+ | Tints the glass, not the content |
+| `.interactive(_ isEnabled: Bool = true)` | iOS 26.0+ | Adds the pointer/press reaction to *custom* interactive glass |
+| `.buttonStyle(.glass)` / `.buttonStyle(.glassProminent)` | iOS 26.0+ | System glass buttons — do not hand-build these |
+| `.scrollEdgeEffectStyle(_:for:)` / `.scrollEdgeEffectHidden()` | iOS 26.0+ | The soft edge fade under bars |
+
+`Glass` is a value type: `Glass.regular.tint(.accentColor).interactive()` composes.
 
 ---
 
-## 4. Accessibility: Handling `Reduce Transparency`
-
-Users with vision impairments or sensory sensitivity often turn on **Reduce Transparency** in iOS/iPadOS/macOS Settings (`Settings → Accessibility → Display & Text Size → Reduce Transparency`).
-
-When this is enabled, transparent materials must automatically collapse into solid, high-contrast opaque surfaces.
+## 2. The one pattern you need
 
 ```swift
-struct AdaptiveGlassSurface: View {
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-    @Environment(\.colorScheme) private var colorScheme
-    
+struct GlassSurface<Content: View>: View {
+    @ViewBuilder var content: Content
+
     var body: some View {
-        VStack {
-            Text("Native Glass")
-                .font(.headline)
-                .foregroundStyle(.primary)
-        }
-        .padding()
-        .background {
-            if reduceTransparency {
-                // Fallback to fully opaque semantic system background
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color(uiColor: .secondarySystemGroupedBackground))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color(uiColor: .separator), lineWidth: 0.5)
-                    )
-            } else {
-                // Liquid native material
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(.ultraThinMaterial)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .strokeBorder(.white.opacity(colorScheme == .dark ? 0.2 : 0.5), lineWidth: 0.5)
-                    )
-            }
+        if #available(iOS 26.0, macOS 26.0, *) {
+            content
+                .padding(16)
+                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        } else {
+            content
+                .padding(16)
+                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         }
     }
 }
 ```
 
----
+The `#available` branch is not optional if your deployment target is below 26. Shipping the call unguarded is a
+compile error on older SDKs and a runtime crash on older OS versions — `LG001` catches it.
 
-## 5. Advanced Configurable Liquid Glass Engine (Inspired by Glisse)
+### Merging glass
 
-Drawing insights from web-based optical liquid glass implementations (such as `0kzh/glisse`) and translating them into hardware-accelerated native SwiftUI, developers can fine-tune refraction, specular intensity, ambient tints, and continuous squircle curvature through a single parameter struct:
+Two glass surfaces that overlap should merge rather than stack. Use a container and stable IDs:
 
 ```swift
-import SwiftUI
-
-// MARK: - Liquid Glass Configuration Parameters
-public struct LiquidGlassConfiguration: Sendable {
-    public var material: Material
-    public var cornerRadius: CGFloat
-    public var specularIntensity: Double
-    public var specularAngle: Angle
-    public var surfaceTint: Color?
-    public var tintOpacity: Double
-    public var shadowRadius: CGFloat
-    public var shadowOpacity: Double
-    
-    public init(
-        material: Material = .regularMaterial,
-        cornerRadius: CGFloat = 16,
-        specularIntensity: Double = 0.5,
-        specularAngle: Angle = .degrees(45),
-        surfaceTint: Color? = nil,
-        tintOpacity: Double = 0.08,
-        shadowRadius: CGFloat = 12,
-        shadowOpacity: Double = 0.08
-    ) {
-        self.material = material
-        self.cornerRadius = cornerRadius
-        self.specularIntensity = specularIntensity
-        self.specularAngle = specularAngle
-        self.surfaceTint = surfaceTint
-        self.tintOpacity = tintOpacity
-        self.shadowRadius = shadowRadius
-        self.shadowOpacity = shadowOpacity
-    }
-    
-    // Standard Presets
-    public static let standard = LiquidGlassConfiguration()
-    
-    public static let hud = LiquidGlassConfiguration(
-        material: .ultraThinMaterial,
-        cornerRadius: 24,
-        specularIntensity: 0.7,
-        shadowRadius: 16,
-        shadowOpacity: 0.12
-    )
-    
-    public static let floatingDock = LiquidGlassConfiguration(
-        material: .thinMaterial,
-        cornerRadius: 32,
-        specularIntensity: 0.6,
-        surfaceTint: .white,
-        tintOpacity: 0.05,
-        shadowRadius: 20,
-        shadowOpacity: 0.15
-    )
-}
-
-// MARK: - Configurable Liquid Glass ViewModifier
-public struct ConfigurableLiquidGlassModifier: ViewModifier {
-    @Environment(\.colorScheme) private var colorScheme
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-    
-    public let config: LiquidGlassConfiguration
-    
-    public func body(content: Content) -> some View {
-        content
-            .background {
-                if reduceTransparency {
-                    // Accessibility high-contrast opaque fallback
-                    RoundedRectangle(cornerRadius: config.cornerRadius, style: .continuous)
-                        .fill(Color(uiColor: .secondarySystemGroupedBackground))
-                        .overlay {
-                            RoundedRectangle(cornerRadius: config.cornerRadius, style: .continuous)
-                                .stroke(Color(uiColor: .separator), lineWidth: 0.5)
-                        }
-                } else {
-                    // Optical Liquid Glass with Specular Gradient & Vibrancy
-                    RoundedRectangle(cornerRadius: config.cornerRadius, style: .continuous)
-                        .fill(config.material)
-                        .overlay {
-                            if let tint = config.surfaceTint {
-                                RoundedRectangle(cornerRadius: config.cornerRadius, style: .continuous)
-                                    .fill(tint.opacity(config.tintOpacity))
-                            }
-                        }
-                        .overlay {
-                            // Specular Edge Lighting
-                            let specularColor = colorScheme == .dark ? Color.white : Color.white
-                            let baseOpacity = colorScheme == .dark ? 0.3 : 0.6
-                            let highlightOpacity = baseOpacity * config.specularIntensity
-                            
-                            RoundedRectangle(cornerRadius: config.cornerRadius, style: .continuous)
-                                .strokeBorder(
-                                    LinearGradient(
-                                        colors: [
-                                            specularColor.opacity(highlightOpacity),
-                                            specularColor.opacity(highlightOpacity * 0.2),
-                                            Color.clear
-                                        ],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ),
-                                    lineWidth: 0.5
-                                )
-                        }
-                        .shadow(
-                            color: Color.black.opacity(colorScheme == .dark ? config.shadowOpacity * 2.2 : config.shadowOpacity),
-                            radius: config.shadowRadius,
-                            x: 0,
-                            y: 4
-                        )
-                }
-            }
-    }
-}
-
-// MARK: - View Extension
-public extension View {
-    func liquidGlass(
-        _ config: LiquidGlassConfiguration = .standard
-    ) -> some View {
-        modifier(ConfigurableLiquidGlassModifier(config: config))
-    }
-    
-    func liquidGlass(
-        material: Material = .regularMaterial,
-        cornerRadius: CGFloat = 16,
-        tint: Color? = nil,
-        specularIntensity: Double = 0.5
-    ) -> some View {
-        let config = LiquidGlassConfiguration(
-            material: material,
-            cornerRadius: cornerRadius,
-            specularIntensity: specularIntensity,
-            surfaceTint: tint
-        )
-        return modifier(ConfigurableLiquidGlassModifier(config: config))
+if #available(iOS 26.0, *) {
+    GlassEffectContainer(spacing: 12) {
+        HStack(spacing: 12) {
+            ControlA().glassEffect(.regular).glassEffectID("a", in: namespace)
+            ControlB().glassEffect(.regular).glassEffectID("b", in: namespace)
+        }
     }
 }
 ```
 
+Without the container, each surface samples the backdrop independently: double the GPU cost and a visible seam.
+
+### Buttons and bars
+
+Do not build glass buttons by hand. The system has them:
+
+```swift
+Button("Continue") { submit() }
+    .buttonStyle(.glassProminent)   // primary action
+Button("Cancel") { dismiss() }
+    .buttonStyle(.glass)            // secondary
+```
+
 ---
 
-## 6. Official HIG References
-- [Apple HIG - Materials](https://developer.apple.com/design/human-interface-guidelines/materials)
-- [Apple HIG - Color & Vibrancy](https://developer.apple.com/design/human-interface-guidelines/color)
-- [Apple HIG - Spatial Layout and Glass (visionOS)](https://developer.apple.com/design/human-interface-guidelines/spatial-layout)
+## 3. What *not* to do
+
+```swift
+// ✗ Imitation: three independent backdrop samples, wrong optics, three offscreen passes
+content
+    .background(.ultraThinMaterial)
+    .blur(radius: 12)
+    .overlay(LinearGradient(colors: [.white.opacity(0.3), .clear], …))
+    .shadow(color: .black.opacity(0.2), radius: 24)
+```
+
+- **Don't stack materials.** One material surface, or one glass effect. Nested `.ultraThinMaterial` layers each
+  sample the backdrop.
+- **Don't blur content that already has a material.** `.blur` behind a material is redundant work.
+- **Don't fake the specular rim with a linear gradient.** Real glass highlights follow the shape's curvature and
+  the light source.
+- **Don't apply glass to text-heavy surfaces.** Legibility wins; use a plain background with
+  `.foregroundStyle(.primary)`.
+- **Don't use `.clear` glass over busy content.** Use it over video or photos where the content *is* the point,
+  and add a `.tint` for contrast.
+
+---
+
+## 4. Performance
+
+| Rule | Why |
+| :--- | :--- |
+| One container per cluster of glass | Each surface is a separate backdrop sample |
+| Prefer `.glass` button styles over custom glass on tap targets | System implementation is already optimised and state-aware |
+| Avoid glass in `List` rows | Hundreds of live backdrops is the fastest way to drop frames |
+| Keep glass off the scrolling axis when possible | Backdrop sampling during scroll is the expensive case |
+| Profile with the Animation Hitches instrument | Glass regressions show up as hitches, not CPU spikes |
+
+---
+
+## 5. Accessibility
+
+- **Reduce Transparency** (`UIAccessibility.isReduceTransparencyEnabled`): glass becomes opaque. Never encode
+  meaning in the translucency alone — a label on glass must still meet 4.5:1 against the *worst* backdrop.
+- **Increase Contrast** increases material opacity automatically; custom gradients do not get that treatment.
+- **Reduce Motion** disables the interactive reaction; don't rely on it for feedback.
+- VoiceOver ignores visual layering: every glass control still needs a label.
+
+---
+
+## 6. Review checklist
+
+- [ ] Every glass API call is inside an availability guard matching the deployment target
+- [ ] Sibling glass elements live in a `GlassEffectContainer` with `.glassEffectID`
+- [ ] No `.ultraThinMaterial` + `.blur` + gradient shadow stacks remain
+- [ ] Glass buttons use `.buttonStyle(.glass)` / `.glassProminent`
+- [ ] Text on glass passes contrast against the busiest backdrop you ship
+- [ ] Verified with Reduce Transparency and Increase Contrast enabled
+- [ ] `tools/liquid-glass-auditor/audit_liquid_glass.py` reports zero `LG001` / `LG010`
+
+---
+
+## 7. Sources
+
+- Apple, *Liquid Glass* technology overview — <https://developer.apple.com/documentation/technologyoverviews/liquid-glass>
+- Apple, *Adopting Liquid Glass* — <https://developer.apple.com/documentation/technologyoverviews/adopting-liquid-glass>
+- `SwiftUICore` SDK interface (verified locally against iOS 27.2)

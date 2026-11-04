@@ -1,125 +1,179 @@
 #!/usr/bin/env python3
-"""
-Apple Native Engineer — Screenshot Studio Tool
-Manages App Store screenshot workflows:
-- Validates screenshot sets against official display specs.
-- Captures screenshots from active iOS/iPadOS simulators using xcrun simctl.
-- Organizes export folders by device and locale.
+"""Screenshot Studio — capture and audit App Store screenshots.
+
+Two modes:
+
+``capture``  grabs a screenshot from the booted simulator via ``xcrun simctl``
+             (macOS + Xcode only) and immediately validates the resulting pixel
+             size against the App Store slots.
+``audit``    validates an existing directory of screenshots.
+
+Usage::
+
+    python3 tools/screenshot-studio/screenshot_studio.py --out shot.png
+    python3 tools/screenshot-studio/screenshot_studio.py --screenshots ./shots
 """
 
-import sys
-import os
-import json
+from __future__ import annotations
+
 import shutil
 import subprocess
-import argparse
+import sys
 from pathlib import Path
+from typing import Dict, List, Optional
 
-# Add asset validator to path
-sys.path.insert(0, str(Path(__file__).parent.parent / "asset-validator"))
-from validate_assets import validate_screenshot
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 
-def capture_simulator_screenshot(output_path: str) -> dict:
-    dest = Path(output_path).resolve()
-    dest.parent.mkdir(parents=True, exist_ok=True)
+from apple_native import __version__
+from apple_native.cli import build_parser, emit
+from apple_native.imaging import (
+    UnsupportedImage,
+    closest_screenshot_slots,
+    image_info,
+    match_screenshot_spec,
+)
+from apple_native.report import Report
+from apple_native.swiftscan import iter_files
 
-    # Check if xcrun is available (macOS only)
+
+def list_booted_simulators() -> List[Dict[str, str]]:
     if shutil.which("xcrun") is None:
-        return {
-            "success": False,
-            "error": "'xcrun' is not available. Simulator screenshot capture requires macOS with Xcode Command Line Tools installed."
-        }
-
+        return []
     try:
-        cmd = ["xcrun", "simctl", "io", "booted", "screenshot", str(dest)]
-        proc = subprocess.run(cmd, capture_output=True, text=True)
-        if proc.returncode != 0:
-            return {
-                "success": False,
-                "error": f"xcrun simctl failed: {proc.stderr.strip()}"
-            }
-        
-        # Validate captured screenshot
-        val_result = validate_screenshot(str(dest))
-        return {
-            "success": True,
-            "file": str(dest),
-            "validation": val_result
-        }
-    except Exception as e:
-        return {"success": False, "error": str(e)}
+        proc = subprocess.run(
+            ["xcrun", "simctl", "list", "devices", "booted", "--json"],
+            capture_output=True, text=True, timeout=30,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return []
+    if proc.returncode != 0:
+        return []
+    import json
+    try:
+        payload = json.loads(proc.stdout)
+    except json.JSONDecodeError:
+        return []
+    devices: List[Dict[str, str]] = []
+    for runtime, entries in payload.get("devices", {}).items():
+        for entry in entries:
+            if entry.get("state") == "Booted":
+                devices.append({"name": entry.get("name", "?"), "udid": entry.get("udid", "?"), "runtime": runtime})
+    return devices
 
-def audit_screenshot_directory(dir_path: str) -> dict:
-    root = Path(dir_path).resolve()
-    if not root.exists():
-        raise FileNotFoundError(f"Screenshot directory not found: {dir_path}")
 
-    images = list(root.glob("**/*.png")) + list(root.glob("**/*.jpg")) + list(root.glob("**/*.jpeg"))
-    results = {
-        "directory": str(root),
-        "total_images": len(images),
-        "valid_count": 0,
-        "invalid_count": 0,
-        "device_breakdown": {},
-        "files": []
-    }
+def capture(output: Path, device: Optional[str] = None, report: Optional[Report] = None) -> Report:
+    report = report or Report(tool="screenshot-studio", target=str(output), version=__version__)
 
-    for img in images:
-        val = validate_screenshot(str(img))
-        results["files"].append(val)
-        if val["valid"]:
-            results["valid_count"] += 1
-            dev = val.get("matched_device", "Unknown")
-            results["device_breakdown"][dev] = results["device_breakdown"].get(dev, 0) + 1
+    if shutil.which("xcrun") is None:
+        report.error(
+            "SHOT001",
+            "xcrun is not available; simulator capture requires macOS with Xcode installed.",
+            hint="Run this on a Mac with Xcode, or use --screenshots to audit existing files.",
+        )
+        return report
+
+    devices = list_booted_simulators()
+    report.data["booted_simulators"] = devices
+    if not devices:
+        report.error(
+            "SHOT002",
+            "No booted simulator found.",
+            hint="Boot one with: xcrun simctl boot 'iPhone 17 Pro' (then re-run).",
+        )
+        return report
+
+    target = device or devices[0]["udid"]
+    output.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        proc = subprocess.run(
+            ["xcrun", "simctl", "io", target, "screenshot", str(output)],
+            capture_output=True, text=True, timeout=120,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        report.error("SHOT003", f"Simulator capture failed: {exc}")
+        return report
+
+    if proc.returncode != 0:
+        report.error(
+            "SHOT004",
+            f"simctl screenshot failed: {proc.stderr.strip() or 'unknown error'}",
+            hint="Check the device is booted and not showing a permission dialog.",
+        )
+        return report
+
+    report.data["captured"] = str(output)
+    audit_image(output, report)
+    return report
+
+
+def audit_image(path: Path, report: Report) -> None:
+    try:
+        info = image_info(path)
+    except (UnsupportedImage, OSError) as exc:
+        report.error("SHOT010", f"Unreadable screenshot: {exc}", file=path.name)
+        return
+
+    match = match_screenshot_spec(info.width, info.height)
+    if match is None:
+        hints = closest_screenshot_slots(info.width, info.height, 1)
+        suggestion = ""
+        if hints:
+            _, device, orientation, size = hints[0]
+            suggestion = f" Closest App Store slot: {device} {orientation} {size[0]}x{size[1]}."
+        report.warn(
+            "SHOT011",
+            f"{path.name} is {info.width}x{info.height}, which is not an App Store screenshot slot.",
+            file=path.name,
+            hint="App Store Connect rejects unsupported dimensions." + suggestion,
+        )
+    else:
+        device_slot, orientation = match
+        report.info("SHOT012", f"{path.name} matches {device_slot} ({orientation}).", file=path.name)
+        report.data["slot"] = f"{device_slot} {orientation}"
+
+
+def audit_directory(directory: Path, report: Report) -> None:
+    images = list(iter_files(directory, (".png", ".jpg", ".jpeg")))
+    report.data["screenshot_count"] = len(images)
+    if not images:
+        report.warn("SHOT020", "No screenshots found in directory.", file=str(directory))
+        return
+    for image in images:
+        audit_image(image, report)
+
+
+def main(argv=None) -> int:
+    parser = build_parser(
+        "screenshot-studio",
+        "Capture simulator screenshots and validate them against App Store slots.",
+        epilog="Exit codes: 0 pass, 1 warnings with --strict, 2 failure.",
+    )
+    parser.add_argument("--out", help="Capture a screenshot to this path (requires a booted simulator)")
+    parser.add_argument("--device", help="Simulator UDID to capture from (default: first booted)")
+    parser.add_argument("--screenshots", help="Audit an existing screenshots directory")
+    args = parser.parse_args(argv)
+
+    if args.out:
+        report = capture(Path(args.out).expanduser().resolve(), device=args.device)
+        return emit(report, args, title="Apple Native Engineer — Screenshot Capture")
+
+    if args.screenshots:
+        target = Path(args.screenshots).expanduser().resolve()
+        report = Report(tool="screenshot-studio", target=str(target), version=__version__)
+        if not target.is_dir():
+            report.error("SHOT000", f"Directory not found: {target}")
         else:
-            results["invalid_count"] += 1
+            audit_directory(target, report)
+        return emit(report, args, title="Apple Native Engineer — Screenshot Audit")
 
-    return results
+    report = Report(tool="screenshot-studio", target=".", version=__version__)
+    report.info(
+        "SHOT030",
+        "Nothing to do: pass --out <file> to capture or --screenshots <dir> to audit.",
+        hint="Example: --out ./shots/home.png --device <UDID>",
+    )
+    return emit(report, args, title="Apple Native Engineer — Screenshot Studio")
 
-def main():
-    parser = argparse.ArgumentParser(description="Apple Native Engineer — Screenshot Studio")
-    parser.add_argument("--capture", type=str, help="Capture screenshot from booted iOS Simulator and save to specified file path")
-    parser.add_argument("--audit", type=str, help="Audit a folder of screenshots against App Store specifications")
-    parser.add_argument("--json", action="store_true", help="Output results in JSON format")
-    args = parser.parse_args()
-
-    if not args.capture and not args.audit:
-        parser.print_help()
-        sys.exit(0)
-
-    if args.capture:
-        res = capture_simulator_screenshot(args.capture)
-        if args.json:
-            print(json.dumps(res, indent=2))
-        else:
-            if res["success"]:
-                print(f"✓ Screenshot captured successfully: {res['file']}")
-                val = res.get("validation", {})
-                if val.get("valid"):
-                    print(f"  Matched Device: {val.get('matched_device')} ({val.get('width')}x{val.get('height')} px)")
-                else:
-                    print(f"  ⚠ Warning: {', '.join(val.get('errors', []))}")
-            else:
-                print(f"✗ Failed to capture screenshot: {res['error']}", file=sys.stderr)
-                sys.exit(1)
-
-    elif args.audit:
-        rep = audit_screenshot_directory(args.audit)
-        if args.json:
-            print(json.dumps(rep, indent=2))
-        else:
-            print("==========================================================")
-            print("  Apple Native Engineer — Screenshot Set Audit            ")
-            print("==========================================================")
-            print(f"Directory:    {rep['directory']}")
-            print(f"Total Images: {rep['total_images']}")
-            print(f"Valid:        {rep['valid_count']} | Invalid: {rep['invalid_count']}")
-            print("Device Breakdown:")
-            for dev, count in rep["device_breakdown"].items():
-                print(f"  • {dev}: {count} image(s)")
-            print("==========================================================")
-            if rep["invalid_count"] > 0:
-                sys.exit(1)
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

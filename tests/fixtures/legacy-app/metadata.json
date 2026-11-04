@@ -1,0 +1,10 @@
+{
+  "name": "Legacy App — The Best Legacy App In The World",
+  "subtitle": "Ship faster with legacy patterns everywhere",
+  "keywords": "legacy,legacy,app,app,swift,swiftui,ios,mac",
+  "promotional_text": "Short text.",
+  "description": "A deliberately broken listing used by the test suite. It has an http link: http://example.com and no privacy policy URL.",
+  "support_url": "http://example.com/support",
+  "marketing_url": "not-a-url",
+  "screenshots": ["one.png", "two.png"]
+}

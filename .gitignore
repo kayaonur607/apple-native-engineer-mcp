@@ -26,13 +26,18 @@ Thumbs.db
 !*.xcworkspace/contents.xcworkspacedata
 DerivedData/
 *.swp
-*.lock
+# package-lock.json is committed: CI runs `npm ci`
+!package-lock.json
 
 # Node & Package Managers
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Repository verification scratch space
+.swiftwork/
+RELEASE_REPORT.md
 
 # AI Agent Local Cache & Temporary Session Files
 .claude/memory/

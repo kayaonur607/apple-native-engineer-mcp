@@ -9,19 +9,19 @@ The master orchestration command that evaluates an existing Apple platform proje
 1. **Workspace Inspection**:
    Run the project inspector tool to analyze project type, frameworks, and architecture:
    ```bash
-   ./tools/project-inspector/inspect_project.py . --json
+   python3 tools/project-inspector/inspect_project.py . --json
    ```
 
 2. **Privacy & Security Audit**:
    Scan for Required-Reason APIs and verify `PrivacyInfo.xcprivacy`:
    ```bash
-   ./tools/privacy-auditor/audit_privacy.py . --json
+   python3 tools/privacy-auditor/audit_privacy.py . --json
    ```
 
 3. **Release Readiness Evaluation**:
    Generate an end-to-end readiness score and quality gate report:
    ```bash
-   ./tools/release-readiness/generate_report.py .
+   python3 tools/release-readiness/generate_report.py .
    ```
 
 4. **Interactive Alignment**:

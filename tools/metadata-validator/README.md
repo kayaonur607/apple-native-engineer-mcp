@@ -1,19 +1,56 @@
-# App Store Metadata Validator Tool
+# Metadata Validator
 
-Validates App Store metadata against official Apple App Store Connect specifications:
-- **Character Limits**: Name (30), Subtitle (30), Description (4000), Keywords (100), Promotional Text (170), What's New (4000).
-- **Mandatory URLs**: Validates `privacyPolicyUrl` (Guideline 5.1.1) and `supportUrl`.
-- **Keyword Optimization**: Detects duplicate keywords and keywords redundantly repeated in the app title.
-- **Review Sensitivity**: Flags unsubstantiated marketing superlatives ("best app", "#1", "top rated").
+App Store listing copy and URLs against App Store Connect limits.
 
----
+Part of [apple-native-engineer-mcp](../../README.md). Exposed over MCP as a matching tool.
 
 ## Usage
 
 ```bash
-# Validate metadata template or project metadata JSON
-./tools/metadata-validator/validate_metadata.py templates/metadata/app_metadata_template.json
-
-# Output in JSON format for automated CI or MCP tools
-./tools/metadata-validator/validate_metadata.py templates/metadata/app_metadata_template.json --json
+python3 tools/metadata-validator/validate_metadata.py metadata.json
 ```
+
+Every tool accepts `--json` (stable envelope, see below), `--strict` (warnings become failures) and
+`--color auto|always|never`.
+
+## What it checks
+
+- character limits: name 30, subtitle 30, keywords 100, promotional text 170, description 4000
+- required `https://` URLs (support, privacy) and optional marketing URL
+- keyword duplicates and wasted budget
+- screenshot count (3–10) and http links in the description
+
+## Findings
+
+| Code | Meaning |
+| :--- | :--- |
+| `META001` | over character limit |
+| `META004` | required URL missing |
+| `META005` | invalid https URL |
+| `META007` | duplicate keywords |
+| `META012` | fewer than 3 screenshots |
+
+## Output contract
+
+`--json` prints one object and nothing else:
+
+```json
+{
+  "schema_version": "2.0",
+  "tool": "metadata-validator",
+  "tool_version": "2.0.0",
+  "target": "/absolute/path",
+  "status": "pass | warn | fail",
+  "summary": {"critical": 0, "error": 0, "warning": 0, "info": 0, "total": 0},
+  "findings": [{"code": "...", "severity": "...", "message": "...", "file": "...", "line": 0, "hint": "..."}],
+  "data": {}
+}
+```
+
+## Exit codes
+
+| Code | Meaning |
+| ---: | :--- |
+| 0 | pass (or warnings without `--strict`) |
+| 1 | warnings with `--strict` |
+| 2 | at least one error or critical finding |

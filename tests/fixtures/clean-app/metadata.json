@@ -1,0 +1,11 @@
+{
+  "name": "Clean App",
+  "subtitle": "Native by default",
+  "keywords": "swiftui,native,ios,design,widgets",
+  "promotional_text": "Built with the Apple Native Engineer standard.",
+  "description": "A reference app used by the verification suite. Every screen follows the HIG, supports Dynamic Type, VoiceOver and Dark Mode, and the release gate passes with no findings.",
+  "support_url": "https://example.com/support",
+  "privacy_url": "https://example.com/privacy",
+  "marketing_url": "https://example.com",
+  "screenshots": ["home.png", "detail.png", "settings.png"]
+}

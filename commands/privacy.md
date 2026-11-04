@@ -9,7 +9,7 @@ Audits privacy manifests, Required-Reason APIs, `Info.plist` permission descript
 1. **Automated Audit**:
    Execute the privacy auditor tool:
    ```bash
-   ./tools/privacy-auditor/audit_privacy.py . --json
+   python3 tools/privacy-auditor/audit_privacy.py . --json
    ```
 
 2. **Required-Reason APIs**:

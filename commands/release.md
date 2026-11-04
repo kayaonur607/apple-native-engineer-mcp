@@ -9,7 +9,7 @@ Executes final quality gates and generates a publication-ready release report be
 1. **Run Full Quality Gate**:
    Execute the release readiness generator:
    ```bash
-   ./tools/release-readiness/generate_report.py . --output RELEASE_REPORT.md
+   python3 tools/release-readiness/generate_report.py . --output RELEASE_REPORT.md
    ```
 
 2. **Verify Critical Gates**:

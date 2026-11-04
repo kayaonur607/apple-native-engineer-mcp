@@ -42,12 +42,12 @@
 
     <!-- Main Title -->
     <text x="75" y="46" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="42" font-weight="700" letter-spacing="-0.5" fill="url(#textGrad)">
-      Apple Native Engineer MCP
+      apple-native-engineer-mcp
     </text>
 
     <!-- Subtitle Tagline -->
     <text x="75" y="86" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif" font-size="19" font-weight="400" fill="#8E95A5">
-      Apple Platform Design Engineering Standard, Executable Toolkit &amp; MCP Server
+      14 auditors · 13 MCP tools · 30 references · every claim verified by CI
     </text>
 
     <!-- Pillar Chips -->
@@ -70,7 +70,7 @@
 
       <!-- Chip 5: Kowalski Motion -->
       <rect x="620" y="0" width="140" height="32" rx="16" fill="white" fill-opacity="0.06" stroke="white" stroke-opacity="0.15"/>
-      <text x="690" y="20" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" font-size="12" font-weight="600" fill="#64D2FF" text-anchor="middle">✨ Kowalski Springs</text>
+      <text x="690" y="20" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" font-size="12" font-weight="600" fill="#64D2FF" text-anchor="middle">🧊 Liquid Glass 26</text>
     </g>
 
     <!-- Clear Independent Developer Disclaimer -->

@@ -20,7 +20,7 @@ Cursor supports native skill and context discovery through either of the followi
 ### Method A: Automated via Vercel Skills CLI
 ```bash
 # Add to current workspace
-npx skills add kayaonur607/apple-native-engineer -a cursor
+npx skills add kayaonur607/apple-native-engineer-mcp -a cursor
 ```
 
 ### Method B: Manual Symlink

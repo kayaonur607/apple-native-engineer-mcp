@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  repository:
+    name: Structure, links and counts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate repository
+        run: python3 scripts/validate_repo.py
+
+  python:
+    name: Python tests (3.${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.9", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Run unit and golden tests
+        run: python3 -m unittest discover -s tests -t tests -v
+
+  mcp:
+    name: MCP protocol tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: integrations/mcp-server/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install server dependencies
+        working-directory: integrations/mcp-server
+        run: npm ci
+      - name: Run MCP client/server tests
+        working-directory: integrations/mcp-server
+        run: npm test
+
+  swift:
+    name: Swift compilation
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Type-check fixtures and parse documentation snippets
+        run: ./scripts/verify-swift.sh

@@ -20,10 +20,10 @@ OpenAI Codex discovers skills using the canonical Agent Skills directory structu
 ### Method A: Automated via Vercel Skills CLI
 ```bash
 # Project-level install
-npx skills add kayaonur607/apple-native-engineer -a codex
+npx skills add kayaonur607/apple-native-engineer-mcp -a codex
 
 # Global install
-npx skills add kayaonur607/apple-native-engineer -g -a codex
+npx skills add kayaonur607/apple-native-engineer-mcp -g -a codex
 ```
 
 ### Method B: Manual Symlink / Directory Copy

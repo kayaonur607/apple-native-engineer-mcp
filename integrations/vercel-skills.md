@@ -10,24 +10,24 @@ Once the repository is published on GitHub, developers can install it directly u
 
 ### Install into Current Project (Default)
 ```bash
-npx skills add kayaonur607/apple-native-engineer
+npx skills add kayaonur607/apple-native-engineer-mcp
 ```
 
 ### Install Globally (Available Across All Workspaces)
 ```bash
-npx skills add kayaonur607/apple-native-engineer -g
+npx skills add kayaonur607/apple-native-engineer-mcp -g
 ```
 
 ### Target Specific Agents
 ```bash
 # Target Claude Code only
-npx skills add kayaonur607/apple-native-engineer -a claude-code
+npx skills add kayaonur607/apple-native-engineer-mcp -a claude-code
 
 # Target Cursor only
-npx skills add kayaonur607/apple-native-engineer -a cursor
+npx skills add kayaonur607/apple-native-engineer-mcp -a cursor
 
 # Target multiple agents simultaneously
-npx skills add kayaonur607/apple-native-engineer -a claude-code -a cursor -a codex
+npx skills add kayaonur607/apple-native-engineer-mcp -a claude-code -a cursor -a codex
 ```
 
 ---

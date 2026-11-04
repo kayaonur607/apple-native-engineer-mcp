@@ -1,20 +1,56 @@
-# Asset Validator Tool
+# Asset Validator
 
-Executable tool that inspects and validates App Store asset requirements:
-- **App Icons**: Validates exact 1024x1024pt dimensions, PNG signature, and verifies that no alpha channel (transparency) exists.
-- **App Store Screenshots**: Validates pixel dimensions against Apple's official display specifications (iPhone 6.9", 6.7", 6.5", iPad 13", iPad 12.9", Mac).
+App Store icon and screenshot compliance, parsed from image headers.
 
----
+Part of [apple-native-engineer-mcp](../../README.md). Exposed over MCP as a matching tool.
 
 ## Usage
 
 ```bash
-# Validate an App Icon
-./tools/asset-validator/validate_assets.py --icon /path/to/AppIcon-1024.png
-
-# Validate an App Store Screenshot
-./tools/asset-validator/validate_assets.py --screenshot /path/to/screen_6_7.png
-
-# Output JSON for CI or MCP integration
-./tools/asset-validator/validate_assets.py --icon /path/to/AppIcon-1024.png --json
+python3 tools/asset-validator/validate_assets.py [PATH]
+python3 tools/asset-validator/validate_assets.py --icon AppIcon-1024.png
+python3 tools/asset-validator/validate_assets.py --screenshots ./shots
 ```
+
+Every tool accepts `--json` (stable envelope, see below), `--strict` (warnings become failures) and
+`--color auto|always|never`.
+
+## What it checks
+
+- marketing icon: exactly 1024×1024, PNG, no alpha channel
+- `.appiconset` Contents.json: declared slots exist with matching dimensions
+- screenshots: accepted App Store slot per device and orientation
+
+## Findings
+
+| Code | Meaning |
+| :--- | :--- |
+| `ASSET002` | not a PNG |
+| `ASSET003` | wrong dimensions |
+| `ASSET004` | alpha channel present |
+| `ASSET022` | screenshot slot unknown |
+
+## Output contract
+
+`--json` prints one object and nothing else:
+
+```json
+{
+  "schema_version": "2.0",
+  "tool": "asset-validator",
+  "tool_version": "2.0.0",
+  "target": "/absolute/path",
+  "status": "pass | warn | fail",
+  "summary": {"critical": 0, "error": 0, "warning": 0, "info": 0, "total": 0},
+  "findings": [{"code": "...", "severity": "...", "message": "...", "file": "...", "line": 0, "hint": "..."}],
+  "data": {}
+}
+```
+
+## Exit codes
+
+| Code | Meaning |
+| ---: | :--- |
+| 0 | pass (or warnings without `--strict`) |
+| 1 | warnings with `--strict` |
+| 2 | at least one error or critical finding |

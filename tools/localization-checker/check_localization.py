@@ -1,173 +1,247 @@
 #!/usr/bin/env python3
-"""
-Apple Native Engineer — Localization Checker
-Scans Apple platform projects for hardcoded UI strings, directional layout anti-patterns,
-and String Catalog (.xcstrings) completeness.
+"""Localization Checker — hardcoded strings, RTL mirroring and String Catalogs.
+
+Detects the three localisation bugs that are cheap to fix early and expensive to
+fix after launch:
+
+1. user-visible string literals in SwiftUI views instead of ``LocalizedStringKey``
+   or ``String(localized:)``
+2. layout code that assumes left-to-right (``.padding(.leading)`` is fine,
+   ``.left``/``.right`` and hardcoded ``alignment: .leading`` in RTL-hostile ways)
+3. ``.xcstrings`` catalogs with missing languages or unlocalised plural forms
+
+Usage::
+
+    python3 tools/localization-checker/check_localization.py [PATH] [--json]
 """
 
-import os
-import sys
+from __future__ import annotations
+
 import json
 import re
-import argparse
+import sys
 from pathlib import Path
+from typing import Dict, List, Optional
 
-# Patterns indicating hardcoded strings in SwiftUI views
-HARDCODED_TEXT_PATTERN = re.compile(r'\b(Text|Button|Label|NavigationTitle)\s*\(\s*"([^"]+)"\s*\)')
-DIRECTIONAL_PADDING_PATTERN = re.compile(r'\.padding\s*\(\s*\.(left|right)\b')
-ALIGNMENT_PATTERN = re.compile(r'\b(TextAlignment|\.alignment)\s*:\s*\.(leading|trailing|center|left|right)\b')
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 
-def scan_swift_files(project_dir: Path):
-    findings = []
-    swift_files = list(project_dir.glob("**/*.swift"))
+from apple_native import __version__
+from apple_native.cli import build_parser, emit, guard_directory
+from apple_native.report import Report
+from apple_native.swiftscan import iter_files, load_swift_files
 
-    for file_path in swift_files:
-        # Ignore build or test fixture directories
-        if any(part in file_path.parts for part in [".build", "DerivedData", "Pods", "Carthage"]):
+#: Constructs that explicitly bypass localisation.
+VERBATIM_PATTERNS = [
+    re.compile(r'Text\s*\(\s*verbatim\s*:\s*"((?:[^"\\]|\\.){2,})"'),
+    re.compile(r'String\s*\(\s*verbatim\s*:\s*"((?:[^"\\]|\\.){2,})"'),
+]
+
+#: UIKit / AppKit properties whose String overload is not localisable at all.
+UIKIT_STRING_ASSIGNMENTS = [
+    (re.compile(r'\.text\s*=\s*"((?:[^"\\]|\\.){2,})"'), ".text = \"...\""),
+    (re.compile(r'\.placeholder\s*=\s*"((?:[^"\\]|\\.){2,})"'), ".placeholder = \"...\""),
+    (re.compile(r'\.title\s*=\s*"((?:[^"\\]|\\.){2,})"'), ".title = \"...\""),
+    (re.compile(r'setTitle\s*\(\s*"((?:[^"\\]|\\.){2,})"'), "setTitle(\"...\")"),
+    (re.compile(r'setMessage\s*\(\s*"((?:[^"\\]|\\.){2,})"'), "setMessage(\"...\")"),
+]
+
+#: SwiftUI's `Text(String)` overload takes an already-resolved string, so an
+#: interpolated variable is *not* looked up in the String Catalog.
+TEXT_DYNAMIC = re.compile(r'Text\s*\(\s*([a-zA-Z_][\w.]*(?:\([^)]*\))?)\s*\)')
+
+#: Direction-agnostic padding/margins are correct; these are not.
+RTL_HOSTILE = [
+    (re.compile(r"\.padding\s*\(\s*\.left\b"), ".padding(.left) does not mirror in RTL",
+     "Use .padding(.leading) / .padding(.horizontal)."),
+    (re.compile(r"\.padding\s*\(\s*\.right\b"), ".padding(.right) does not mirror in RTL",
+     "Use .padding(.trailing) / .padding(.horizontal)."),
+    (re.compile(r"\btextAlignment\s*:\s*\.left\b"), "textAlignment: .left ignores RTL",
+     "Use .leading for natural alignment."),
+    (re.compile(r"\bUIEdgeInsets\s*\([^)]*left\s*:"), "UIEdgeInsets(left:) is not mirrored",
+     "Use leading/trailing insets or semantic margins."),
+]
+
+
+def scan_hardcoded_strings(report: Report, root: Path) -> None:
+    """Report strings that genuinely cannot be localised.
+
+    `Text("Hello")` is *not* a defect: SwiftUI treats the literal as a
+    `LocalizedStringKey` and looks it up in the String Catalog automatically.
+    The real defects are `Text(verbatim:)`, UIKit String assignments and
+    `Text(someString)` where the value is already resolved.
+    """
+
+    files = load_swift_files(root)
+    hits = 0
+
+    for swift in files:
+        if "#Preview" in swift.raw and swift.relative.endswith("Preview.swift"):
             continue
 
+        for pattern in VERBATIM_PATTERNS:
+            for match in pattern.finditer(swift.code):
+                hits += 1
+                report.warn(
+                    "L10N001",
+                    f'verbatim string bypasses localisation: "{match.group(1)[:60]}"',
+                    file=swift.relative,
+                    line=swift.line_of(match.start()),
+                    hint="Use Text(\"...\") or String(localized: \"...\") so the String Catalog is consulted.",
+                )
+
+        for pattern, label in UIKIT_STRING_ASSIGNMENTS:
+            for match in pattern.finditer(swift.code):
+                hits += 1
+                report.warn(
+                    "L10N002",
+                    f'UIKit string assignment is never localised: {label}',
+                    file=swift.relative,
+                    line=swift.line_of(match.start()),
+                    hint="Use String(localized:) or NSLocalizedString(_:comment:).",
+                )
+
+        for match in TEXT_DYNAMIC.finditer(swift.clean):
+            argument = match.group(1)
+            if argument.startswith(("verbatim", ".init", "Image")):
+                continue
+            if argument[0].islower() and "(" not in argument:
+                hits += 1
+                report.info(
+                    "L10N003",
+                    f"Text({argument}) receives a resolved String, so it is not localised.",
+                    file=swift.relative,
+                    line=swift.line_of(match.start()),
+                    hint="Pass a literal (LocalizedStringKey) or wrap the value in String(localized:).",
+                )
+
+    report.data["hardcoded_strings"] = hits
+
+
+def scan_directional_layout(report: Report, root: Path) -> None:
+    files = load_swift_files(root)
+    hits = 0
+    for swift in files:
+        for pattern, message, hint in RTL_HOSTILE:
+            for match in pattern.finditer(swift.code):
+                hits += 1
+                report.warn(
+                    "L10N010",
+                    message,
+                    file=swift.relative,
+                    line=swift.line_of(match.start()),
+                    hint=hint,
+                )
+    report.data["rtl_issues"] = hits
+
+
+def scan_string_catalogs(report: Report, root: Path) -> None:
+    catalogs = list(iter_files(root, (".xcstrings",)))
+    report.data["string_catalogs"] = len(catalogs)
+
+    for catalog in catalogs:
         try:
-            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
-                lines = f.readlines()
-        except Exception:
+            payload = json.loads(catalog.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            report.error("L10N020", f"String Catalog is not valid JSON: {exc}", file=str(catalog))
             continue
 
-        rel_path = str(file_path.relative_to(project_dir))
+        source_language = payload.get("sourceLanguage", "en")
+        strings = payload.get("strings", {})
+        untranslated: List[str] = []
+        total_locales: Dict[str, int] = {}
 
-        for idx, line in enumerate(lines, start=1):
-            # Check for non-RTL padding (.left / .right)
-            pad_match = DIRECTIONAL_PADDING_PATTERN.search(line)
-            if pad_match:
-                direction = pad_match.group(1)
-                findings.append({
-                    "file": rel_path,
-                    "line": idx,
-                    "severity": "High",
-                    "type": "DirectionalLayoutIssue",
-                    "message": f"Found non-adaptive '.padding(.{direction})'. Use '.leading' or '.trailing' for RTL mirroring."
-                })
+        for key, entry in strings.items():
+            localizations = entry.get("localizations", {})
+            for locale, value in localizations.items():
+                total_locales[locale] = total_locales.get(locale, 0) + 1
+            if entry.get("shouldTranslate") is False:
+                continue
+            if not localizations:
+                untranslated.append(key)
+                continue
+            missing = [loc for loc in localizations if loc != source_language and not _has_translation(localizations[loc])]
+            if missing:
+                untranslated.append(f"{key} ({', '.join(missing)})")
 
-            # Check for hardcoded UI strings that should be localized
-            # Filter out SF Symbol names or technical keys
-            for match in HARDCODED_TEXT_PATTERN.finditer(line):
-                element = match.group(1)
-                text = match.group(2)
-                # Ignore system symbol identifiers or empty strings
-                if len(text.strip()) > 1 and not text.startswith("systemImage:"):
-                    findings.append({
-                        "file": rel_path,
-                        "line": idx,
-                        "severity": "Medium",
-                        "type": "UnlocalizedStringLiteral",
-                        "message": f"Hardcoded string \"{text}\" in {element}(). Consider String Catalog localization."
-                    })
+        if untranslated:
+            report.warn(
+                "L10N021",
+                f"{catalog.name}: {len(untranslated)} key(s) missing translations.",
+                file=str(catalog.relative_to(root)) if catalog.is_relative_to(root) else str(catalog),
+                hint="First few: " + ", ".join(untranslated[:5]),
+            )
 
-    return findings, len(swift_files)
+        for key, entry in strings.items():
+            for locale, value in entry.get("localizations", {}).items():
+                unit = value.get("stringUnit")
+                if unit and unit.get("state") == "needs_review":
+                    report.info(
+                        "L10N022",
+                        f"{catalog.name}: '{key}' [{locale}] is marked needs_review.",
+                        file=str(catalog.name),
+                    )
+                    break
 
-def inspect_string_catalogs(project_dir: Path):
-    catalog_findings = []
-    xcstrings_files = list(project_dir.glob("**/*.xcstrings"))
-    catalog_stats = {}
+        report.data.setdefault("catalog_locales", {})[catalog.name] = sorted(total_locales.keys())
 
-    for cat_path in xcstrings_files:
-        rel_path = str(cat_path.relative_to(project_dir))
-        try:
-            with open(cat_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-        except Exception as e:
-            catalog_findings.append({
-                "file": rel_path,
-                "line": 1,
-                "severity": "Critical",
-                "type": "InvalidStringCatalog",
-                "message": f"Failed to parse JSON in String Catalog: {e}"
-            })
-            continue
+        variations = sum(1 for entry in strings.values() if _has_plural(entry))
+        report.data.setdefault("plural_keys", {})[catalog.name] = variations
 
-        source_lang = data.get("sourceLanguage", "en")
-        strings = data.get("strings", {})
-        total_keys = len(strings)
-        untranslated_count = 0
+    if not catalogs:
+        report.info(
+            "L10N023",
+            "No .xcstrings catalog found; strings are presumably localised elsewhere.",
+            hint="Xcode 15+ defaults to String Catalogs for new localisations.",
+        )
 
-        for key, details in strings.items():
-            localizations = details.get("localizations", {})
-            for lang, loc_data in localizations.items():
-                unit = loc_data.get("stringUnit", {})
-                state = unit.get("state", "")
-                if state in ["new", "needs_review"]:
-                    untranslated_count += 1
-                    catalog_findings.append({
-                        "file": rel_path,
-                        "line": 1,
-                        "severity": "Medium",
-                        "type": "PendingTranslation",
-                        "message": f"String key '{key}' has pending translation state '{state}' for language '{lang}'."
-                    })
 
-        catalog_stats[rel_path] = {
-            "sourceLanguage": source_lang,
-            "totalKeys": total_keys,
-            "untranslatedKeys": untranslated_count
-        }
+def _has_translation(value: Dict) -> bool:
+    unit = value.get("stringUnit")
+    if unit and unit.get("value"):
+        return True
+    variations = value.get("variations") or {}
+    plural = variations.get("plural") or {}
+    if plural:
+        return all(
+            (entry.get("stringUnit") or {}).get("value")
+            for entry in plural.values()
+        )
+    return False
 
-    return catalog_findings, catalog_stats
 
-def main():
-    parser = argparse.ArgumentParser(description="Apple Native Engineer Localization Checker")
-    parser.add_argument("--project-dir", default=".", help="Path to project directory")
-    parser.add_argument("--json", action="store_true", help="Output results in JSON format")
-    args = parser.parse_args()
+def _has_plural(entry: Dict) -> bool:
+    for value in entry.get("localizations", {}).values():
+        if (value.get("variations") or {}).get("plural"):
+            return True
+    return False
 
-    project_dir = Path(args.project_dir).resolve()
-    if not project_dir.exists():
-        print(f"Error: Project directory '{project_dir}' not found.", file=sys.stderr)
-        sys.exit(1)
 
-    code_findings, swift_count = scan_swift_files(project_dir)
-    catalog_findings, catalog_stats = inspect_string_catalogs(project_dir)
+def check_localization(raw_root: str) -> Report:
+    root = Path(raw_root).expanduser().resolve()
+    report = Report(tool="localization-checker", target=str(root), version=__version__)
 
-    all_findings = code_findings + catalog_findings
-    criticals = [f for f in all_findings if f["severity"] == "Critical"]
-    highs = [f for f in all_findings if f["severity"] == "High"]
-    mediums = [f for f in all_findings if f["severity"] == "Medium"]
+    scan_hardcoded_strings(report, root)
+    scan_directional_layout(report, root)
+    scan_string_catalogs(report, root)
 
-    result_data = {
-        "status": "PASS" if not criticals and not highs else "WARNING" if not criticals else "FAIL",
-        "totalSwiftFilesScanned": swift_count,
-        "stringCatalogs": catalog_stats,
-        "summary": {
-            "critical": len(criticals),
-            "high": len(highs),
-            "medium": len(mediums),
-            "totalIssues": len(all_findings)
-        },
-        "findings": all_findings
-    }
+    if report.data.get("hardcoded_strings", 0) == 0 and report.data.get("rtl_issues", 0) == 0:
+        report.info("L10N030", "No localisation issues detected.")
+    return report
 
-    if args.json:
-        print(json.dumps(result_data, indent=2))
-        sys.exit(0 if not criticals else 1)
 
-    print("=" * 60)
-    print("🌍 Apple Native Engineer — Localization Audit")
-    print("=" * 60)
-    print(f"Directory:          {project_dir}")
-    print(f"Swift Files:        {swift_count}")
-    print(f"String Catalogs:    {len(catalog_stats)}")
-    print(f"Status:             {result_data['status']}")
-    print("-" * 60)
-    print(f"Critical: {len(criticals)} | High: {len(highs)} | Medium: {len(mediums)}")
-    print("=" * 60)
+def main(argv=None) -> int:
+    parser = build_parser(
+        "localization-checker",
+        "Detect hardcoded user-visible strings, RTL-hostile layout and incomplete String Catalogs.",
+        epilog="Exit codes: 0 pass, 1 warnings with --strict, 2 failure.",
+    )
+    args = parser.parse_args(argv)
+    guard = guard_directory("localization-checker", args.path)
+    if guard is not None:
+        return emit(guard, args)
+    return emit(check_localization(args.path), args,
+                title="Apple Native Engineer — Localization & RTL Audit")
 
-    if all_findings:
-        print("\nFindings:")
-        for idx, item in enumerate(all_findings, start=1):
-            print(f"[{idx}] [{item['severity'].upper()}] {item['file']}:{item['line']} - {item['type']}")
-            print(f"    {item['message']}")
-    else:
-        print("\n✅ Zero localization issues detected. RTL layout and string management are optimal.")
-
-    sys.exit(0 if not criticals else 1)
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

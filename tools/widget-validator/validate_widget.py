@@ -1,151 +1,200 @@
 #!/usr/bin/env python3
-"""
-Apple Native Engineer — Widget & Dynamic Island Validator
-Validates WidgetKit bundles, ActivityKit Live Activities, and Dynamic Island configurations.
+"""Widget & Live Activity Validator.
+
+WidgetKit bundles fail in ways that are invisible until a user adds the widget:
+a missing ``DynamicIsland`` region, a Live Activity without the Info.plist flag,
+or a timeline provider that never reloads. This tool audits all of them.
+
+Usage::
+
+    python3 tools/widget-validator/validate_widget.py [PATH] [--json]
 """
 
-import os
-import sys
-import json
+from __future__ import annotations
+
 import re
-import argparse
+import sys
 from pathlib import Path
+from typing import Dict, List, Optional
 
-def audit_widgets(project_dir: Path):
-    findings = []
-    swift_files = list(project_dir.glob("**/*.swift"))
-    plist_files = list(project_dir.glob("**/Info.plist"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 
-    has_live_activity_model = False
-    has_dynamic_island = False
-    has_widget_protocol = False
-    has_compact_leading = False
-    has_compact_trailing = False
-    has_minimal = False
+from apple_native import __version__
+from apple_native.cli import build_parser, emit, guard_directory
+from apple_native.report import Report
+from apple_native.swiftscan import iter_files, load_swift_files
+from apple_native.xcode import discover, read_plist
 
-    for sfile in swift_files:
-        if any(part in sfile.parts for part in [".build", "DerivedData"]):
-            continue
-        try:
-            content = sfile.read_text(encoding="utf-8", errors="ignore")
-        except Exception:
-            continue
+DYNAMIC_ISLAND_REGIONS = {
+    "compactLeading": r"\bcompactLeading\s*:|CompactLeading",
+    "compactTrailing": r"\bcompactTrailing\s*:|CompactTrailing",
+    "minimal": r"DynamicIslandExpandedRegion|\bminimal\b|\bMinimal\b",
+    "expanded": r"\.expanded\s*\(|ExpandedRegion",
+}
 
-        rel_path = str(sfile.relative_to(project_dir))
+WIDGET_FAMILIES = [
+    "systemSmall", "systemMedium", "systemLarge", "systemExtraLarge",
+    "accessoryCircular", "accessoryRectangular", "accessoryInline",
+    "accessoryCorner",
+]
 
-        if ": Widget" in content or "struct " in content and "Widget" in content:
-            has_widget_protocol = True
 
-        if "ActivityAttributes" in content:
-            has_live_activity_model = True
+def _widget_sources(root: Path):
+    files = load_swift_files(root)
+    return [f for f in files if "import WidgetKit" in f.clean or "import ActivityKit" in f.clean]
 
-        if "DynamicIsland" in content:
-            has_dynamic_island = True
-            if "compactLeading:" in content or "compactLeading" in content:
-                has_compact_leading = True
-            if "compactTrailing:" in content or "compactTrailing" in content:
-                has_compact_trailing = True
-            if "minimal:" in content or "minimal" in content:
-                has_minimal = True
 
-    # Validate Info.plist for NSSupportsLiveActivities
-    has_live_activity_plist_flag = False
-    for pfile in plist_files:
-        try:
-            pcontent = pfile.read_text(encoding="utf-8", errors="ignore")
-            if "NSSupportsLiveActivities" in pcontent:
-                has_live_activity_plist_flag = True
+def validate_widgets(raw_root: str) -> Report:
+    root = Path(raw_root).expanduser().resolve()
+    report = Report(tool="widget-validator", target=str(root), version=__version__)
+
+    project = discover(root)
+    widget_files = _widget_sources(root)
+    joined = "\n".join(f.code for f in widget_files)
+
+    report.data["widget_sources"] = [f.relative for f in widget_files]
+    report.data["has_widgetkit"] = "import WidgetKit" in joined
+    report.data["has_activitykit"] = "import ActivityKit" in joined
+
+    if not widget_files:
+        report.info(
+            "WID001",
+            "No WidgetKit/ActivityKit sources found — nothing to validate.",
+            hint="Run this tool inside a project that ships a widget extension.",
+        )
+        return report
+
+    # -- Live Activities -------------------------------------------------
+    if "import ActivityKit" in joined:
+        families: List[str] = []
+        if "ActivityAttributes" in joined:
+            families.append("ActivityAttributes")
+        live_activities = bool(re.search(r"\bActivity(?:<[^>]+>)?\.request\b", joined))
+        supports_flag = False
+
+        for plist_path in project.info_plists:
+            data = read_plist(plist_path)
+            if data and data.get("NSSupportsLiveActivities"):
+                supports_flag = True
                 break
-        except Exception:
-            pass
 
-    if has_live_activity_model and not has_live_activity_plist_flag:
-        findings.append({
-            "severity": "Critical",
-            "type": "MissingLiveActivitiesPlistFlag",
-            "message": "Project defines ActivityAttributes but 'NSSupportsLiveActivities' boolean is missing from Info.plist."
-        })
+        report.data["live_activities"] = live_activities
+        report.data["live_activity_flag"] = supports_flag
+
+        if live_activities and not supports_flag:
+            report.error(
+                "WID010",
+                "Live Activities are requested but NSSupportsLiveActivities is not set in Info.plist.",
+                hint="Add <key>NSSupportsLiveActivities</key><true/> to the app target's Info.plist.",
+                docs="https://developer.apple.com/documentation/activitykit/starting-and-updating-live-activities-with-activitykit-push-notifications",
+            )
+        if live_activities and "ActivityAttributes" not in joined:
+            report.error(
+                "WID011",
+                "Activity.request used without an ActivityAttributes conforming type.",
+                hint="Live Activities require a struct conforming to ActivityAttributes.",
+            )
+        if live_activities and not re.search(r"pushType|\.token", joined):
+            report.info(
+                "WID013",
+                "No push token handling found; the Live Activity will only update from the app process.",
+                hint="Capture activity.pushToken updates if you need server-driven updates.",
+            )
+
+    # -- Dynamic Island ---------------------------------------------------
+    has_dynamic_island = "DynamicIsland" in joined
+    report.data["dynamic_island"] = has_dynamic_island
 
     if has_dynamic_island:
-        if not (has_compact_leading and has_compact_trailing):
-            findings.append({
-                "severity": "High",
-                "type": "IncompleteDynamicIslandCompactState",
-                "message": "DynamicIsland implementation is missing either compactLeading or compactTrailing presentation."
-            })
-        if not has_minimal:
-            findings.append({
-                "severity": "High",
-                "type": "MissingDynamicIslandMinimalState",
-                "message": "DynamicIsland implementation is missing 'minimal' presentation for multi-activity situations."
-            })
+        for region, pattern in DYNAMIC_ISLAND_REGIONS.items():
+            if not re.search(pattern, joined):
+                report.warn(
+                    "WID020",
+                    f"DynamicIsland is missing the '{region}' presentation region.",
+                    hint="Live Activities look broken on iPhone when compact/minimal states are empty.",
+                )
+        if not re.search(r"\.contentMarginsDisabled\s*\(", joined):
+            report.info(
+                "WID021",
+                "Dynamic Island content may inherit default margins.",
+                hint="Consider .contentMarginsDisabled() for edge-to-edge compact content.",
+            )
+    elif "ActivityAttributes" in joined:
+        report.warn(
+            "WID022",
+            "A Live Activity is declared but no DynamicIsland presentation is implemented.",
+            hint="Without it the activity falls back to the Lock Screen presentation only.",
+        )
 
-    return {
-        "hasWidget": has_widget_protocol,
-        "hasLiveActivities": has_live_activity_model,
-        "hasDynamicIsland": has_dynamic_island,
-        "liveActivitiesPlistConfigured": has_live_activity_plist_flag,
-        "findings": findings
-    }
+    # -- Widget configuration ---------------------------------------------
+    families_found = [family for family in WIDGET_FAMILIES if family in joined]
+    report.data["supported_families"] = families_found
+    if families_found and "accessoryRectangular" not in families_found:
+        report.info(
+            "WID030",
+            "No accessoryRectangular family declared; the widget will not appear on the Lock Screen.",
+            hint="Add .accessoryRectangular to supportedFamilies for Lock Screen presence.",
+        )
+    if "supportedFamilies" not in joined:
+        report.warn(
+            "WID031",
+            "No .supportedFamilies(_:) declaration found.",
+            hint="Without it WidgetKit shows only the default family.",
+        )
 
-def main():
-    parser = argparse.ArgumentParser(description="Apple Native Engineer Widget Validator")
-    parser.add_argument("--project-dir", default=".", help="Path to project directory")
-    parser.add_argument("--json", action="store_true", help="Output results in JSON format")
-    args = parser.parse_args()
+    providers = []
+    if "TimelineProvider" in joined:
+        providers.append("TimelineProvider")
+    if "AppIntentTimelineProvider" in joined or "AppIntentConfiguration" in joined:
+        providers.append("AppIntentTimelineProvider")
+    if "@main" in joined and "WidgetBundle" in joined:
+        providers.append("WidgetBundle")
+    report.data["providers"] = providers
+    if not providers:
+        report.error(
+            "WID032",
+            "No TimelineProvider / AppIntentTimelineProvider / WidgetBundle found.",
+            hint="A widget extension needs an @main entry point and a timeline provider.",
+        )
+    if "AppIntentTimelineProvider" not in providers and "AppIntentConfiguration" not in joined:
+        report.info(
+            "WID033",
+            "Widget is not configurable via App Intents.",
+            hint="AppIntentConfiguration is the modern replacement for IntentConfiguration (iOS 17+).",
+        )
 
-    project_dir = Path(args.project_dir).resolve()
-    if not project_dir.exists():
-        print(f"Error: Directory '{project_dir}' not found.", file=sys.stderr)
-        sys.exit(1)
+    # -- Shared container --------------------------------------------------
+    if "App Group" not in joined and not re.search(r"group\.[a-zA-Z0-9_.-]+", joined):
+        report.info(
+            "WID034",
+            "No App Group identifier found; the widget cannot share data with the app.",
+            hint="Use containerURL(forSecurityApplicationGroupIdentifier:) with a group.* identifier.",
+        )
 
-    result = audit_widgets(project_dir)
-    findings = result["findings"]
-    criticals = [f for f in findings if f["severity"] == "Critical"]
-    highs = [f for f in findings if f["severity"] == "High"]
+    # -- Platform availability ---------------------------------------------
+    if "WidgetKit" in joined and not re.search(r"@available\(iOS 1[4-9]|@available\(iOS 2[0-9]", joined):
+        report.info(
+            "WID035",
+            "Widget sources do not declare availability.",
+            hint="Guard iOS 17+ APIs (containerBackground, interactive widgets) with @available.",
+        )
 
-    status = "PASS" if not criticals and not highs else "FAIL" if criticals else "WARNING"
+    return report
 
-    output = {
-        "status": status,
-        "projectDir": str(project_dir),
-        "widgetSummary": {
-            "hasWidget": result["hasWidget"],
-            "hasLiveActivities": result["hasLiveActivities"],
-            "hasDynamicIsland": result["hasDynamicIsland"],
-            "plistConfigured": result["liveActivitiesPlistConfigured"]
-        },
-        "summary": {
-            "critical": len(criticals),
-            "high": len(highs),
-            "totalIssues": len(findings)
-        },
-        "findings": findings
-    }
 
-    if args.json:
-        print(json.dumps(output, indent=2))
-        sys.exit(0 if not criticals else 1)
+def main(argv=None) -> int:
+    parser = build_parser(
+        "widget-validator",
+        "Validate WidgetKit widgets, Dynamic Island regions and Live Activity configuration.",
+        epilog="Exit codes: 0 pass, 1 warnings with --strict, 2 failure.",
+    )
+    args = parser.parse_args(argv)
+    guard = guard_directory("widget-validator", args.path)
+    if guard is not None:
+        return emit(guard, args)
+    return emit(validate_widgets(args.path), args,
+                title="Apple Native Engineer — Widget & Live Activity Audit")
 
-    print("=" * 60)
-    print("🏝️  Apple Native Engineer — Widget & Live Activity Validator")
-    print("=" * 60)
-    print(f"WidgetKit Detected:    {'Yes' if result['hasWidget'] else 'No'}")
-    print(f"Live Activities:       {'Yes' if result['hasLiveActivities'] else 'No'}")
-    print(f"Dynamic Island:        {'Yes' if result['hasDynamicIsland'] else 'No'}")
-    print(f"Plist Flag Configured: {'Yes' if result['liveActivitiesPlistConfigured'] else 'No'}")
-    print(f"Status:                {status}")
-    print("=" * 60)
-
-    if findings:
-        print("\nFindings:")
-        for idx, item in enumerate(findings, start=1):
-            print(f"[{idx}] [{item['severity'].upper()}] {item['type']}")
-            print(f"    {item['message']}")
-    else:
-        print("\n✅ All WidgetKit and Dynamic Island configurations conform to Apple guidelines.")
-
-    sys.exit(0 if not criticals else 1)
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

@@ -12,13 +12,13 @@ Captures, composes, and validates App Store screenshots from actual running appl
 2. **Actual Screenshot Capture**:
    Capture unscaled screenshots directly from booted iOS Simulators using `xcrun simctl`:
    ```bash
-   ./tools/screenshot-studio/screenshot_studio.py --capture screenshots/ios/01_dashboard.png
+   python3 tools/screenshot-studio/screenshot_studio.py --capture screenshots/ios/01_dashboard.png
    ```
 
 3. **Display Specification Validation**:
    Validate that captured assets match Apple's required dimensions (6.7" iPhone, 6.5" iPhone, 13" iPad):
    ```bash
-   ./tools/screenshot-studio/screenshot_studio.py --audit screenshots/
+   python3 tools/screenshot-studio/screenshot_studio.py --audit screenshots/
    ```
 
 4. **Marketing Composition**:
