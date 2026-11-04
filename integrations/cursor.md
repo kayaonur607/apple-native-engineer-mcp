@@ -1,0 +1,57 @@
+# Cursor Integration Guide
+
+This guide explains how to install and invoke the `apple-native-engineer` skill in **Cursor** (the AI-first code editor).
+
+---
+
+## 1. Installation Locations
+
+Cursor supports native skill and context discovery through either of the following directories:
+
+| Scope | Path | Discovery Context |
+| :--- | :--- | :--- |
+| **Cursor Skills** | `.cursor/skills/apple-native-engineer/SKILL.md` | Primary Cursor skills discovery path. |
+| **Universal Agents** | `.agents/skills/apple-native-engineer/SKILL.md` | Standard Agent Skills path also indexed by Cursor Composer. |
+
+---
+
+## 2. Installation Methods
+
+### Method A: Automated via Vercel Skills CLI
+```bash
+# Add to current workspace
+npx skills add kayaonur607/apple-native-engineer -a cursor
+```
+
+### Method B: Manual Symlink
+```bash
+# Create target directory and link repository
+mkdir -p .cursor/skills
+ln -s ~/Desktop/apple-native-engineer .cursor/skills/apple-native-engineer
+```
+
+---
+
+## 3. Configuring Cursor Rules (`.cursorrules`)
+
+To ensure Cursor's agent model prioritizes the skill during all Swift and SwiftUI editing sessions, reference the skill in your project's `.cursorrules`:
+
+```markdown
+# Apple Native Design & Engineering Rules
+When generating, modifying, or reviewing Swift and SwiftUI code:
+1. Always adhere to Apple Human Interface Guidelines and the instructions in `.cursor/skills/apple-native-engineer/SKILL.md`.
+2. Use standard Dynamic Type text styles, semantic colors, and minimum 44x44pt touch targets.
+3. Follow Emil Kowalski's motion principles: use physics springs, avoid scale(0) pops, and respect Reduced Motion.
+```
+
+---
+
+## 4. Example Prompts in Cursor Composer
+
+Open Cursor Composer (`⌘-I` or `Ctrl-I`) and prompt:
+
+```text
+@apple-native-engineer Audit our payment confirmation sheet for HIG compliance, thumb ergonomics, and VoiceOver accessibility.
+
+Design an adaptive navigation layout for our iPad app that supports 3-column NavigationSplitView and Inspector panel.
+```

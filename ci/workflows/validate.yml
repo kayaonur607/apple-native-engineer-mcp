@@ -1,0 +1,23 @@
+name: Validate Skill
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Skill Validation Suite
+        run: |
+          chmod +x scripts/*.sh
+          ./scripts/validate-skill.sh
+
+      - name: Verify Link References
+        run: |
+          ./scripts/check-references.sh
