@@ -61,32 +61,13 @@ struct SettingsView: View {
                     }
                 }
                 Section {
-                    GlassSurface {
-                        Text("Liquid Glass is used only where the system provides it.")
-                            .font(.callout)
-                    }
+                    Text("Liquid Glass is used only where the system provides it.")
+                        .font(.callout)
+                        .padding(DesignTokens.Spacing.md)
+                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
                 }
             }
             .navigationTitle(Text("Settings"))
-        }
-    }
-}
-
-/// Uses Liquid Glass on iOS 26+ and a material surface on older systems.
-/// The availability check is what keeps this file compatible with the iOS 17
-/// deployment target declared in `Package.swift`.
-struct GlassSurface<Content: View>: View {
-    @ViewBuilder var content: Content
-
-    var body: some View {
-        if #available(iOS 26.0, macOS 26.0, *) {
-            content
-                .padding(DesignTokens.Spacing.md)
-                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-        } else {
-            content
-                .padding(DesignTokens.Spacing.md)
-                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         }
     }
 }

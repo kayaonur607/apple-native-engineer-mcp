@@ -51,7 +51,7 @@ OK
   SDK: iPhoneSimulator27.2.sdk
   ✓ fixture: clean-app/App
   ✓ fixture: clean-app/Widgets
-  ✓ documentation snippets parse (116 blocks)
+  ✓ documentation snippets parse (118 blocks)
   checked 3 unit(s), 0 failure(s)
 
 ────────────────────────────────────────────
@@ -152,7 +152,7 @@ $ ./scripts/verify-swift.sh
   SDK: iPhoneSimulator27.2.sdk
   ✓ fixture: clean-app/App
   ✓ fixture: clean-app/Widgets
-  ✓ documentation snippets parse (116 blocks)
+  ✓ documentation snippets parse (118 blocks)
   checked 3 unit(s), 0 failure(s)
 ```
 

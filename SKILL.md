@@ -2,7 +2,7 @@
 name: apple-native-engineer-mcp
 description: "Operating standard and executable toolkit for shipping genuinely native Apple software. Use when building, reviewing or auditing SwiftUI/UIKit/AppKit apps for iOS 17–27, iPadOS, macOS 14–27, visionOS or watchOS: enforces Human Interface Guidelines, Liquid Glass (iOS 26+) adoption with availability guards, Dynamic Type, semantic colour, VoiceOver, 44pt targets, Swift 6 concurrency and @Observable state, Required-Reason API privacy manifests, String Catalog localisation and RTL, WidgetKit/Live Activity completeness, App Store metadata limits, and a weighted release gate. Ships 14 CLI auditors and an MCP server that returns machine-readable finding codes."
 license: MIT
-compatibility: "MCP clients (Claude Desktop, Claude Code, Cursor, Codex, Copilot, Gemini CLI), Agent Skills runtimes, or plain CLI on macOS/Linux with Python 3.9+."
+compatibility: "MCP clients (Claude Desktop, Claude Code, Cursor, Codex, Copilot, Gemini CLI), Agent Skills runtimes, or plain CLI on macOS/Linux with Python 3.10+."
 metadata:
   version: "2.0.0"
   category: "developer-toolkit"

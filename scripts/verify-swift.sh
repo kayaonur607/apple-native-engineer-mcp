@@ -23,6 +23,7 @@ SDK="$(xcrun --sdk iphonesimulator --show-sdk-path 2>/dev/null)" || {
 WORK="$REPO_ROOT/.swiftwork"
 mkdir -p "$WORK/tmp" "$WORK/mc"
 
+SDK_MAJOR="$(xcrun --sdk iphonesimulator --show-sdk-version | cut -d. -f1)"
 TARGET="arm64-apple-ios18.0-simulator"
 SWIFTC_FLAGS=(-typecheck -parse-as-library -disable-sandbox -sdk "$SDK" -target "$TARGET"
               -module-cache-path "$WORK/mc")
@@ -46,10 +47,26 @@ compile() {
 echo "  SDK: $(basename "$SDK")"
 
 # 1. Fixtures ---------------------------------------------------------------
+# Liquid Glass (`glassEffect`) only exists in the iOS 26+ SDK, so the glass demo
+# is only compiled when the toolchain can see those symbols.
 # Note: the Swift Testing module (`import Testing`) is only available to
 # `swift test`, not to a standalone `swiftc` invocation, so the test target is
 # compiled by Xcode/SwiftPM in CI rather than here.
-compile "fixture: clean-app/App"        tests/fixtures/clean-app/App/*.swift
+APP_FILES=(tests/fixtures/clean-app/App/*.swift)
+if [ "${SDK_MAJOR:-0}" -lt 26 ]; then
+    APP_FILES=()
+    for file in tests/fixtures/clean-app/App/*.swift; do
+        case "$file" in
+            *GlassSurface.swift)
+                printf '  ~ skipping %s (needs the iOS 26 SDK; found %s)\n' \
+                    "$(basename "$file")" "$(xcrun --sdk iphonesimulator --show-sdk-version)"
+                ;;
+            *) APP_FILES+=("$file") ;;
+        esac
+    done
+fi
+
+compile "fixture: clean-app/App"        "${APP_FILES[@]}"
 compile "fixture: clean-app/Widgets"    tests/fixtures/clean-app/Widgets/*.swift
 
 # 2. Documentation snippets (syntax only) -----------------------------------
@@ -68,7 +85,7 @@ for md in sorted(pathlib.Path(".").glob("examples/*.md")) + sorted(pathlib.Path(
     text = md.read_text(encoding="utf-8", errors="ignore")
     for index, block in enumerate(re.finditer(r"```swift\n(.*?)```", text, re.S)):
         count += 1
-        (out / f"{md.stem}-{index:02d}.swift").write_text(block.group(1), encoding="utf-8")
+        (out / f"{md.parent.name}-{md.stem}-{index:02d}.swift").write_text(block.group(1), encoding="utf-8")
 print(count)
 PY
 

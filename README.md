@@ -98,7 +98,7 @@ python3 tools/release-readiness/generate_report.py . \
   --metadata metadata.json --icon AppIcon-1024.png --output RELEASE_REPORT.md
 ```
 
-Python 3.9+ and the standard library. No virtualenv, no `pip install`, nothing to break.
+Python 3.10+ and the standard library. No virtualenv, no `pip install`, nothing to break.
 
 ---
 
@@ -219,9 +219,9 @@ This is the part most repositories skip. Here is what `./scripts/verify.sh` actu
 | Stage | Result | How it is measured |
 | :--- | :--- | :--- |
 | Repository validation | **pass** | Frontmatter, 20 required paths, 116 internal links, and every count in this README cross-checked against the filesystem |
-| Python tests | **55 pass** | `python3 -m unittest` across 3.9 / 3.12 / 3.13 in CI |
+| Python tests | **55 pass** | `python3 -m unittest` across 3.10 / 3.12 / 3.13 in CI |
 | MCP protocol tests | **8 pass** | A real `Client` ↔ `McpServer` pair over the SDK's in-memory transport |
-| Swift compilation | **pass** | `swiftc -typecheck` on both fixtures, `swiftc -parse` on all 116 documentation snippets |
+| Swift compilation | **pass** | `swiftc -typecheck` on both fixtures, `swiftc -parse` on all 118 documentation snippets |
 | SF Symbols catalogue | **9,649 symbols** | Extracted from `CoreGlyphs.bundle`, internally consistent |
 
 Both directions are tested, which is the point:
@@ -283,7 +283,7 @@ apple-native-engineer-mcp/
 | OS targets | iOS 17–27, iPadOS, macOS 14–27, watchOS 10+, visionOS 1+ |
 | Language | Swift 6.x (tools also audit Swift 5 mode projects) |
 | Xcode | 16+ for the Swift checks; the Python tools need no Xcode |
-| Python | 3.9, 3.12, 3.13 (stdlib only) |
+| Python | 3.10, 3.12, 3.13 (stdlib only) |
 | Node | 20, 22 (MCP server) |
 | Clients | Claude Desktop, Claude Code, Cursor, Codex, Copilot, Gemini CLI, OpenCode, any MCP client |
 
