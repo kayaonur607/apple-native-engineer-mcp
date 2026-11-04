@@ -1,0 +1,36 @@
+{
+  "$schema": "https://developer.apple.com/app-store-connect/api",
+  "app_id": "com.example.app",
+  "version": "1.0.0",
+  "primary_locale": "en-US",
+  "localizations": {
+    "en-US": {
+      "name": "App Name (Max 30 chars)",
+      "subtitle": "Clear, informative subtitle (Max 30 chars)",
+      "privacyPolicyUrl": "https://example.com/privacy",
+      "supportUrl": "https://example.com/support",
+      "marketingUrl": "https://example.com",
+      "description": "Comprehensive, user-focused description explaining app features, workflow benefits, and native device capabilities. Avoid keyword stuffing and unsupported claims. (Max 4000 characters).",
+      "keywords": "native,swiftui,productivity,scanner,tools,offline",
+      "promotionalText": "Optional promotional copy displayed above the description that can be updated at any time without submitting a new build. (Max 170 characters).",
+      "whatsNew": "Initial release introducing native SwiftUI interface, Dynamic Type scaling, and offline sync."
+    },
+    "tr-TR": {
+      "name": "Uygulama Adı (Maks 30 karakter)",
+      "subtitle": "Kısa ve net alt başlık (Maks 30 karakter)",
+      "privacyPolicyUrl": "https://example.com/tr/gizlilik",
+      "supportUrl": "https://example.com/tr/destek",
+      "marketingUrl": "https://example.com/tr",
+      "description": "Uygulamanın özelliklerini, sunduğu çözümleri ve yerel Apple yeteneklerini anlatan açıklama metni. (Maks 4000 karakter).",
+      "keywords": "yerel,swiftui,verimlilik,tarayıcı,araçlar,çevrimdışı",
+      "promotionalText": "Açıklamanın üzerinde görünen ve yeni sürüm gerektirmeden güncellenebilen tanıtım metni. (Maks 170 karakter).",
+      "whatsNew": "SwiftUI ve iOS 18 desteğiyle ilk resmi sürüm."
+    }
+  },
+  "review_information": {
+    "demo_account_required": true,
+    "demo_username": "appstore_reviewer@example.com",
+    "demo_password": "ReviewDemoPassword123!",
+    "notes": "Test login credentials provided above. To test the core workflow, tap the + button to create a sample document."
+  }
+}

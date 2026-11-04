@@ -30,8 +30,8 @@ while IFS= read -r md_file; do
     while IFS= read -r link; do
         [[ -z "${link}" ]] && continue
         
-        # Skip web links and internal page anchors
-        if [[ "${link}" =~ ^https?:// ]] || [[ "${link}" =~ ^mailto: ]] || [[ "${link}" =~ ^# ]]; then
+        # Skip web links, internal page anchors, and non-path tokens (like code snippets)
+        if [[ "${link}" =~ ^https?:// ]] || [[ "${link}" =~ ^mailto: ]] || [[ "${link}" =~ ^# ]] || [[ "${link}" =~ [[:space:]] ]]; then
             continue
         fi
         

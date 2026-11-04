@@ -42,12 +42,12 @@
 
     <!-- Main Title -->
     <text x="75" y="46" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="42" font-weight="700" letter-spacing="-0.5" fill="url(#textGrad)">
-      Apple Native Engineer
+      Apple Native Engineer MCP
     </text>
 
     <!-- Subtitle Tagline -->
     <text x="75" y="86" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif" font-size="19" font-weight="400" fill="#8E95A5">
-      The Full-Lifecycle AI Development Standard for Apple Platforms
+      Apple Platform Design Engineering Standard, Executable Toolkit &amp; MCP Server
     </text>
 
     <!-- Pillar Chips -->

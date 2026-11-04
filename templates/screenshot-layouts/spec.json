@@ -1,0 +1,78 @@
+{
+  "version": "2026.1",
+  "source": "https://developer.apple.com/help/app-store-connect/reference/screenshot-specifications",
+  "verified_date": "2026-11-05",
+  "devices": {
+    "iphone_6_9": {
+      "display_name": "iPhone 16 Pro Max (6.9-inch)",
+      "required": false,
+      "pixel_dimensions": {
+        "portrait": [1320, 2868],
+        "landscape": [2868, 1320]
+      },
+      "max_count": 10
+    },
+    "iphone_6_7": {
+      "display_name": "iPhone 15 Pro Max / 14 Pro Max / 15 Plus (6.7-inch)",
+      "required": true,
+      "pixel_dimensions": {
+        "portrait": [1290, 2796],
+        "landscape": [2796, 1290]
+      },
+      "max_count": 10
+    },
+    "iphone_6_5": {
+      "display_name": "iPhone 11 Pro Max / XS Max (6.5-inch)",
+      "required": true,
+      "pixel_dimensions": {
+        "portrait": [1242, 2688],
+        "landscape": [2688, 1242]
+      },
+      "max_count": 10
+    },
+    "iphone_5_5": {
+      "display_name": "iPhone 8 Plus / 7 Plus (5.5-inch)",
+      "required": false,
+      "pixel_dimensions": {
+        "portrait": [1242, 2208],
+        "landscape": [2208, 1242]
+      },
+      "max_count": 10
+    },
+    "ipad_13": {
+      "display_name": "iPad Pro 13-inch (M4) / 12.9-inch",
+      "required": true,
+      "pixel_dimensions": {
+        "portrait": [2064, 2752],
+        "landscape": [2752, 2064]
+      },
+      "max_count": 10
+    },
+    "ipad_12_9": {
+      "display_name": "iPad Pro 12.9-inch (3rd-6th generation)",
+      "required": true,
+      "pixel_dimensions": {
+        "portrait": [2048, 2732],
+        "landscape": [2732, 2048]
+      },
+      "max_count": 10
+    },
+    "mac": {
+      "display_name": "macOS Desktop Display",
+      "required": false,
+      "pixel_dimensions": {
+        "standard_16_10": [2880, 1800],
+        "standard_4k": [3840, 2160]
+      },
+      "max_count": 10
+    },
+    "apple_watch_ultra": {
+      "display_name": "Apple Watch Ultra 2 (49mm)",
+      "required": false,
+      "pixel_dimensions": {
+        "portrait": [410, 502]
+      },
+      "max_count": 10
+    }
+  }
+}

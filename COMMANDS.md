@@ -17,6 +17,9 @@ This document defines the specialized command workflows of `apple-native-enginee
 | **`/apple-native-ipad`** | iPadOS adaptation: `NavigationSplitView`, sidebars, Stage Manager, pointer hover, and keyboard shortcuts. | iPadOS & macOS |
 | **`/apple-native-accessibility`** | Comprehensive accessibility audit: Dynamic Type (AX1–AX5), VoiceOver tree, contrast, and touch targets. | Accessibility (a11y) |
 | **`/apple-native-performance`** | 120Hz ProMotion smoothness, SwiftUI view invalidation, memory leaks, and concurrency audit. | Performance & Metal |
+| **`/apple-native-widgets`** | Audits WidgetKit timelines, ActivityKit Live Activities, and Dynamic Island presentation states. | Widgets & Dynamic Island |
+| **`/apple-native-localization`** | Audits String Catalogs (`.xcstrings`), unlocalized strings, and Right-to-Left (RTL) mirroring. | i18n & Localization |
+| **`/apple-native-connect`** | Manages official App Store Connect API interactions, versions, builds, and metadata. | App Store Connect API |
 | **`/apple-native-release`** | Pre-submission release checklist: App icons, launch screens, metadata, and final verification gates. | App Store Release |
 
 ---

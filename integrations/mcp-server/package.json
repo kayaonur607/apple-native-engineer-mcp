@@ -1,0 +1,25 @@
+{
+  "name": "@kayaonur607/apple-native-engineer-mcp",
+  "version": "1.0.0",
+  "description": "Model Context Protocol (MCP) server exposing executable Apple development and App Store Connect tools.",
+  "main": "src/index.js",
+  "bin": {
+    "apple-native-engineer-mcp": "./src/index.js"
+  },
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test"
+  },
+  "keywords": [
+    "mcp",
+    "apple",
+    "swiftui",
+    "app-store-connect",
+    "ios",
+    "ipados",
+    "macos"
+  ],
+  "author": "kayaonur607",
+  "license": "MIT"
+}

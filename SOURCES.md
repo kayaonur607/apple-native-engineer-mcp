@@ -30,6 +30,12 @@ All platform requirements and recommendations in this repository are verified ag
 | **SF Symbols Specification** | [developer.apple.com/sf-symbols](https://developer.apple.com/sf-symbols/) | System iconography, variable color, symbol effects (bounce, pulse, replace, breathe), and optical alignment. | November 2026 |
 | **Apple Accessibility Guidelines** | [developer.apple.com/accessibility](https://developer.apple.com/accessibility/) | VoiceOver semantics, Dynamic Type scales (AX1–AX5), Switch Control, and AssistiveTouch support. | November 2026 |
 | **Apple Design Resources** | [developer.apple.com/design/resources](https://developer.apple.com/design/resources/) | Official design kits, typography specifications, and hardware bezel templates. | November 2026 |
+| **App Store Connect API** | [developer.apple.com/documentation/appstoreconnectapi](https://developer.apple.com/documentation/appstoreconnectapi) | RESTful API for builds, metadata, versions, testers, submissions, and sales reports. | November 2026 |
+| **SwiftData Documentation** | [developer.apple.com/documentation/swiftdata](https://developer.apple.com/documentation/swiftdata) | Declarative persistence, model macros, schema migrations, and CloudKit synchronization. | November 2026 |
+| **WidgetKit & ActivityKit** | [developer.apple.com/documentation/widgetkit](https://developer.apple.com/documentation/widgetkit) | Timelines, Lock Screen accessories, Live Activities, and Dynamic Island presentations. | November 2026 |
+| **App Intents Framework** | [developer.apple.com/documentation/appintents](https://developer.apple.com/documentation/appintents) | Siri Shortcuts, Spotlight search indexing, and iOS 18 Control Center widgets. | November 2026 |
+| **StoreKit 2 Documentation** | [developer.apple.com/documentation/storekit](https://developer.apple.com/documentation/storekit) | SubscriptionStoreView, product purchases, entitlement verification, and paywalls. | November 2026 |
+| **Xcode Localization (String Catalogs)** | [developer.apple.com/documentation/xcode/localization](https://developer.apple.com/documentation/xcode/localization) | Modern `.xcstrings` catalogs, pluralization, and Right-to-Left (RTL) mirroring. | November 2026 |
 
 ---
 
@@ -42,11 +48,19 @@ The standards in this skill directly integrate design and engineering insights f
   - *Create custom visual effects with SwiftUI shaders and materials* (Translucent glass and specular reflections)
   - *Migrate your app to Swift 6 strict concurrency* (Eliminating data races and ensuring `@MainActor` safety)
   - *Meet Swift Testing* (Modern `@Test` and `#expect` macros replacing legacy XCTest)
+  - *Design great visionOS apps* (Spatial depth, gaze-pinch input, ornaments, and volumes)
+  - *Design with interactive widgets* (App Intents in widgets and Control Center widgets)
+  - *Bring your app to Siri* (App Intents, Spotlight integration, and Action Button controls)
+  - *Create a custom data store with SwiftData* (SwiftData architecture and CloudKit syncing)
 - **WWDC23**:
   - *Discover Observation in SwiftUI* (`@Observable` macro mechanics and property-level invalidation tracking)
   - *Animate with springs* (Standardizing physics spring presets: `.snappy`, `.bouncy`, `.smooth`)
   - *Get started with privacy manifests* (`PrivacyInfo.xcprivacy` and required-reason API declarations)
   - *Design with spatial UI components* (Translucent materials, depth, and elevation)
+  - *Design for spatial user interfaces* (Infinite canvas, vergence-accommodation ergonomics)
+  - *Discover String Catalogs* (Xcode 15+ String Catalog `.xcstrings` architecture and pluralization)
+  - *Meet SwiftData* (Core SwiftData model definitions and persistent containers)
+  - *Bring widgets to new places* (StandBy mode, Lock Screen, and iPad interactive widgets)
 - **WWDC22**:
   - *The SwiftUI cookbook for navigation* (Type-safe `NavigationStack` and `NavigationSplitView`)
   - *Compose custom layouts with SwiftUI* (`Layout` protocol and `ViewThatFits` adaptive scaling)

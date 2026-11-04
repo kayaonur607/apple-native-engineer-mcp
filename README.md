@@ -1,327 +1,321 @@
 <p align="center">
-  <img src="assets/hero.svg" alt="Apple Native Engineer Banner" width="100%">
+  <img src="assets/hero.svg" alt="Apple Native Engineer MCP Banner" width="100%">
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT">
-  <img src="https://img.shields.io/badge/Standard-Agent%20Skills-purple.svg" alt="Agent Skills Standard">
-  <img src="https://img.shields.io/badge/Swift-5.9%20%7C%206.0-orange.svg" alt="Swift 5.9 / 6.0">
-  <img src="https://img.shields.io/badge/iOS-17%2B%20%7C%2018%2B-black.svg" alt="iOS 17+ / 18+">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square" alt="License: MIT"></a>
+  <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-JSON--RPC%202.0-8A2BE2.svg?style=flat-square" alt="MCP Protocol"></a>
+  <a href="https://agentskills.io"><img src="https://img.shields.io/badge/Standard-Agent%20Skills-4A154B.svg?style=flat-square" alt="Agent Skills Standard"></a>
+  <a href="#supported-apple-platforms--hardware"><img src="https://img.shields.io/badge/Ecosystem-Apple%20Platforms-0A84FF.svg?style=flat-square" alt="Apple Platforms"></a>
+  <a href="#validation--test-suite"><img src="https://img.shields.io/badge/Tests-18%20Passed-30D158.svg?style=flat-square" alt="Tests Passed"></a>
 </p>
 
 <p align="center">
-  <strong>One skill. Your entire Apple development workflow.</strong><br>
-  <em>Design natively. Engineer cleanly. Protect user privacy. Validate platform compatibility. Prepare for App Store Review.</em>
+  <strong>The Full-Lifecycle Apple Development Standard, Executable Toolkit &amp; Model Context Protocol (MCP) Server.</strong><br>
+  <em>Design natively. Engineer cleanly. Audit privacy. Automate App Store Connect. Ship first-party quality software.</em>
 </p>
 
 > [!NOTE]
-> **Independent Developer Notice**: This project is developed and maintained by an independent developer and open-source contributors. It is **not** an official Apple product, and is **not** affiliated with, authorized by, sponsored by, or endorsed by Apple Inc. All Apple platform trademarks, names, and design guidelines are referenced solely for descriptive and interoperability purposes under nominative fair use.
+> **Independent Developer Notice**: This project is developed and maintained by independent open-source developers. It is **not** an official Apple product, and is **not** affiliated with, authorized by, sponsored by, or endorsed by Apple Inc. All Apple platform names, hardware models, and guidelines are referenced strictly for identification and interoperability under nominative fair use.
 
 ---
 
 ## The Central Promise
 
-> **Turn your AI coding assistant into a research-driven Apple platform design engineer, software architect, privacy reviewer, and App Store readiness specialist.**
+> **"Transform your AI coding assistant into a research-driven Apple platform design engineer, software architect, privacy auditor, and App Store Connect specialist."**
 
-AI coding assistants frequently generate "AI slop" when generating Apple platform code: generic web-like flat cards, hardcoded hex colors that break in Dark Mode, rigid `.frame(height: 44)` containers that truncate under Dynamic Type, and missing Privacy Manifests that lead to immediate App Store rejection.
+AI assistants frequently generate generic "AI slop" when asked for Apple code: flat web-like cards, hardcoded hex colors that break in Dark Mode, rigid containers that truncate under Dynamic Type, and missing Privacy Manifests that cause immediate App Store rejections.
 
-**`apple-native-engineer`** is a reusable, framework-independent AI Agent Skill built on the [Agent Skills open standard](https://agentskills.io/). It equips compatible coding assistants (Claude Code, Cursor, OpenAI Codex, GitHub Copilot, Gemini CLI, OpenCode) with the deep engineering standards, review checklists, and architectural workflows needed to build, modernize, and ship first-party quality software across **iOS**, **iPadOS**, **macOS**, and **visionOS**.
-
----
-
-## 11 Key Questions Answered
-
-### 1. What is this project?
-An open-source, cross-agent development standard and executable skill that guides AI coding assistants through the complete lifecycle of Apple platform development: UI/UX design, SwiftUI architecture, Swift 6 concurrency, privacy manifests, accessibility, and App Store Review preparation.
-
-### 2. Who should use it?
-- **iOS / macOS Engineers** seeking to elevate existing apps to Apple Design Award standards.
-- **Solo Developers & Indie Hackers** preparing applications for App Store submission who need an automated pre-flight review.
-- **Engineering Teams** wanting to enforce consistent SwiftUI state modeling, Dynamic Type resilience, and strict privacy standards across their AI assistants.
-
-### 3. What problems does it solve?
-- **Prevents "Web-Slop" UI**: Replaces flat CSS-like designs with authentic Apple materials (`.regularMaterial`), continuous squircles (`style: .continuous`), and native components.
-- **Eliminates Animation Clumsiness**: Replaces linear transitions and unnatural `scale(0)` pops with Emil Kowalski-inspired physics springs (`.spring(.snappy)`) and sensory feedback.
-- **Preempts App Store Rejections**: Flags missing required-reason APIs, missing privacy manifests, un-native web wrappers, and paywall disclosure omissions before submission.
-- **Enforces Modern Swift Standards**: Migrates legacy `ObservableObject` code to the Swift 5.9/6 `@Observable` macro and ensures `@MainActor` thread safety.
-
-### 4. How does it transform an existing application?
-The skill begins by inspecting your existing repository—respecting your architecture, deployment targets, and brand identity. It then executes a systematic 10-step audit, categorizes findings by severity, proposes an actionable remediation plan, and provides tested SwiftUI implementations.
-
-### 5. What can the AI agent inspect, improve, and validate?
-1. **Design & HIG**: Layout, 8pt spacing grid, typography scale, SF Symbols, Liquid Glass materials, and touch targets (minimum 44×44pt).
-2. **Architecture & Clean Code**: Observation framework, `@MainActor` isolation, dependency injection, and modular view composition.
-3. **Privacy & Security**: `PrivacyInfo.xcprivacy` manifests, Required-Reason APIs, `Info.plist` usage descriptions, Keychain vs UserDefaults, and in-app account deletion.
-4. **App Store Readiness**: StoreKit 2 subscriptions, Sign in with Apple compliance, cancellation disclosures, and crash-free completeness.
-5. **Platform Adaptability**: Multi-column `NavigationSplitView` on iPad, Stage Manager resizing, pointer hover morphing, and keyboard shortcuts.
-6. **Accessibility (a11y)**: Dynamic Type scaling (AX1–AX5), VoiceOver semantic grouping, contrast ratios (4.5:1), and Reduce Motion fallbacks.
-
-### 6. Which Apple platforms and development technologies are supported?
-- **Platforms**: iOS 17+, iOS 18+, iPadOS 17/18+, macOS 14/15+ (Sonoma/Sequoia), visionOS 1/2+, and watchOS.
-- **Technologies**: Swift 5.9 & Swift 6, SwiftUI, Swift Concurrency, Observation framework, StoreKit 2, Swift Testing, and AppKit/UIKit bridges.
-
-### 7. Which AI agents are supported?
-- **Anthropic Claude Code**: Project-level (`.claude/skills/`) and Global (`~/.claude/skills/`).
-- **OpenAI Codex**: Project-level (`.agents/skills/`) and Global (`~/.agents/skills/`).
-- **Cursor**: Workspace skills (`.cursor/skills/` or `.agents/skills/`) and `.cursorrules`.
-- **GitHub Copilot**: Project instructions (`.github/copilot-instructions.md`).
-- **Google Gemini CLI / Antigravity**: Workspace (`.gemini/skills/`) and Global profile.
-- **OpenCode**: Native Agent Skills standard directory.
-- **Vercel Skills CLI**: Automated cross-agent installation via `npx skills add`.
-
-### 8. How can a user install it?
-Via one command with the Vercel Skills CLI, or using the included cross-agent installer script (see [Installation](#installation) below).
-
-### 9. How can a user invoke it with slash commands?
-Using specialized slash-commands such as `/apple-native`, `/apple-native-design`, `/apple-native-review`, and `/apple-native-privacy` (see [Slash Commands](#slash-commands--workflows) below).
-
-### 10. What are its limitations?
-- **No Headless Simulator Rendering**: Terminal-only agents without a running macOS Window Server cannot capture live GUI simulator screenshots. In such environments, the skill conducts deep static structural audits and provides copyable `#Preview` code for Xcode verification.
-- **Risk Assessment, Not Guarantees**: Pre-flight audits assess compliance with published guidelines; they cannot guarantee App Store approval, which rests solely with Apple.
-
-### 11. Which official documents and open-source projects influenced it?
-Apple Human Interface Guidelines, App Store Review Guidelines, WWDC sessions (WWDC21–WWDC24), Emil Kowalski's design engineering principles, Clean Architecture SwiftUI, Point-Free TCA, and the Agent Skills standard. See [`SOURCES.md`](file:///SOURCES.md) for complete citations.
+**`apple-native-engineer-mcp`** solves this by providing a unified, framework-independent standard across three complementary layers:
+1. **Layer 1: AI Engineering Standard**: Comprehensive Human Interface Guidelines (HIG), Kowalski physics springs, Glisse optical materials, Swift concurrency, and MVVM architecture.
+2. **Layer 2: Executable CLI Toolkit (`tools/`)**: 8 standalone command-line tools for project inspection, icon validation, screenshot generation, metadata checks, privacy audits, localization, and release scoring.
+3. **Layer 3: Model Context Protocol (MCP) Server (`integrations/mcp-server/`)**: A standard stdio JSON-RPC 2.0 server connecting Claude Desktop, Cursor, OpenAI Codex, and Gemini directly to your Apple development tools and the App Store Connect REST API.
 
 ---
 
-## Slash Commands & Workflows
+## Supported Apple Platforms & Hardware
 
-Compatible assistants recognize these specialized workflows. See [`COMMANDS.md`](file:///COMMANDS.md) for full execution details:
+Designed for the modern Apple ecosystem across all primary device classes:
 
-| Command | Workflow | Core Responsibility |
+| Platform | Hardware Ecosystem | Target Capabilities & Form Factors |
 | :--- | :--- | :--- |
-| **`/apple-native-install`** | Setup & Discovery | Inspects project stack and installs/links skill safely into target agent directory. |
-| **`/apple-native`** | Master Inspection | Full-lifecycle review: evaluates existing app, diagnoses flaws, proposes plan, refactors code. |
-| **`/apple-native-design`** | HIG & Polish | Audits typography, 8pt spacing grid, squircle corners, materials, and touch targets. |
-| **`/apple-native-code`** | Swift 6 Architecture | Modernizes state with `@Observable`, enforces `@MainActor`, and modularizes views. |
-| **`/apple-native-review`** | App Store Pre-Flight | Pre-submission audit across Safety, Performance, Business, Design, and Legal (Sections 1–5). |
-| **`/apple-native-privacy`** | Privacy & Security | Audits `PrivacyInfo.xcprivacy`, Required-Reason APIs, permissions, and Keychain storage. |
-| **`/apple-native-ipad`** | iPadOS Adaptation | Implements `NavigationSplitView`, sidebars, Stage Manager, pointer hover, and keyboard shortcuts. |
-| **`/apple-native-accessibility`**| Accessibility (a11y) | Dynamic Type testing (AX1–AX5), VoiceOver grouping, contrast, and 44pt touch targets. |
-| **`/apple-native-performance`**  | Performance & 120Hz | Diagnoses render hitches, GPU transforms, view invalidation, and retain cycles. |
-| **`/apple-native-release`**      | Release Readiness   | Final pre-submission checklist: App icons, launch screens, metadata, and testing gates. |
+| 📱 **iOS** | **iPhone 16 / Pro / Max**, **iPhone 15 Series**, **iPhone 14 / 13 / 12 / SE** | Dynamic Island, StandBy mode, Action Button, Control Center widgets, Live Activities, ProMotion 120Hz. |
+| 📱 **iPadOS** | **iPad Pro (M4 / M2)**, **iPad Air (M2)**, **iPad mini**, **iPad (10th Gen)** | Multi-column `NavigationSplitView`, sidebar morphing, Stage Manager resizing, pointer hover, Apple Pencil. |
+| 💻 **macOS** | **MacBook Pro**, **MacBook Air**, **Mac Studio**, **Mac mini**, **Mac Pro** | Unified window toolbars, Menu Bar extras, native Settings scenes, keyboard command shortcuts. |
+| 🥽 **visionOS** | **Apple Vision Pro** | Shared Space windows, 3D volumetric containers, Immersive Spaces (`.mixed`, `.progressive`, `.full`), ornaments, gaze-pinch input. |
+| ⌚ **watchOS** | **Apple Watch Ultra 2**, **Apple Watch Series 10 / 9**, **Apple Watch SE** | Smart Stack widgets, vertical pagination, Digital Crown haptic interaction, Double Tap gesture, Always-On display. |
 
 ---
 
-## Installation
+## 3-Layer System Architecture
 
-### Option 1: Via Vercel Skills CLI (`npx skills`)
-```bash
-# Add to current project (interactive agent selector)
-npx skills add kayaonur607/apple-native-engineer
-
-# Add globally to user profile across all projects
-npx skills add kayaonur607/apple-native-engineer -g
-
-# Target specific agents directly
-npx skills add kayaonur607/apple-native-engineer -a claude-code
-npx skills add kayaonur607/apple-native-engineer -a cursor
-npx skills add kayaonur607/apple-native-engineer -a codex
 ```
-
-### Option 2: Via Included Local Installer Script
-```bash
-git clone https://github.com/kayaonur607/apple-native-engineer.git
-cd apple-native-engineer
-
-# Install globally for all supported agents on this Mac
-./scripts/install-skill.sh -g -a all
-
-# Or link locally into your current Xcode project
-./scripts/install-skill.sh -p -a claude
+┌────────────────────────────────────────────────────────────────────────┐
+│               LAYER 1: CANONICAL AGENT SKILL (SKILL.md)                │
+│  • HIG Design Foundations    • Kowalski Physics Springs  • Swift MVVM  │
+│  • Glisse Optical Materials  • Privacy Manifest Auditing • Checklists  │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ triggers / guides
+┌───────────────────────────────────▼────────────────────────────────────┐
+│                    LAYER 2: EXECUTABLE CLI TOOLS                       │
+│  tools/project-inspector/     tools/asset-validator/                   │
+│  tools/privacy-auditor/       tools/metadata-validator/               │
+│  tools/localization-checker/  tools/widget-validator/                 │
+│  tools/screenshot-studio/     tools/release-readiness/                 │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ exposes via stdio
+┌───────────────────────────────────▼────────────────────────────────────┐
+│          LAYER 3: MODEL CONTEXT PROTOCOL (MCP) & ASC CLIENT            │
+│  • JSON-RPC 2.0 Server (Claude Desktop, Cursor, Copilot, Codex)        │
+│  • Official App Store Connect REST API (JWT ES256 authentication)      │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Lifecycle Transformation: Before vs. After
+## Model Context Protocol (MCP) Quickstart
 
-### 1. Design & Touch Ergonomics
-```swift
-// ❌ BEFORE: Web-slop, un-native, un-ergonomic, breaks in Dark Mode
-struct OldProfileCard: View {
-    var body: some View {
-        VStack {
-            Text("User Profile")
-                .font(.system(size: 20)) // ❌ Fixed size, never scales with Dynamic Type
-                .foregroundColor(Color(hex: "#1A1A1A")) // ❌ Hardcoded hex invisible in Dark Mode
-            Button("Edit") { edit() }
-                .frame(width: 30, height: 24) // ❌ Violates 44x44pt touch target rule!
-                .background(Color.blue)
-                .cornerRadius(4) // ❌ Non-continuous circular corner
-        }
-        .padding(13.5) // ❌ Arbitrary non-grid spacing
-    }
-}
+Connect your favorite AI coding environment directly to Apple native development tools.
 
-// ✅ AFTER: Native Apple Design Engineering
-struct NativeProfileCard: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("User Profile")
-                .font(.headline) // ✅ Dynamic Type support
-                .foregroundStyle(.primary) // ✅ Semantic contrast
-            
-            Button("Edit Profile") { edit() }
-                .buttonStyle(.bordered)
-                .controlSize(.regular)
-                .frame(minHeight: 44) // ✅ Meets Level 1 touch target requirement
-        }
-        .padding(16) // ✅ 8pt mathematical spacing grid
-        .background(
-            Color(uiColor: .secondarySystemGroupedBackground),
-            in: RoundedRectangle(cornerRadius: 16, style: .continuous) // ✅ Continuous squircle
-        )
+### 1. Claude Desktop Configuration
+Add the server configuration to your `claude_desktop_config.json` (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+
+```json
+{
+  "mcpServers": {
+    "apple-native-engineer": {
+      "command": "node",
+      "args": [
+        "/Users/YOUR_USERNAME/Desktop/apple-native-engineer-mcp/integrations/mcp-server/src/index.js"
+      ],
+      "env": {
+        "ASC_KEY_ID": "YOUR_KEY_ID",
+        "ASC_ISSUER_ID": "YOUR_ISSUER_ID",
+        "ASC_PRIVATE_KEY_PATH": "/path/to/AuthKey_XYZ.p8"
+      }
     }
+  }
 }
 ```
 
-### 2. Architecture & Concurrency (Swift 6)
-```swift
-// ❌ BEFORE: Thread-unsafe legacy ObservableObject triggering body re-render cascades
-class UserViewModel: ObservableObject {
-    @Published var users: [User] = []
-    func load() {
-        DispatchQueue.global().async {
-            let data = fetchUsers()
-            DispatchQueue.main.async {
-                self.users = data // Data-race hazard in Swift 6
-            }
-        }
-    }
-}
+### 2. Cursor Configuration
+Add to your project's `.cursor/mcp.json`:
 
-// ✅ AFTER: Modern Swift 6 Observation isolated to MainActor
-@Observable
-@MainActor
-final class UserViewModel {
-    private(set) var users: [User] = []
-    private let service: UserServiceProtocol
-    
-    init(service: UserServiceProtocol) {
-        self.service = service
+```json
+{
+  "mcpServers": {
+    "apple-native-engineer": {
+      "command": "node",
+      "args": ["./integrations/mcp-server/src/index.js"]
     }
-    
-    func load() async {
-        users = (try? await service.fetchUsers()) ?? [] // Clean structured concurrency
-    }
+  }
 }
 ```
 
-### 3. Privacy Manifests & Required-Reason APIs
-```xml
-<!-- ❌ BEFORE: Missing PrivacyInfo.xcprivacy — Triggers App Store Rejection -->
-
-<!-- ✅ AFTER: Declared in PrivacyInfo.xcprivacy -->
-<key>NSPrivacyAccessedAPITypes</key>
-<array>
-    <dict>
-        <key>NSPrivacyAccessedAPIType</key>
-        <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
-        <key>NSPrivacyAccessedAPITypeReasons</key>
-        <array>
-            <string>CA92.1</string>
-        </array>
-    </dict>
-</array>
-```
-
----
-
-## Repository Architecture
-
-```
-apple-native-engineer/
-├── SKILL.md                          # Canonical Agent Skills standard specification (agentskills.io)
-├── README.md                         # Comprehensive documentation, lifecycle guide, quickstart
-├── SOURCES.md                        # Master research bibliography, official & community sources
-├── COMMANDS.md                       # Complete slash-command specification & agent workflows
-├── LICENSE                           # MIT License
-├── CHANGELOG.md                      # Semantic version history (v1.0.0)
-├── CONTRIBUTING.md                   # Community contribution guide & PR standards
-├── CODE_OF_CONDUCT.md                # Contributor Covenant v2.1
-├── SECURITY.md                       # Security & vulnerability reporting policy
-│
-├── references/                       # Progressive disclosure knowledge base
-│   ├── apple-hig-foundations.md      # Clarity, Deference, Depth, direct manipulation & feedback
-│   ├── design-principles.md          # 5-Tier Authority Taxonomy (Requirements vs Polish)
-│   ├── typography-and-color.md       # SF Pro, Dynamic Type AX1-AX5, Semantic Colors, Contrast
-│   ├── liquid-glass.md               # Apple Materials (.regularMaterial), Squircles, Specular Edges
-│   ├── native-components.md          # Buttons, Lists, Forms, Pickers, Detents, ContentUnavailableView
-│   ├── navigation-patterns.md        # NavigationStack, NavigationSplitView, TabView, Toolbars
-│   ├── iphone-design.md              # Compact Width, Thumb Reach Zone, Safe Area, Keyboard
-│   ├── ipad-design.md                # Multi-column SplitView, Sidebars, Inspectors, Hover, Shortcuts
-│   ├── macos-design.md               # AppKit/SwiftUI density, Menu Bar, Unified Toolbars, Settings
-│   ├── architecture-and-clean-code.md# Clean Architecture, MVVM, @Observable, MainActor, Swift Testing
-│   ├── privacy-and-security.md       # Privacy Manifests (PrivacyInfo.xcprivacy), Keychain, ATT
-│   ├── app-store-readiness.md        # App Store Review Guidelines (Sections 1–5), StoreKit 2
-│   ├── accessibility.md              # Dynamic Type, VoiceOver, Touch Targets (44pt), Reduce Motion
-│   ├── performance-optimization.md   # 120Hz ProMotion, GPU transforms, view invalidation, retain cycles
-│   ├── swiftui-engineering.md        # @Observable macro, Swift 6 @MainActor, Swift Testing
-│   ├── animation-principles.md       # Emil Kowalski principles, Springs (.snappy), No scale(0) pops
-│   ├── design-systems.md             # Strongly-typed tokens: Spacing, Radius, Motion, Elevation
-│   ├── visual-quality.md             # Xcode Previews matrix, Simulator inspection & integrity
-│   ├── official-resources.md         # Apple HIG & Developer API citations (exact URLs & WWDC)
-│   └── community-resources.md        # Studied open-source repos, licenses, and design attributions
-│
-├── checklists/                       # Systematic review & audit workflows
-│   ├── apple-hig-audit.md            # Complete 10-step audit protocol & severity grading template
-│   ├── app-store-guidelines-review.md# Full App Store Review Guidelines compliance checklist (Sec 1-5)
-│   ├── privacy-security-review.md    # Privacy manifests, permissions, Keychain, and ATT checklist
-│   ├── performance-review.md         # SwiftUI rendering, 120Hz smoothness, and concurrency checklist
-│   ├── iphone-review.md              # iPhone ergonomics, safe area, and detent review
-│   ├── ipad-review.md                # iPadOS multi-column, Stage Manager, pointer review
-│   ├── accessibility-review.md       # Dynamic Type AX, VoiceOver tree, contrast, touch target review
-│   ├── visual-design-review.md       # Visual hierarchy, 8pt spacing grid, materials & motion review
-│   └── release-review.md             # Pre-App Store submission readiness & privacy manifests
-│
-├── examples/                         # Production-grade, copy-pasteable SwiftUI code
-│   ├── navigation-examples.md        # Type-safe router & universal adaptive NavigationSplitView
-│   ├── adaptive-layout-examples.md   # ViewThatFits dynamic type & responsive dashboard grids
-│   ├── native-components.md          # Grouped forms, interactive search scopes, and detented sheets
-│   ├── animation-examples.md         # Grounded card dialogs, tactile bookmark toggle, sensory haptics
-│   └── design-system-example.md      # Drop-in production SwiftUI Design System & tokens package
-│
-├── integrations/                     # Cross-agent setup and discovery guides
-│   ├── claude-code.md                # Anthropic Claude Code (.claude/skills/)
-│   ├── codex.md                      # OpenAI Codex & Agent Skills standard (.agents/skills/)
-│   ├── cursor.md                     # Cursor Composer & .cursorrules (.cursor/skills/)
-│   ├── github-copilot.md             # GitHub Copilot (.github/copilot-instructions.md)
-│   ├── gemini-cli.md                 # Google Gemini CLI & Antigravity (.gemini/skills/)
-│   ├── opencode.md                   # OpenCode & universal agent runtimes
-│   └── vercel-skills.md              # Vercel Skills CLI package management (npx skills)
-│
-├── scripts/                          # Automated validation & installation tooling
-│   ├── validate-skill.sh             # Validates YAML frontmatter, file tree & link integrity
-│   ├── check-references.sh           # Scans and validates all internal markdown links
-│   └── install-skill.sh              # Cross-agent local & global symlink installer
-│
-└── .github/                          # GitHub templates & CI automation
-    ├── ISSUE_TEMPLATE/
-    ├── PULL_REQUEST_TEMPLATE.md
-    └── workflows/
-        └── validate.yml              # GitHub Actions automated validation workflow
-```
-
----
-
-## Validation & Quality Assurance
-
-Run the automated verification suite to validate frontmatter, file presence, and internal reference links:
+### 3. Verification via Terminal
+Test the MCP server over stdio:
 
 ```bash
-# Full repository validation
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | node integrations/mcp-server/src/index.js
+```
+
+---
+
+## Executable CLI Tools & Terminal Previews
+
+All tools are located in `tools/` and run without third-party Python dependencies (Python 3 standard library only).
+
+### 1. Project Inspector
+Analyzes Xcode project structure, Swift package manifests, frameworks, and deployment targets:
+
+```bash
+python3 tools/project-inspector/inspect_project.py .
+```
+
+```text
+============================================================
+📱 Apple Native Engineer — Project Inspection Report
+============================================================
+Project Root:        /Users/developer/MyNativeApp
+Project Type:        Xcode Workspace (.xcworkspace)
+Swift Version:       Swift 6
+Platforms:           iOS (17.0+), iPadOS (17.0+), macOS (14.0+)
+UI Framework:        SwiftUI (Native)
+Architecture:        Clean MVVM + Observation (@Observable)
+Concurrency:         Strict Concurrency Checking Enabled
+============================================================
+```
+
+### 2. Privacy Manifest & Required-Reason Auditor
+Scans Swift sources for Apple's Required-Reason APIs and verifies declarations in `PrivacyInfo.xcprivacy`:
+
+```bash
+python3 tools/privacy-auditor/audit_privacy.py .
+```
+
+```text
+============================================================
+🔒 Apple Native Engineer — Privacy & Security Audit
+============================================================
+Manifest Status:     FOUND (PrivacyInfo.xcprivacy)
+Scanned Source Files: 42 Swift files
+------------------------------------------------------------
+[PASS] NSPrivacyAccessedAPICategoryFileTimestamp
+       Declared reasons: ["C617.1"]
+[PASS] NSPrivacyAccessedAPICategoryUserDefaults
+       Declared reasons: ["CA92.1"]
+------------------------------------------------------------
+Result: 0 Critical Errors, 0 Missing Reason Declarations
+Status: PASS (Ready for App Store Review)
+============================================================
+```
+
+### 3. App Store Icon & Asset Validator
+Ensures App Store marketing icons strictly meet Apple's non-negotiable requirements (1024×1024, zero alpha transparency):
+
+```bash
+python3 tools/asset-validator/validate_assets.py --icon AppIcon-1024.png
+```
+
+```text
+============================================================
+🎨 Apple Native Engineer — App Icon & Asset Validator
+============================================================
+Target:      AppIcon-1024.png
+Dimensions:  1024 × 1024 px [PASS]
+Format:      PNG Signature [PASS]
+Alpha:       No Transparency Channels [PASS]
+Status:      VALID (App Store Submission Ready)
+============================================================
+```
+
+### 4. Localization & Right-to-Left (RTL) Checker
+Scans SwiftUI views for hardcoded text, non-adaptive directional padding (`.left`/`.right`), and String Catalog (`.xcstrings`) completeness:
+
+```bash
+python3 tools/localization-checker/check_localization.py --project-dir .
+```
+
+### 5. WidgetKit & Dynamic Island Validator
+Audits WidgetKit bundles and Live Activities for missing Dynamic Island presentation states (`compactLeading`, `compactTrailing`, `minimal`) and verifies `NSSupportsLiveActivities` in `Info.plist`:
+
+```bash
+python3 tools/widget-validator/validate_widget.py --project-dir .
+```
+
+### 6. Automated Pre-Flight Release Readiness Report
+Generates an App Store readiness audit scoring code, privacy, assets, and metadata:
+
+```bash
+python3 tools/release-readiness/generate_report.py . --output RELEASE_REPORT.md
+```
+
+---
+
+## Executable Slash Commands & Workflows
+
+Compatible AI assistants can execute specialized workflows using these commands:
+
+| Command | Target Domain | Core Responsibility & Tool Invocation |
+| :--- | :--- | :--- |
+| **`/apple-native`** | Master Inspection | End-to-end audit: evaluates architecture, HIG, privacy, and generates action plan. |
+| **`/apple-native-design`** | HIG & Visuals | 8pt grid, SF Symbols, Liquid Glass shaders, squircle corners, and color semantics. |
+| **`/apple-native-code`** | Swift Architecture | Modernizes state with `@Observable`, enforces `@MainActor`, and modularizes views. |
+| **`/apple-native-review`** | App Store Review | Pre-submission audit across Guidelines 1–5 (Safety, Performance, Business, Design, Legal). |
+| **`/apple-native-privacy`** | Privacy Manifests | Audits `PrivacyInfo.xcprivacy` using `tools/privacy-auditor/audit_privacy.py`. |
+| **`/apple-native-icon`** | App Icon Check | Validates 1024×1024 PNG with `tools/asset-validator/validate_assets.py`. |
+| **`/apple-native-screenshots`** | Screenshot Studio | Validates App Store screenshot resolutions and prepares multi-device frames. |
+| **`/apple-native-connect`** | ASC Automation | Interacts with the App Store Connect REST API (apps, versions, builds, testers). |
+| **`/apple-native-metadata`** | App Store Metadata | Validates character counts, keywords, and URLs with `tools/metadata-validator/`. |
+| **`/apple-native-widgets`** | Widgets & Island | Audits WidgetKit timelines and Dynamic Island states with `tools/widget-validator/`. |
+| **`/apple-native-localization`** | i18n & RTL | Audits String Catalogs and RTL mirroring with `tools/localization-checker/`. |
+| **`/apple-native-release`** | Release Gate | Generates pre-submission release report with `tools/release-readiness/`. |
+
+---
+
+## Comprehensive Knowledge Base
+
+The repository includes 29 specialized engineering reference guides, 12 audit checklists, and 9 production-grade examples:
+
+### Reference Guides (`references/`)
+- [`apple-hig-foundations.md`](file:///references/apple-hig-foundations.md): Clarity, deference, depth, and mental models.
+- [`typography-and-color.md`](file:///references/typography-and-color.md): SF Pro family, Dynamic Type scales, and semantic materials.
+- [`liquid-glass.md`](file:///references/liquid-glass.md): Native materials, specular edge highlights, and Glisse-inspired parameter engine.
+- [`native-components.md`](file:///references/native-components.md): Buttons, lists, forms, menus, sheets, pickers, and search bars.
+- [`navigation-patterns.md`](file:///references/navigation-patterns.md): `NavigationStack`, `NavigationSplitView`, `TabView`, and detents.
+- [`iphone-design.md`](file:///references/iphone-design.md): Compact width, thumb reach, safe areas, and keyboard avoidance.
+- [`ipad-design.md`](file:///references/ipad-design.md): Multi-column layouts, sidebars, Stage Manager, pointer hover, and shortcuts.
+- [`macos-design.md`](file:///references/macos-design.md): Mac unified toolbars, window styles, settings scenes, and menu bar commands.
+- [`visionos-spatial-design.md`](file:///references/visionos-spatial-design.md): 3D windows, volumes, immersive spaces, ornaments, and gaze-pinch input.
+- [`watchos-design.md`](file:///references/watchos-design.md): Smart Stack, vertical pagination, Digital Crown haptics, and Double Tap gesture.
+- [`widgets-live-activities.md`](file:///references/widgets-live-activities.md): WidgetKit, ActivityKit, Dynamic Island presentations, and Lock Screen widgets.
+- [`app-intents-siri-shortcuts.md`](file:///references/app-intents-siri-shortcuts.md): App Intents framework, AppShortcutsProvider, Siri, and iOS 18 Control Center widgets.
+- [`architecture-and-clean-code.md`](file:///references/architecture-and-clean-code.md): Clean architecture, MVVM, `@Observable`, dependency injection, and Swift Testing.
+- [`swiftui-engineering.md`](file:///references/swiftui-engineering.md): SwiftUI state lifecycle, custom view modifiers, and view tree optimization.
+- [`storekit-monetization.md`](file:///references/storekit-monetization.md): StoreKit 2 paywalls, auto-renewing subscriptions, promotional offers, and Xcode testing.
+- [`cloudkit-sync-data.md`](file:///references/cloudkit-sync-data.md): SwiftData `@Model` entities, schema migrations, and private CloudKit database synchronization.
+- [`metal-shaders-visual-effects.md`](file:///references/metal-shaders-visual-effects.md): Metal stitchable shaders, iOS 18 MeshGradient, and sensory haptic feedback.
+- [`internationalization-localization.md`](file:///references/internationalization-localization.md): String Catalogs (`.xcstrings`), pluralization, and Right-to-Left (RTL) mirroring.
+- [`offline-caching-networking.md`](file:///references/offline-caching-networking.md): Resilient `URLSession` concurrency, NWPathMonitor reachability, and background transfers.
+- [`privacy-and-security.md`](file:///references/privacy-and-security.md): Privacy Manifests (`PrivacyInfo.xcprivacy`), Required-Reason APIs, Keychain, and ATT.
+- [`app-store-readiness.md`](file:///references/app-store-readiness.md): App Store Review Guidelines (Sections 1–5), StoreKit 2 paywalls, and Sign in with Apple.
+- [`app-store-connect-api.md`](file:///references/app-store-connect-api.md): Official App Store Connect REST API, JWT auth, endpoints, and error handling.
+- [`accessibility.md`](file:///references/accessibility.md): VoiceOver semantics, Dynamic Type AX, contrast, and 44pt touch targets.
+- [`performance-optimization.md`](file:///references/performance-optimization.md): 120Hz ProMotion, GPU transforms, view invalidation, and retain cycles.
+- [`animation-principles.md`](file:///references/animation-principles.md): Kowalski motion design, physics springs, and sensory feedback.
+- [`design-systems.md`](file:///references/design-systems.md): Token systems for spacing, radius, typography, and elevation.
+- [`visual-quality.md`](file:///references/visual-quality.md): Visual verification protocols, Xcode Previews matrix, and Simulator testing.
+- [`official-resources.md`](file:///references/official-resources.md): Official Apple HIG, Developer Documentation, and WWDC citations.
+- [`community-resources.md`](file:///references/community-resources.md): Open-source inspirations and attributions.
+
+### Review Checklists (`checklists/`)
+- [`apple-hig-audit.md`](file:///checklists/apple-hig-audit.md): Complete 10-step Apple HIG audit template and severity guide.
+- [`app-store-guidelines-review.md`](file:///checklists/app-store-guidelines-review.md): Full App Store Review Guidelines compliance checklist (Sections 1–5).
+- [`privacy-security-review.md`](file:///checklists/privacy-security-review.md): Privacy manifests, permissions, Keychain, and ATT checklist.
+- [`performance-review.md`](file:///checklists/performance-review.md): SwiftUI rendering, 120Hz smoothness, and concurrency safety checklist.
+- [`iphone-review.md`](file:///checklists/iphone-review.md): iPhone layout, thumb reach, and modal ergonomics review.
+- [`ipad-review.md`](file:///checklists/ipad-review.md): iPad multi-column, sidebar, Stage Manager, and pointer review.
+- [`accessibility-review.md`](file:///checklists/accessibility-review.md): Dynamic Type AX, VoiceOver tree, contrast, and touch target checklist.
+- [`visual-design-review.md`](file:///checklists/visual-design-review.md): Visual polish, 8pt spacing grid, materials, and hierarchy review.
+- [`release-review.md`](file:///checklists/release-review.md): Pre-submission release checklist.
+- [`widget-dynamic-island-review.md`](file:///checklists/widget-dynamic-island-review.md): WidgetKit, Dynamic Island, and Smart Stack review.
+- [`localization-review.md`](file:///checklists/localization-review.md): String Catalogs, RTL mirroring, and formatting checklist.
+- [`swiftdata-persistence-review.md`](file:///checklists/swiftdata-persistence-review.md): SwiftData model safety, migrations, and CloudKit sync review.
+
+### Production Examples (`examples/`)
+- [`navigation-examples.md`](file:///examples/navigation-examples.md): Adaptive iPhone/iPad navigation architectures.
+- [`adaptive-layout-examples.md`](file:///examples/adaptive-layout-examples.md): Size-class switching and `ViewThatFits` implementations.
+- [`native-components.md`](file:///examples/native-components.md): Production forms, buttons, pickers, and sheets with correct vs incorrect patterns.
+- [`animation-examples.md`](file:///examples/animation-examples.md): Fluid springs, expandable cards, bookmark toggles, and reduced motion fallbacks.
+- [`design-system-example.md`](file:///examples/design-system-example.md): Modular SwiftUI design token implementation.
+- [`live-activities-example.md`](file:///examples/live-activities-example.md): Dynamic Island & Live Activity full implementation.
+- [`swiftdata-cloudkit-example.md`](file:///examples/swiftdata-cloudkit-example.md): SwiftData model container with CloudKit sync and queries.
+- [`mesh-gradients-shaders.md`](file:///examples/mesh-gradients-shaders.md): iOS 18 `MeshGradient` and Metal shader effects.
+- [`storekit-paywall-example.md`](file:///examples/storekit-paywall-example.md): StoreKit 2 custom subscription store with offer codes.
+
+---
+
+## Validation & Test Suite
+
+Verify all repository tools, frontmatter specifications, and link integrity:
+
+```bash
+# 1. Run Python unit tests for all CLI tools (18 unit tests)
+python3 -m unittest discover -s tests
+
+# 2. Run Agent Skills standard validation and link verification
 ./scripts/validate-skill.sh
 
-# Local markdown reference scan
-./scripts/check-references.sh
+# 3. Run all tools in pipeline against local project
+./scripts/run-all-tools.sh .
 ```
 
 ---
 
 ## Disclaimers & Independent Developer Notice
 
-- **Independent Project**: This repository is created, maintained, and operated by an independent developer and the open-source community. It has **no affiliation, connection, association, sponsorship, authorization, or endorsement from Apple Inc.**
-- **Trademark Disclaimers**: *Apple, iPhone, iPad, iPadOS, macOS, watchOS, visionOS, Swift, SwiftUI, AppKit, UIKit, SF Symbols, and Dynamic Type are trademarks or registered trademarks of Apple Inc. in the United States and other jurisdictions.* Their mention in this repository is strictly for descriptive identification, educational instruction, and platform interoperability under nominative fair use.
+- **Independent Project**: This repository is created, maintained, and operated by independent developers and the open-source community. It has no affiliation, connection, association, sponsorship, authorization, or endorsement from Apple Inc.
+- **Trademark Disclaimers**: Apple, iPhone, iPad, iPadOS, Mac, macOS, Apple Watch, watchOS, Apple Vision Pro, visionOS, Swift, SwiftUI, AppKit, UIKit, Dynamic Island, Action Button, SF Symbols, and Dynamic Type are trademarks or registered trademarks of Apple Inc. in the United States and other jurisdictions. Their mention in this repository is strictly for descriptive identification, educational instruction, and platform interoperability under nominative fair use.
 - **No Guarantee of Approval**: All audit checklists, risk ratings, and guidelines represent independent developer interpretations of publicly available Apple documentation. They do not constitute formal legal counsel and cannot guarantee App Store approval, which remains solely at the discretion of Apple Inc.
 
 ---

@@ -1,0 +1,16 @@
+{
+  "app_id": "com.test.sample",
+  "version": "1.0.0",
+  "localizations": {
+    "en-US": {
+      "name": "Valid App Name",
+      "subtitle": "A clean subtitle under thirty",
+      "privacyPolicyUrl": "https://example.com/privacy",
+      "supportUrl": "https://example.com/support",
+      "description": "This is a valid description that clearly outlines application functionality and satisfies all App Store Connect rules.",
+      "keywords": "swift,native,tools,design,test",
+      "promotionalText": "A valid promotional text under one hundred and seventy characters.",
+      "whatsNew": "General performance updates."
+    }
+  }
+}
