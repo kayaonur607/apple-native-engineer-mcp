@@ -63,5 +63,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: Type-check fixtures and parse documentation snippets
         run: ./scripts/verify-swift.sh
-      - name: Check generated SDK reference is current
-        run: python3 scripts/generate_whats_new.py --check
+      - name: Validate generated SDK reference
+        run: python3 scripts/generate_whats_new.py --validate

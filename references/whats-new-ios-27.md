@@ -54,6 +54,12 @@ This file is **generated**, not written. It lists every declaration in the insta
 
 - `statusBar` — macOS unavailable, visionOS unavailable, watchOS unavailable, tvOS unavailable
 
+**let** (3)
+
+- `high` — macOS 26.1, visionOS unavailable, watchOS unavailable, tvOS unavailable
+- `low` — macOS 26.1, visionOS unavailable, watchOS unavailable, tvOS unavailable
+- `topBarPinnedTrailing` — macOS unavailable, watchOS unavailable, tvOS unavailable
+
 **typealias** (1)
 
 - `Body` — visionOS unavailable
@@ -81,6 +87,11 @@ This file is **generated**, not written. It lists every declaration in the insta
 - `responseStream` — watchOS unavailable, tvOS unavailable
 - `text` — watchOS unavailable, tvOS unavailable
 
+**let** (2)
+
+- `rawValue` — watchOS unavailable, tvOS unavailable
+- `typeDisplayRepresentation` — watchOS unavailable, tvOS unavailable
+
 **typealias** (5)
 
 - `PerformResult` — macOS unavailable, visionOS unavailable, watchOS unavailable, tvOS unavailable
@@ -100,6 +111,14 @@ This file is **generated**, not written. It lists every declaration in the insta
 **var** (1)
 
 - `all`
+
+**let** (5)
+
+- `bundledSubscriptions`
+- `partners`
+- `storeType`
+- `subscriptionBundle`
+- `subscriptionSuite`
 
 ## UIKit — 4 new declaration(s)
 

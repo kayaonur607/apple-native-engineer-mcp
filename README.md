@@ -12,7 +12,7 @@
 
 <p align="center">
   <a href="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml"><img src="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/tests-74_passing-30D158" alt="74 tests">
+  <img src="https://img.shields.io/badge/tests-77_passing-30D158" alt="77 tests">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT"></a>
   <img src="https://img.shields.io/badge/MCP-1.32-8A2BE2" alt="MCP">
   <img src="https://img.shields.io/badge/Swift-6.x-F05138" alt="Swift 6">
@@ -41,7 +41,7 @@ This repository is that feedback loop. It ships:
    as resources and the workflows as prompts.
 
 > [!IMPORTANT]
-> **Nothing here is vibes.** Every number in this README is produced by `./scripts/verify.sh`, which runs 74
+> **Nothing here is vibes.** Every number in this README is produced by `./scripts/verify.sh`, which runs 77
 > tests, a link/count validator and a real Swift type-check. See [Proof](#proof).
 
 ---
@@ -219,7 +219,7 @@ This is the part most repositories skip. Here is what `./scripts/verify.sh` actu
 | Stage | Result | How it is measured |
 | :--- | :--- | :--- |
 | Repository validation | **pass** | Frontmatter, 20 required paths, every internal link, and every count in this README cross-checked against the filesystem |
-| Python tests | **66 pass** | `python3 -m unittest` across 3.10 / 3.12 / 3.13 in CI |
+| Python tests | **69 pass** | `python3 -m unittest` across 3.10 / 3.12 / 3.13 in CI |
 | MCP protocol tests | **8 pass** | A real `Client` ↔ `McpServer` pair over the SDK's in-memory transport |
 | Swift compilation | **pass** | `swiftc -typecheck` on both fixtures, `swiftc -parse` on all 118 documentation snippets |
 | SF Symbols catalogue | **9,649 symbols** | Extracted from `CoreGlyphs.bundle`, internally consistent |

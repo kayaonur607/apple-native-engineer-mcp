@@ -10,7 +10,8 @@ Usage::
 
     python3 scripts/generate_whats_new.py            # current SDK release
     python3 scripts/generate_whats_new.py --release 26
-    python3 scripts/generate_whats_new.py --check    # fail if the doc is stale
+    python3 scripts/generate_whats_new.py --check    # fail if the doc is stale (same SDK)
+    python3 scripts/generate_whats_new.py --validate # SDK-independent consistency check
 """
 
 from __future__ import annotations
@@ -177,7 +178,11 @@ def render(release: int, sdk: Path, per_framework: Dict[str, Dict[str, Dict[str,
         for entry in entries.values():
             grouped[str(entry["kind"])].append(entry)
 
-        for kind in ("struct", "class", "enum", "protocol", "actor", "func", "var", "init", "typealias"):
+        order = ("struct", "class", "enum", "protocol", "actor", "func", "var", "let", "init",
+                 "typealias", "case", "subscript", "macro")
+        kinds = [kind for kind in order if kind in grouped]
+        kinds += sorted(kind for kind in grouped if kind not in order)
+        for kind in kinds:
             items = grouped.get(kind)
             if not items:
                 continue
@@ -206,6 +211,50 @@ def render(release: int, sdk: Path, per_framework: Dict[str, Dict[str, Dict[str,
     return "\n".join(lines)
 
 
+SECTION_RE = re.compile(r"^## (\w+) — (\d+) new declaration\(s\)$", re.MULTILINE)
+TOTAL_RE = re.compile(r"Declarations found: \*\*(\d+)\*\*")
+BULLET_RE = re.compile(r"^- `", re.MULTILINE)
+
+
+def validate_doc(path: Path) -> List[str]:
+    """Structural validation that does not depend on which SDK generated the file.
+
+    CI cannot regenerate the document (the runner's Xcode differs from the one
+    that produced it), but it can still prove the document is internally
+    consistent: every section count must match its bullet count, and the total
+    must match the sum of the sections.
+    """
+
+    errors: List[str] = []
+    if not path.exists():
+        return [f"missing generated reference: {path.name}"]
+
+    text = path.read_text()
+    total_match = TOTAL_RE.search(text)
+    if not total_match:
+        return ["declaration total is missing"]
+
+    sections = list(SECTION_RE.finditer(text))
+    if not sections:
+        return ["no framework sections found"]
+
+    bullets_total = 0
+    for index, match in enumerate(sections):
+        start = match.end()
+        end = sections[index + 1].start() if index + 1 < len(sections) else len(text)
+        bullets = len(BULLET_RE.findall(text[start:end]))
+        declared = int(match.group(2))
+        bullets_total += bullets
+        if bullets != declared:
+            errors.append(f"{match.group(1)}: heading claims {declared}, body lists {bullets}")
+
+    declared_total = int(total_match.group(1))
+    if declared_total != bullets_total:
+        errors.append(f"total claims {declared_total}, sections list {bullets_total}")
+
+    return errors
+
+
 def main(argv: List[str]) -> int:
     sdk = sdk_path()
     release = sdk_release(sdk)
@@ -227,6 +276,15 @@ def main(argv: List[str]) -> int:
     content = render(release, sdk, per_framework)
     out = OUT_DIR / f"whats-new-ios-{release}.md"
 
+    if "--validate" in argv:
+        problems = validate_doc(OUT_DIR / f"whats-new-ios-{release}.md")
+        if problems:
+            for problem in problems:
+                print(f"invalid: {problem}", file=sys.stderr)
+            return 1
+        print(f"references/whats-new-ios-{release}.md is structurally consistent")
+        return 0
+
     if "--check" in argv:
         if not out.exists() or out.read_text() != content:
             print(f"stale: {out.relative_to(REPO)} — regenerate with scripts/generate_whats_new.py")
@@ -236,8 +294,9 @@ def main(argv: List[str]) -> int:
 
     out.write_text(content)
     print(f"wrote {out.relative_to(REPO)}: {total} declarations across {len(per_framework)} frameworks")
-    for framework, entries in sorted(per_framework.items(), key=lambda item: -len(item[1]))[:6]:
-        print(f"  {framework:14} {len(entries)}")
+    for framework, entries in sorted(per_framework.items(), key=lambda item: -len(item[1])):
+        if entries:
+            print(f"  {framework:14} {len(entries)}")
     return 0
 
 

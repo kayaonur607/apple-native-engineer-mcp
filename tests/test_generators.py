@@ -105,6 +105,29 @@ class AvailabilityCollectionTests(unittest.TestCase):
         self.assertNotIn("_PrivateThing", names)
 
 
+class StructuralValidationTests(unittest.TestCase):
+    def test_checked_in_reference_is_consistent(self):
+        path = REPO_ROOT / "references" / "whats-new-ios-27.md"
+        if not path.exists():
+            self.skipTest("generated reference not present")
+        self.assertEqual(GEN.validate_doc(path), [])
+
+    def test_mismatched_section_count_is_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "doc.md"
+            path.write_text(
+                "# Title\n\n- Declarations found: **9**\n\n"
+                "## SwiftUI — 2 new declaration(s)\n\n- `A`\n\n"
+                "## AppIntents — 5 new declaration(s)\n\n- `B`\n"
+            )
+            errors = GEN.validate_doc(path)
+            self.assertTrue(any("AppIntents" in error for error in errors))
+            self.assertTrue(any("total claims 9" in error for error in errors))
+
+    def test_missing_file_is_reported(self):
+        self.assertTrue(GEN.validate_doc(Path("/nonexistent/doc.md")))
+
+
 class RenderTests(unittest.TestCase):
     def test_render_is_deterministic(self):
         entries = {

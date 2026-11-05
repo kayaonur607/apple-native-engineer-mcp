@@ -34,7 +34,7 @@ cd integrations/mcp-server && npm install && cd ../..
 ▸ Python tests (shared library + tools)
 .......................................................
 ----------------------------------------------------------------------
-Ran 66 tests in 1.324s
+Ran 69 tests in 1.219s
 
 OK
 
@@ -271,7 +271,7 @@ severity reflects the confidence: `info` for suggestions, `error` for rules Appl
 
 | Claim | Command |
 | :--- | :--- |
-| "74 tests pass" | `./scripts/verify.sh` |
+| "77 tests pass" | `./scripts/verify.sh` |
 | "14 CLI tools" | `ls -d tools/*/ \| wc -l` |
 | "13 MCP tools" | `node integrations/mcp-server/src/index.js --selftest` |
 | "every internal link resolves" | `python3 scripts/validate_repo.py --links` |
