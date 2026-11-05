@@ -411,6 +411,26 @@ class AppStoreConnectTests(unittest.TestCase):
         self.assertEqual(envelope["data"]["mode"], "mock")
         self.assertIn("ASC010", codes(envelope), "mock mode must be announced as a warning")
 
+    def test_reads_app_details(self):
+        envelope = run_tool("app-store-connect/cli.py", "--mock", "app", "--app", "123", expect=0)
+        self.assertEqual(envelope["data"]["name"], "Mock App")
+        self.assertEqual(envelope["data"]["content_rights"], "USES_THIRD_PARTY_CONTENT")
+
+    def test_lists_localisations(self):
+        envelope = run_tool("app-store-connect/cli.py", "--mock", "localizations", "--version", "v1", expect=0)
+        locales = [entry["locale"] for entry in envelope["data"]["localizations"]]
+        self.assertEqual(locales, ["en-US"])
+
+    def test_screenshot_sets_warn_when_thin(self):
+        envelope = run_tool("app-store-connect/cli.py", "--mock", "screenshots",
+                            "--localization", "loc-en", expect=0)
+        self.assertEqual(envelope["data"]["sets"][0]["display_type"], "APP_IPHONE_69")
+        self.assertIn("ASC017", codes(envelope), "fewer than three screenshots must warn")
+
+    def test_localizations_requires_a_version_id(self):
+        envelope = run_tool("app-store-connect/cli.py", "--mock", "localizations", expect=2)
+        self.assertIn("ASC002", codes(envelope))
+
     def test_missing_credentials_do_not_fall_back_to_mock(self):
         import os
         environment = {k: v for k, v in os.environ.items() if not k.startswith("ASC_")}

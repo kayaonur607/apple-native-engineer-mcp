@@ -507,8 +507,12 @@ export const TOOL_SPECS = [
       "Read-only App Store Connect access: verify credentials, list apps, list versions and builds. Requires " +
       "ASC_KEY_ID / ASC_ISSUER_ID / ASC_PRIVATE_KEY_PATH. Never falls back to mock data silently.",
     inputSchema: {
-      operation: z.enum(["verify", "list_apps", "versions", "builds"]).describe("Which read-only operation to run"),
-      app_id: z.string().optional().describe("App Store app ID (required for versions/builds)"),
+      operation: z
+        .enum(["verify", "list_apps", "app_details", "versions", "builds", "localizations", "screenshots"])
+        .describe("Which read-only operation to run"),
+      app_id: z.string().optional().describe("App Store app ID (for app_details, versions, builds)"),
+      version_id: z.string().optional().describe("App Store version ID (for localizations)"),
+      localization_id: z.string().optional().describe("Version localization ID (for screenshots)"),
       mock: z.boolean().optional().describe("Use synthetic data instead of calling Apple (explicit opt-in)"),
       limit: z.number().int().min(1).max(100).optional().describe("Maximum records to return"),
     },
@@ -516,9 +520,19 @@ export const TOOL_SPECS = [
     run: async (args) => {
       const cliArgs = [];
       if (args.mock) cliArgs.push("--mock");
-      const command = args.operation.replace("_", "-");
+      const command = {
+        verify: "verify",
+        list_apps: "list-apps",
+        app_details: "app",
+        versions: "versions",
+        builds: "builds",
+        localizations: "localizations",
+        screenshots: "screenshots",
+      }[args.operation];
       cliArgs.push(command);
       if (args.app_id) cliArgs.push("--app", args.app_id);
+      if (args.version_id) cliArgs.push("--version", args.version_id);
+      if (args.localization_id) cliArgs.push("--localization", args.localization_id);
       if (args.limit) cliArgs.push("--limit", String(args.limit));
       return runTool("tools/app-store-connect/cli.py", cliArgs);
     },

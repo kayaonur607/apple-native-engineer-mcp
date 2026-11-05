@@ -252,6 +252,72 @@ class AppStoreConnectClient:
             })
         return builds
 
+
+    def app_details(self, app_id: str) -> Dict[str, Any]:
+        """Attributes of one app: identity, locale, content-rights declaration."""
+        payload = self.get(f"apps/{app_id}")
+        attributes = (payload.get("data") or {}).get("attributes", {})
+        return {
+            "id": (payload.get("data") or {}).get("id", app_id),
+            "name": attributes.get("name"),
+            "bundle_id": attributes.get("bundleId"),
+            "sku": attributes.get("sku"),
+            "primary_locale": attributes.get("primaryLocale"),
+            "content_rights": attributes.get("contentRightsDeclaration"),
+            "available_in_new_territories": attributes.get("availableInNewTerritories"),
+        }
+
+    def version_localizations(self, version_id: str) -> List[Dict[str, Any]]:
+        """Listing copy per locale for one App Store version."""
+        payload = self.get(f"appStoreVersions/{version_id}/appStoreVersionLocalizations",
+                           {"limit": "50"})
+        localisations = []
+        for item in payload.get("data", []):
+            attributes = item.get("attributes", {})
+            localisations.append({
+                "id": item.get("id"),
+                "locale": attributes.get("locale"),
+                "description": attributes.get("description"),
+                "keywords": attributes.get("keywords"),
+                "promotional_text": attributes.get("promotionalText"),
+                "support_url": attributes.get("supportUrl"),
+                "marketing_url": attributes.get("marketingUrl"),
+                "whats_new": attributes.get("whatsNew"),
+            })
+        return localisations
+
+    def screenshot_sets(self, version_localization_id: str) -> List[Dict[str, Any]]:
+        """Screenshot sets attached to one locale of one version."""
+        payload = self.get(
+            f"appStoreVersionLocalizations/{version_localization_id}/appScreenshotSets",
+            {"limit": "10", "include": "appScreenshots"},
+        )
+        included = {item.get("id"): item for item in payload.get("included", []) or []}
+        sets = []
+        for item in payload.get("data", []):
+            attributes = item.get("attributes", {})
+            screenshots = []
+            for relationship in item.get("relationships", {}).get("appScreenshots", {}).get("data", []) or []:
+                shot = included.get(relationship.get("id"), {})
+                shot_attributes = shot.get("attributes", {})
+                screenshots.append({
+                    "id": shot.get("id", relationship.get("id")),
+                    "file_name": shot_attributes.get("fileName"),
+                    "state": shot_attributes.get("assetDeliveryState", {}).get("state")
+                    if isinstance(shot_attributes.get("assetDeliveryState"), dict) else None,
+                    "width": shot_attributes.get("imageAsset", {}).get("width")
+                    if isinstance(shot_attributes.get("imageAsset"), dict) else None,
+                    "height": shot_attributes.get("imageAsset", {}).get("height")
+                    if isinstance(shot_attributes.get("imageAsset"), dict) else None,
+                })
+            sets.append({
+                "id": item.get("id"),
+                "display_type": attributes.get("screenshotDisplayType"),
+                "count": len(screenshots),
+                "screenshots": screenshots,
+            })
+        return sets
+
     # -- mock ------------------------------------------------------------
     def _mock(self, path: str, params: Optional[Dict[str, str]]) -> Dict[str, Any]:
         if path == "apps":
@@ -265,6 +331,50 @@ class AppStoreConnectClient:
                     "primaryLocale": "en-US",
                 },
             }], "mock": True}
+        if path.startswith("apps/") and path.count("/") == 1:
+            return {"data": {
+                "id": "0000000000",
+                "type": "apps",
+                "attributes": {
+                    "name": "Mock App",
+                    "bundleId": "com.example.mock",
+                    "sku": "MOCK001",
+                    "primaryLocale": "en-US",
+                    "contentRightsDeclaration": "USES_THIRD_PARTY_CONTENT",
+                },
+            }, "mock": True}
+        if path.endswith("/appStoreVersionLocalizations"):
+            return {"data": [{
+                "id": "loc-en",
+                "attributes": {
+                    "locale": "en-US",
+                    "description": "Mock description for the listing.",
+                    "keywords": "mock,app,listing",
+                    "promotionalText": "Mock promotional text.",
+                    "supportUrl": "https://example.com/support",
+                    "marketingUrl": "https://example.com",
+                    "whatsNew": "Initial release.",
+                },
+            }], "mock": True}
+        if path.endswith("/appScreenshotSets"):
+            return {
+                "data": [{
+                    "id": "set-1",
+                    "type": "appScreenshotSets",
+                    "attributes": {"screenshotDisplayType": "APP_IPHONE_69"},
+                    "relationships": {"appScreenshots": {"data": [{"id": "shot-1", "type": "appScreenshots"}]}},
+                }],
+                "included": [{
+                    "id": "shot-1",
+                    "type": "appScreenshots",
+                    "attributes": {
+                        "fileName": "home.png",
+                        "assetDeliveryState": {"state": "COMPLETE"},
+                        "imageAsset": {"width": 1320, "height": 2868},
+                    },
+                }],
+                "mock": True,
+            }
         if path.endswith("/appStoreVersions"):
             return {"data": [{
                 "id": "v1",

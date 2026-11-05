@@ -11,6 +11,10 @@ shared machines, and privacy claims that a test enforces.
 
 ### Added
 
+- **App Store Connect depth** — read-only access now covers `app_details` (identity and content-rights declaration),
+  `localizations` (listing copy per locale) and `screenshots` (sets, display type, delivery state, pixel size), in
+  addition to apps, versions and builds. The CLI gained `app`, `localizations` and `screenshots`; the MCP tool
+  exposes them through its `operation` enum. Still GET-only.
 - **Apple documentation research (live)** — `tools/apple-docs-research/`: search a framework index (8,000+ symbols),
   read a page as Markdown, inspect per-platform availability, read HIG pages. Reads the JSON API
   developer.apple.com itself uses, refuses any other host, caches for seven days, and returns `source_url` plus

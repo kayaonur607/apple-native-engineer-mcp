@@ -219,13 +219,17 @@ TOOLS: Dict[str, dict] = {
         "usage": [
             "python3 tools/app-store-connect/cli.py verify",
             "python3 tools/app-store-connect/cli.py list-apps",
+            "python3 tools/app-store-connect/cli.py app --app 1234567890",
             "python3 tools/app-store-connect/cli.py versions --app 1234567890",
+            "python3 tools/app-store-connect/cli.py localizations --version <version-id>",
+            "python3 tools/app-store-connect/cli.py screenshots --localization <localization-id>",
         ],
         "checks": [
             "ES256 JWT signing via `cryptography` (no fake signatures)",
             "hard failure when credentials are missing — never a silent mock",
             "429 rate-limit aware with backoff",
             "read-only: only GET requests are issued",
+            "reads listing copy per locale and the screenshot sets attached to it",
         ],
         "codes": {"ASC001": "missing credentials", "ASC010": "explicit mock mode",
                   "ASC013": "expired builds"},

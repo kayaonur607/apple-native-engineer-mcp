@@ -49,7 +49,9 @@ def _shared_flags() -> "argparse.ArgumentParser":
     common.add_argument("--key-id", default=suppress, help="Override ASC_KEY_ID")
     common.add_argument("--issuer-id", default=suppress, help="Override ASC_ISSUER_ID")
     common.add_argument("--private-key-path", default=suppress, help="Override ASC_PRIVATE_KEY_PATH")
-    common.add_argument("--app", default=suppress, help="App Store app ID (for versions/builds)")
+    common.add_argument("--app", default=suppress, help="App Store app ID (for versions/builds/app)")
+    common.add_argument("--version", default=suppress, help="App Store version ID (for localizations)")
+    common.add_argument("--localization", default=suppress, help="Version localization ID (for screenshots)")
     common.add_argument("--limit", type=int, default=suppress)
     return common
 
@@ -69,6 +71,9 @@ def _build_parser():
     sub.add_parser("list-apps", help="List apps visible to the key", parents=[common])
     sub.add_parser("versions", help="List App Store versions for --app", parents=[common])
     sub.add_parser("builds", help="List recent builds for --app", parents=[common])
+    sub.add_parser("app", help="Show one app's identity and content-rights declaration (--app)", parents=[common])
+    sub.add_parser("localizations", help="Listing copy per locale for a version (--version)", parents=[common])
+    sub.add_parser("screenshots", help="Screenshot sets for a version localization (--localization)", parents=[common])
     return parser
 
 
@@ -86,6 +91,8 @@ def main(argv=None) -> int:
     args.color = _flag(args, "color", "auto")
     args.app = _flag(args, "app", None)
     args.limit = _flag(args, "limit", 20)
+    args.version = _flag(args, "version", None)
+    args.localization = _flag(args, "localization", None)
     args.key_id = _flag(args, "key_id", None)
     args.issuer_id = _flag(args, "issuer_id", None)
     args.private_key_path = _flag(args, "private_key_path", None)
@@ -119,6 +126,39 @@ def main(argv=None) -> int:
             if not apps:
                 report.warn("ASC011", "The key can see no apps.",
                             hint="Check the key's role and that it belongs to the right team.")
+        elif args.command == "app":
+            if not args.app:
+                report.error("ASC002", "--app is required for 'app'.")
+                return report.emit(json_output=args.json, strict=args.strict, color_mode=args.color)
+            details = client.app_details(args.app)
+            report.data = details
+            if not details.get("name"):
+                report.warn("ASC014", "The app returned no name; check the id and the key's permissions.")
+            if details.get("content_rights") == "USES_THIRD_PARTY_CONTENT":
+                report.info("ASC015", "App declares third-party content; keep the documentation for review up to date.")
+        elif args.command == "localizations":
+            if not args.version:
+                report.error("ASC002", "--version is required for 'localizations'.",
+                             hint="Get a version id from: cli.py versions --app <id>")
+                return report.emit(json_output=args.json, strict=args.strict, color_mode=args.color)
+            localisations = client.version_localizations(args.version)
+            report.data = {"version_id": args.version, "localizations": localisations}
+            missing = [loc["locale"] for loc in localisations if not loc.get("description")]
+            if missing:
+                report.warn("ASC016", f"{len(missing)} locale(s) have no description: {', '.join(missing)}")
+        elif args.command == "screenshots":
+            if not args.localization:
+                report.error("ASC002", "--localization is required for 'screenshots'.",
+                             hint="Get a localization id from: cli.py localizations --version <id>")
+                return report.emit(json_output=args.json, strict=args.strict, color_mode=args.color)
+            sets = client.screenshot_sets(args.localization)
+            report.data = {"localization_id": args.localization, "sets": sets}
+            thin = [s["display_type"] for s in sets if s["count"] < 3]
+            if thin:
+                report.warn("ASC017", f"Screenshot set(s) under three images: {', '.join(thin)}",
+                            hint="App Store Connect requires 3–10 per device size.")
+            if not sets:
+                report.warn("ASC018", "No screenshot sets attached to this localization.")
         elif args.command in ("versions", "builds"):
             if not args.app:
                 report.error("ASC002", f"--app is required for '{args.command}'.")
