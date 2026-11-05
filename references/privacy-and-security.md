@@ -1,27 +1,18 @@
 # Privacy, Security & Data Protection Engineering
 
-On Apple platforms, privacy is treated as a fundamental human right and a core engineering requirement. Applications that fail to properly protect user data, neglect privacy manifests, or provide vague permission strings face immediate App Store rejection or regulatory liability.
+> **Verified against** Xcode 27.2 · iOS 27.2 SDK · every API below exists in the installed SDK.
+> **Deployment floor**: iOS 17 for code without an availability guard; iOS 26+ APIs are always guarded.
+> **Authority**: [Privacy manifest files](https://developer.apple.com/documentation/bundleresources/privacy_manifest_files), [Describing use of required reason API](https://developer.apple.com/documentation/bundleresources/describing-use-of-required-reason-api), [App Privacy Details](https://developer.apple.com/app-store/app-privacy-details/)
 
-> **Disclaimer**: This document provides technical and architectural engineering guidance based on Apple's published developer documentation. It does not constitute formal legal advice. Teams should consult qualified legal counsel for statutory compliance (such as GDPR, CCPA, or COPPA).
+Three separate jobs get conflated under "privacy": declaring what the binary touches (`PrivacyInfo.xcprivacy`), asking permission (ATT, usage strings), and protecting what you store (Keychain, CryptoKit, ATS). Each one has a mechanical check, and each check runs locally.
+
+> **Not legal advice.** This is engineering guidance. GDPR, CCPA and COPPA obligations are for counsel.
 
 ---
 
-## 1. Privacy Manifests (`PrivacyInfo.xcprivacy`)
+## 1. Privacy manifest (`PrivacyInfo.xcprivacy`)
 
-Starting in Spring 2024, Apple requires all apps and third-party SDKs to include a **Privacy Manifest** (`PrivacyInfo.xcprivacy`) declaring the types of data collected, tracking domains, and usage of **Required-Reason APIs**.
-
-### A. Required-Reason API Categories
-Apple audits binaries for calls to specific system APIs. If your app or any dependency calls these APIs, you must declare an approved reason code:
-
-| API Category | Common Functions | Required Reason Key | Example Approved Reason |
-| :--- | :--- | :--- | :--- |
-| **User Defaults** | `UserDefaults.standard` | `NSPrivacyAccessedAPICategoryUserDefaults` | `CA92.1`: Access within app to store app-specific state. |
-| **File Timestamps** | `URLResourceValues.contentModificationDate`, `stat` | `NSPrivacyAccessedAPICategoryFileTimestamp` | `C617.1`: Access within app to determine file freshness. |
-| **System Boot Time** | `systemUptime`, `mach_absolute_time` | `NSPrivacyAccessedAPICategorySystemBootTime` | `35F9.1`: Measure time elapsed between app events. |
-| **Disk Space** | `volumeAvailableCapacityKey`, `statfs` | `NSPrivacyAccessedAPICategoryDiskSpace` | `E174.1`: Check whether adequate space exists before downloading. |
-
-### B. Sample `PrivacyInfo.xcprivacy` XML File
-Place this file in your app's root bundle:
+One file per target, plus one per bundled SDK. It declares tracking, tracking domains, collected data types, and required-reason API usage. The abridged manifest below is valid as written; add collected-data dictionaries under `NSPrivacyCollectedDataTypes` using keys of the form `NSPrivacyCollectedDataType<Type>`, `…DataTypeLinked`, `…DataTypeTracking`, `…DataTypePurposes`.
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -33,20 +24,7 @@ Place this file in your app's root bundle:
     <key>NSPrivacyTrackingDomains</key>
     <array/>
     <key>NSPrivacyCollectedDataTypes</key>
-    <array>
-        <dict>
-            <key>NSPrivacyCollectedDataType</key>
-            <string>NSPrivacyCollectedDataTypeUserID</string>
-            <key>NSPrivacyCollectedDataTypeLinked</key>
-            <true/>
-            <key>NSPrivacyCollectedDataTypeTracking</key>
-            <false/>
-            <key>NSPrivacyCollectedDataTypePurposes</key>
-            <array>
-                <string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
-            </array>
-        </dict>
-    </array>
+    <array/>
     <key>NSPrivacyAccessedAPITypes</key>
     <array>
         <dict>
@@ -62,157 +40,195 @@ Place this file in your app's root bundle:
 </plist>
 ```
 
----
+Generate it with **File ▸ New ▸ File ▸ Privacy Manifest** rather than typing XML. A malformed plist is `PRIV002` in the auditor and blocks upload.
 
-## 2. Permission Requests & `Info.plist` Usage Descriptions
-
-Apple requires explicit purpose strings before accessing protected sensors or hardware (Camera, Microphone, Photo Library, Location, Bluetooth, Health, Contacts).
-
-### Rules for Usage Descriptions:
-1. **Explain the specific benefit to the user**: State *why* the access is needed for the user's workflow, not just what the technical component is.
-2. **Never leave empty or generic strings**: Descriptions like "App needs camera access" or "Location required" result in immediate App Store rejection.
-3. **Request Just-in-Time**: Never request permissions on app launch. Trigger the permission prompt only when the user taps an action that requires it (e.g., tapping "Scan Barcode").
-
-```xml
-<!-- ❌ REJECTED: Vague, lazy, unhelpful -->
-<key>NSCameraUsageDescription</key>
-<string>This app requires camera access.</string>
-
-<!-- ✅ APPROVED: Clear, user-focused benefit -->
-<key>NSCameraUsageDescription</key>
-<string>We use your camera to scan physical invoice barcodes and upload receipts directly into your expense ledger.</string>
-```
+Every linked third-party SDK ships its own manifest, and App Store Connect merges them with yours. So do not copy an SDK's codes into your own manifest (duplicates hide a missing file), and audit the merged result — an SDK declaring `CA92.1` while it actually writes shared defaults is a failure you inherit. Prefer SDK versions that ship a manifest over ones that need a justification in review notes.
 
 ---
 
-## 3. App Tracking Transparency (ATT)
+## 2. Required-reason APIs and the codes that are valid
 
-If your app links user data collected from your app with third-party data for targeted advertising or shares data with a data broker, you **must** implement the App Tracking Transparency framework:
+Apple rejects an upload when the binary calls a required-reason API and the manifest omits the category or names a code that does not exist. This table is the validity set enforced by `tools/privacy-auditor/audit_privacy.py`; it is the source of truth for this guide.
+
+| Category | Detected calls | Valid reason codes |
+| :--- | :--- | :--- |
+| `NSPrivacyAccessedAPICategoryUserDefaults` | `UserDefaults`, `@AppStorage`, `NSUbiquitousKeyValueStore` | `CA92.1` app-only defaults · `1C8F.1` app group shared with extensions · `AC6B.1` managed configuration profile · `C56D.1` defaults written by a third-party SDK |
+| `NSPrivacyAccessedAPICategoryFileTimestamp` | `attributesOfItem`, `creationDate`, `contentModificationDate`, `fileModificationDate`, `stat(` | `C617.1` files inside the container, app group or CloudKit container · `3B52.1` files the user explicitly granted · `0A2A.1` files outside the container (third-party SDK) |
+| `NSPrivacyAccessedAPICategorySystemBootTime` | `systemUptime`, `mach_absolute_time`, `clock_gettime` | `35F9.1` elapsed time between events · `8FFB.1` absolute timestamps within one boot · `3D61.1` show boot time to the user |
+| `NSPrivacyAccessedAPICategoryDiskSpace` | `volumeAvailableCapacityKey`, `volumeTotalCapacityKey`, `attributesOfFileSystem`, `NSFileSystemFreeSize` | `E174.1` free space before writing app-managed files · `85F4.1` show storage usage · `7D9E.1` write files the user asked to store · `B728.1` assess space for a user-requested feature |
+| `NSPrivacyAccessedAPICategoryActiveKeyboards` | `activeInputModes` | `3EC4.1` adapt UI to the active keyboard language · `54BD.1` adapt custom text input |
+
+Correction against the previous revision of this guide: it listed one code per category and omitted `ActiveKeyboards` entirely. Under-declaring fails the same way as declaring nothing, so the full sets above are now the only ones written down here.
+
+The auditor's other findings: `PRIV001` no manifest · `PRIV002` unparseable manifest · `PRIV010` category used but not declared · `PRIV011` code that does not exist · `PRIV012` empty reason list · `PRIV013` unknown category (usually a typo) · `PRIV014` declared but unused · `PRIV020` tracking API while `NSPrivacyTracking` is `false` · `PRIV021` empty `NSPrivacyTrackingDomains` with tracking signals present · `PRIV022` data-collecting API with empty `NSPrivacyCollectedDataTypes`.
+
+---
+
+## 3. App Tracking Transparency
+
+Tracking means linking your app's data with third-party data for advertising, or sharing it with a data broker. If you do either, `NSUserTrackingUsageDescription` is required and the prompt must run before any identifier is read.
 
 ```swift
-import AppTrackingTransparency
 import AdSupport
+import AppTrackingTransparency
 
-func requestTrackingPermission() async {
-    // Only prompt after explaining context to the user
+@MainActor
+func trackingIdentifier() async -> String? {
     let status = await ATTrackingManager.requestTrackingAuthorization()
-    switch status {
-    case .authorized:
-        let idfa = ASIdentifierManager.shared().advertisingIdentifier
-        enableTargetedAnalytics(idfa)
-    case .denied, .restricted, .notDetermined:
-        disableThirdPartyTracking()
-    @unknown default:
-        disableThirdPartyTracking()
-    }
+    guard status == .authorized else { return nil }
+    return ASIdentifierManager.shared().advertisingIdentifier.uuidString
 }
 ```
 
-*Note: If your app does not track users across other companies' apps and websites, set `NSPrivacyTracking` to `false` in your privacy manifest and do not prompt for ATT.*
+- The prompt shows **once**. To retest, delete the app or use Settings ▸ Privacy & Security ▸ Tracking.
+- On iOS 27.2 in the EU, `ATTrackingManager.requestTrackingAuthorization(preferringExpandedInterface:additionalInformationAction:completionHandler:)` renders an expanded prompt and can use `NSUserTrackingMarkdownUsageDescription`. Guard with `if #available(iOS 27.2, *)` and keep the plain call as fallback.
+- No tracking means `NSPrivacyTracking` stays `false` and the API is never called. Prompting for permission you do not need is a 5.1.2 problem, not a courtesy.
 
 ---
 
-## 4. Secure Storage: Keychain Services vs. UserDefaults
+## 4. Keychain, not UserDefaults
 
-Never store passwords, authentication tokens, API keys, or personally identifiable information (PII) in `UserDefaults` or unencrypted SQLite databases. `UserDefaults` is stored in plaintext on disk and is included in unencrypted device backups.
-
-### Secure Keychain Wrapper Implementation
+`UserDefaults` is a plist in the app container: plaintext on disk, included in backups. Tokens, passwords and API keys belong in the Keychain.
 
 ```swift
 import Foundation
 import Security
 
-public enum KeychainManager {
-    
-    public enum KeychainError: Error {
-        case itemNotFound
-        case duplicateItem
-        case unexpectedStatus(OSStatus)
-    }
-    
-    public static func save(token: String, forService service: String, account: String) throws {
-        guard let data = token.data(using: .utf8) else { return }
-        
-        // Delete existing item if present
-        let deleteQuery: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service,
-            kSecAttrAccount as String: account
-        ]
-        SecItemDelete(deleteQuery as CFDictionary)
-        
-        // Add new item with strict hardware security
-        let addQuery: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service,
-            kSecAttrAccount as String: account,
-            kSecValueData as String: data,
-            // Accessible only after first device unlock, not migrated to other devices
-            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
-        ]
-        
-        let status = SecItemAdd(addQuery as CFDictionary, nil)
-        guard status == errSecSuccess else {
-            throw KeychainError.unexpectedStatus(status)
-        }
-    }
-    
-    public static func read(service: String, account: String) throws -> String {
+enum KeychainError: Error {
+    case encodingFailed
+    case unexpectedStatus(OSStatus)
+}
+
+struct KeychainStore {
+    let service: String
+
+    func save(_ token: String, account: String) throws {
+        guard let data = token.data(using: .utf8) else { throw KeychainError.encodingFailed }
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
-            kSecReturnData as String: true,
-            kSecMatchLimit as String: kSecMatchLimitOne
         ]
-        
-        var item: CFTypeRef?
-        let status = SecItemCopyMatching(query as CFDictionary, &item)
-        guard status == errSecSuccess, let data = item as? Data, let token = String(data: data, encoding: .utf8) else {
-            throw KeychainError.itemNotFound
-        }
-        return token
+        SecItemDelete(query as CFDictionary)
+
+        var attributes = query
+        attributes[kSecValueData as String] = data
+        attributes[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+
+        let status = SecItemAdd(attributes as CFDictionary, nil)
+        guard status == errSecSuccess else { throw KeychainError.unexpectedStatus(status) }
     }
 }
 ```
 
+Reading is the same query plus `kSecReturnData: true` and `kSecMatchLimit: kSecMatchLimitOne`, then `SecItemCopyMatching(query, &item)` and a cast to `Data`.
+
+- `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly` survives a background relaunch but never migrates to a new device through a backup. `kSecAttrAccessibleWhenUnlockedThisDeviceOnly` is stricter — use it when the secret is only needed while the user is present.
+- Delete-then-add is not atomic. For concurrent writers, call `SecItemUpdate` first and `SecItemAdd` only on `errSecItemNotFound`.
+
 ---
 
-## 5. Mandatory Account Deletion (Guideline 5.1.1(v))
+## 5. CryptoKit and the Secure Enclave
 
-If your application supports account creation, Apple **mandates** that users must also be able to initiate account deletion directly within the app:
-
-- The deletion option must be easy to find (typically in Account / Privacy settings).
-- Simply providing an email address to request deletion or linking to a generic website form is often rejected unless the website directly performs the deletion.
-- It must delete all personal data associated with the account, or clearly explain what records must be legally retained (e.g., financial audit records).
+Encrypt payloads with `AES.GCM`; keep the key where the app cannot read it.
 
 ```swift
-Section("Account Management") {
-    Button(role: .destructive) {
-        showDeleteAccountConfirmation = true
-    } label: {
-        Label("Delete Account", systemImage: "person.crop.circle.badge.minus")
-    }
+import CryptoKit
+import Foundation
+import Security
+
+func seal(_ plaintext: Data, using key: SymmetricKey) throws -> Data {
+    let box = try AES.GCM.seal(plaintext, using: key)
+    guard let combined = box.combined else { throw KeychainError.encodingFailed }
+    return combined
 }
-.confirmationDialog(
-    "Delete Account Permanently?",
-    isPresented: $showDeleteAccountConfirmation,
-    titleVisibility: .visible
-) {
-    Button("Permanently Delete Account & Data", role: .destructive) {
-        Task {
-            await accountViewModel.deleteAccount()
-        }
-    }
-    Button("Cancel", role: .cancel) { }
-} message: {
-    Text("This will permanently remove your profile, purchase history, and all stored data. This action cannot be reversed.")
+
+func makeDeviceSigningKey() throws -> SecureEnclave.P256.Signing.PrivateKey {
+    let access = SecAccessControlCreateWithFlags(
+        nil, kSecAttrAccessibleWhenUnlockedThisDeviceOnly, [.privateKeyUsage, .userPresence], nil
+    )!
+    return try SecureEnclave.P256.Signing.PrivateKey(accessControl: access)
 }
 ```
 
+The Secure Enclave key never leaves the device: signing happens in hardware, and `.userPresence` forces Face ID, Touch ID or the passcode before each use. `combined` is nonce + ciphertext + tag — store that, not the parts.
+
 ---
 
-## 6. Official Apple References
-- [Apple Developer - App Privacy Details](https://developer.apple.com/app-store/app-privacy-details/)
-- [Apple Developer - Describing Data Use in Privacy Manifests](https://developer.apple.com/documentation/bundleresources/privacy_manifest_files)
-- [Apple Developer - Keychain Services](https://developer.apple.com/documentation/security/keychain_services)
+## 6. Face ID and Touch ID with `LAContext`
+
+```swift
+import LocalAuthentication
+
+func authenticateForVault() async throws -> Bool {
+    let context = LAContext()
+    var error: NSError?
+    guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
+        return false        // no biometry enrolled — fall back to a passcode policy if the feature allows it
+    }
+    return try await context.evaluatePolicy(
+        .deviceOwnerAuthenticationWithBiometrics,
+        localizedReason: "Unlock your saved expense reports."
+    )
+}
+```
+
+`NSFaceIDUsageDescription` is required for the biometric prompt. Use `.deviceOwnerAuthentication` when the feature must also work on a device with no enrolled biometry, and `context.localizedCancelTitle` when the system's cancel label is wrong for your UI.
+
+---
+
+## 7. App Transport Security and certificate pinning
+
+ATS blocks cleartext HTTP by default; keep it that way and add exceptions per domain (`NSExceptionDomains` → `NSExceptionMinimumTLSVersion`, `NSIncludesSubdomains`), never globally. `NSAllowsArbitraryLoads` is both a review flag and an attack surface: if a host cannot do TLS 1.2, replace the host.
+
+Pinning is worth its maintenance cost only for high-value endpoints. Pin the leaf certificate's SHA-256 and ship at least two hashes so a rotation does not brick the app.
+
+```swift
+import CryptoKit
+import Foundation
+import Security
+
+final class PinnedSessionDelegate: NSObject, URLSessionDelegate {
+    private let pinnedHashes: Set<String>
+
+    init(pinnedHashes: Set<String>) { self.pinnedHashes = pinnedHashes }
+
+    func urlSession(_ session: URLSession,
+                    didReceive challenge: URLAuthenticationChallenge) async
+    -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        guard challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust,
+              let trust = challenge.protectionSpace.serverTrust else {
+            return (.performDefaultHandling, nil)
+        }
+
+        var error: CFError?
+        guard SecTrustEvaluateWithError(trust, &error),
+              let chain = SecTrustCopyCertificateChain(trust) as? [SecCertificate],
+              let leaf = chain.first else {
+            return (.cancelAuthenticationChallenge, nil)
+        }
+
+        let der = SecCertificateCopyData(leaf) as Data
+        let hash = Data(SHA256.hash(data: der)).base64EncodedString()
+        return pinnedHashes.contains(hash)
+            ? (.useCredential, URLCredential(trust: trust))
+            : (.cancelAuthenticationChallenge, nil)
+    }
+}
+```
+
+`SecTrustEvaluateWithError` must run before you read the chain, or you are trusting an unvalidated chain. Subject-public-key pinning survives certificate renewal but requires DER-wrapping the key yourself.
+
+---
+
+## 8. Account deletion (5.1.1(v))
+
+If users can create an account they must be able to delete it in the app — not by email, not through a marketing page. Delete the account, not just the device copy, and say in the confirmation what is retained for legal reasons (invoices, tax records) instead of keeping it silently. The pattern is a destructive `Button` in account settings, a `confirmationDialog` that names the consequence, and an `async` call that deletes server-side state before the local purge. [app-store-readiness.md](app-store-readiness.md) lists it in the pre-upload checklist.
+
+---
+
+## 9. Evidence
+
+`python3 tools/privacy-auditor/audit_privacy.py .` enforces the manifest rules: it fails with `PRIV001`/`PRIV010`/`PRIV011` and warns `PRIV020`–`PRIV022`. The privacy-policy URL in metadata is checked by `validate_metadata.py` (`META004`, `META005`).
+
+Full documentation index: [official-resources.md](official-resources.md). Key pages: [privacy manifests](https://developer.apple.com/documentation/bundleresources/privacy_manifest_files), [required-reason API](https://developer.apple.com/documentation/bundleresources/describing-use-of-required-reason-api), [Keychain Services](https://developer.apple.com/documentation/security/keychain_services), [Certificate, Key, and Trust Services](https://developer.apple.com/documentation/security/certificate_key_and_trust_services).

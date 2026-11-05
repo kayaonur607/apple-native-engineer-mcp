@@ -1,52 +1,47 @@
 # Navigation Architecture & Patterns
 
-Navigation is the skeletal structure of an Apple application. A well-designed navigation architecture aligns with the user's mental model, preserves navigation state across app restarts, supports deep linking, and adapts seamlessly across iPhone, iPad, and Mac.
+> **Verified against** Xcode 27.2 · iOS 27.2 SDK · every API below exists in the installed SDK.
+> **Deployment floor**: iOS 17 for code without an availability guard; iOS 26+ APIs are always guarded.
+
+Navigation decides how lost a user can get, what the system restores after termination, and whether the
+app adapts to iPad and Mac without a second codebase. Choose the container first; the screens are easy.
 
 ---
 
-## 1. Primary Navigation Paradigms
+## 1. Pick the container
 
-Apple recognizes two primary navigation mental models:
+| Container | API | Use when | Don't use when |
+| :--- | :--- | :--- | :--- |
+| Hierarchy | `NavigationStack` | Drill-down inside one tab, three or more levels | You need a sidebar |
+| Peers | `TabView` + `Tab` | Two to five top-level destinations | More than five, or a Mac-first app |
+| Columns | `NavigationSplitView` | iPad/Mac; collapses to a stack on iPhone | A single-column iPhone app |
+| Interruption | `.sheet` | One self-contained task or a confirmation | Browsing a second hierarchy |
+| Blocking task | `.fullScreenCover` | Camera, onboarding, checkout | Anything the user may want to peek out of |
 
-1. **Hierarchical Navigation (Stack Drill-down)**:
-   - One primary screen branches down into detail screens.
-   - Pushes from trailing edge to leading edge; pops back via edge swipe or leading back button.
-   - Engineered via `NavigationStack`.
-2. **Flat / Lateral Navigation (Peer Contexts)**:
-   - Several distinct categories or domains accessible without traversing a hierarchy.
-   - Engineered via `TabView` (iPhone) or `NavigationSplitView` sidebar (iPad/macOS).
-3. **Modal Presentation**:
-   - A temporary, focused workflow presented on top of the current context (e.g., compose message, filter settings).
-   - Engineered via `.sheet`, `.fullScreenCover`, or `.popover`.
+**`NavigationView` is removed from new code.** It is deprecated since iOS 16, cannot express a typed
+path, and `tools/project-inspector/inspect_project.py` reports it as `PROJ008` on every scan.
 
 ---
 
-## 2. Modern NavigationStack (iOS 16+)
-
-Never use the deprecated `NavigationView`. Use `NavigationStack` with type-safe `NavigationPath` to support programmatic routing and deep linking:
+## 2. NavigationStack: type the path
 
 ```swift
-enum AppRoute: Hashable {
-    case userProfile(userId: String)
-    case transactionDetail(id: UUID)
-    case settings
+enum Route: Hashable, Codable {
+    case profile(id: String)
+    case order(id: UUID)
 }
 
-struct MainFlowView: View {
-    @State private var path = NavigationPath()
-    
+struct AppShell: View {
+    @State private var path: [Route] = []
+
     var body: some View {
         NavigationStack(path: $path) {
-            HomeDashboardView()
-                .navigationTitle("Dashboard")
-                .navigationDestination(for: AppRoute.self) { route in
+            InboxView { orderID in path.append(.order(id: orderID)) }
+                .navigationTitle("Inbox")
+                .navigationDestination(for: Route.self) { route in
                     switch route {
-                    case .userProfile(let userId):
-                        UserProfileView(userId: userId)
-                    case .transactionDetail(let id):
-                        TransactionDetailView(transactionId: id)
-                    case .settings:
-                        SettingsView()
+                    case .profile(let id): ProfileView(userID: id)
+                    case .order(let id): OrderView(orderID: id)
                     }
                 }
         }
@@ -54,120 +49,170 @@ struct MainFlowView: View {
 }
 ```
 
-### Critical Rules for NavigationStack
-- **Never nest `NavigationStack` inside another `NavigationStack`**: This causes duplicate navigation bars, incorrect back button titles, and broken transitions.
-- **Always attach `.navigationTitle()` to the child view inside the stack**, never to the `NavigationStack` itself.
+| Rule | Why |
+| :--- | :--- |
+| Type the path as `[Route]` when every destination shares one type | You get `append`, `removeLast`, indexing and `Codable` restoration for free |
+| Reach for `NavigationPath` only with heterogeneous routes | It boxes `Hashable` values and you lose typed access |
+| Attach `.navigationDestination(for:)` inside the stack, never in a lazy row | A destination declared in a `List` row is unregistered when the row scrolls away |
+| Never nest a stack inside a stack | Duplicate bars, wrong back titles, broken transitions |
+
+Because the path is plain state, routing is mutation: `path.append(.order(id:))` pushes,
+`removeLast()` pops, `removeAll()` returns to root, and `path = [route]` replaces the stack on a cold
+deep link. `.navigationDestination(isPresented:)` exists, but a Boolean is not a route — it cannot be
+restored or inspected.
 
 ---
 
-## 3. NavigationSplitView for iPad & Mac
-
-`NavigationSplitView` is Apple's recommended architecture for multi-column navigation. On iPad and Mac it displays 2 or 3 columns simultaneously; when run on an iPhone, it **automatically collapses** into a standard hierarchical stack!
+## 3. Deep links and state restoration
 
 ```swift
-struct AdaptiveRootView: View {
-    @State private var selectedCategory: Category?
-    @State private var selectedItem: Item?
+struct RootView: View {
+    @SceneStorage("navigation.path") private var storedPath: Data?
+    @State private var path: [Route] = []
+
+    var body: some View {
+        NavigationStack(path: $path) {
+            HomeView()
+                .navigationDestination(for: Route.self) { route in
+                    destination(for: route)
+                }
+        }
+        .onOpenURL { url in
+            guard let route = Route(url: url) else { return }
+            path = [route]        // cold link replaces; a warm link appends
+        }
+        .task {
+            path = storedPath.flatMap { try? JSONDecoder().decode([Route].self, from: $0) } ?? []
+        }
+        .onChange(of: path) { _, newPath in
+            storedPath = try? JSONEncoder().encode(newPath)
+        }
+    }
+}
+```
+
+`.onOpenURL` belongs on the root view, above the stack — not on a destination that may not exist yet.
+`SceneStorage` is restored per scene, so iPad multi-window keeps two independent stacks.
+
+---
+
+## 4. NavigationSplitView
+
+```swift
+struct WorkspaceView: View {
+    @State private var selectedFolderID: Folder.ID?
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
-    
+
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
-            // Column 1: Sidebar
-            List(Category.allCases, selection: $selectedCategory) { category in
-                NavigationLink(value: category) {
-                    Label(category.title, systemImage: category.icon)
+            List(folders, selection: $selectedFolderID) { folder in
+                Label(folder.name, systemImage: "folder")
+            }
+            .navigationTitle("Folders")
+            .navigationSplitViewColumnWidth(min: 200, ideal: 240, max: 320)
+        } detail: {
+            if let selectedFolderID {
+                FolderView(folderID: selectedFolderID)
+            } else {
+                ContentUnavailableView("No Folder", systemImage: "folder")
+            }
+        }
+        .navigationSplitViewStyle(.balanced)
+    }
+}
+```
+
+- The detail column must handle `nil`. A blank pane on launch looks broken; `ContentUnavailableView` is
+  the system answer.
+- `columnVisibility` is a `Binding`, so a toolbar button can collapse the sidebar to `.detailOnly`.
+- On iPhone the split view **collapses automatically** into a push stack.
+  `NavigationSplitView(columnVisibility:preferredCompactColumn:)` picks which column the compact
+  presentation starts on.
+
+Add an inspector with `.inspector(isPresented:)` plus `.inspectorColumnWidth(min:ideal:max:)` — see
+[iPad Design](ipad-design.md).
+
+---
+
+## 5. TabView: `Tab`, not `.tabItem`
+
+`Tab` is the iOS 18 replacement for the `.tabItem`/`.tag` pair, typed end to end, so the selection can
+never point at a missing tab. Guard it — the deployment floor is iOS 17.
+
+```swift
+enum AppTab: Hashable { case home, library }
+
+struct RootTabs: View {
+    @State private var selection: AppTab = .home
+
+    var body: some View {
+        if #available(iOS 18.0, *) {
+            TabView(selection: $selection) {
+                Tab("Home", systemImage: "house", value: AppTab.home) {
+                    NavigationStack { HomeView() }
+                }
+                Tab("Library", systemImage: "books.vertical", value: AppTab.library) {
+                    NavigationStack { LibraryView() }
                 }
             }
-            .navigationTitle("Categories")
-        } content: {
-            // Column 2: Content List
-            if let selectedCategory {
-                ItemList(category: selectedCategory, selectedItem: $selectedItem)
-            } else {
-                ContentUnavailableView("Select a Category", systemImage: "folder")
-            }
-        } detail: {
-            // Column 3: Detail View
-            if let selectedItem {
-                ItemDetailView(item: selectedItem)
-            } else {
-                ContentUnavailableView("Select an Item", systemImage: "doc")
+        } else {
+            TabView(selection: $selection) {
+                NavigationStack { HomeView() }
+                    .tabItem { Label("Home", systemImage: "house") }
+                    .tag(AppTab.home)
+                NavigationStack { LibraryView() }
+                    .tabItem { Label("Library", systemImage: "books.vertical") }
+                    .tag(AppTab.library)
             }
         }
     }
 }
 ```
 
----
+| Refinement | Availability | Effect |
+| :--- | :--- | :--- |
+| `Tab(_:systemImage:value:role: .search)` | iOS 18 | Puts search in the system search slot instead of a peer tab |
+| `.tabViewStyle(.sidebarAdaptable)` | iOS 18 | Lets iPad users switch between tab bar and sidebar |
+| `.tabBarMinimizeBehavior(.onScrollDown)` | iOS 26 | Hides the bar while reading; returns on scroll up |
+| `.toolbarOverflowMenu { }` | iOS 27 | Moves low-priority toolbar items into an overflow menu |
 
-## 4. Modern TabView (iOS 18+ Evolution)
-
-In iOS 18 and iPadOS 18, `TabView` introduces a unified floating tab bar on iPad that can dynamically morph into a sidebar.
-
-```swift
-struct AppTabView: View {
-    @State private var selectedTab: TabSelection = .home
-    
-    var body: some View {
-        TabView(selection: $selectedTab) {
-            NavigationStack {
-                HomeView()
-            }
-            .tabItem {
-                Label("Home", systemImage: "house.fill")
-            }
-            .tag(TabSelection.home)
-            
-            NavigationStack {
-                ExploreView()
-            }
-            .tabItem {
-                Label("Explore", systemImage: "safari.fill")
-            }
-            .tag(TabSelection.explore)
-            
-            NavigationStack {
-                ProfileView()
-            }
-            .tabItem {
-                Label("Profile", systemImage: "person.crop.circle.fill")
-            }
-            .tag(TabSelection.profile)
-        }
-    }
-}
-```
+Every row needs a guard: an unguarded iOS 26 call on an iOS 17 target is a compile error, not a runtime
+surprise.
 
 ---
 
-## 5. Toolbar Placements & Semantics
+## 6. Sheet, push, or cover
 
-Always use semantic toolbar item placements rather than positioning buttons with spacers:
+| The user is… | Present as | Why |
+| :--- | :--- | :--- |
+| Going deeper in the same hierarchy | Push | Back gesture, title, and restoration come free |
+| Completing one task, then returning | `.sheet` | Context stays visible behind the sheet |
+| Blocked from proceeding without finishing | `.fullScreenCover` | No accidental dismissal mid-task |
+| Reading a short detail beside content | `.popover` (iPad/Mac) | Keeps the source visible |
 
-| Placement | Description & Idiom |
-| :--- | :--- |
-| `.topBarLeading` | Secondary actions, dismiss/back, or profile avatar. |
-| `.topBarTrailing` | Primary action (Edit, Save, Add (+)). |
-| `.bottomBar` | Auxiliary utilities, filters, or status counts on iPhone. |
-| `.principal` | Custom title area (e.g. segmented control in navigation bar). |
-| `.cancellationAction` | Sheet "Cancel" button (automatically placed leading on iOS, trailing on macOS). |
-| `.confirmationAction`| Sheet "Done" / "Save" button (prominent, automatically positioned). |
-
-```swift
-.toolbar {
-    ToolbarItem(placement: .cancellationAction) {
-        Button("Cancel") { dismiss() }
-    }
-    ToolbarItem(placement: .confirmationAction) {
-        Button("Save") { save() }
-            .fontWeight(.semibold)
-    }
-}
-```
+Use `.sheet(item:)` rather than `.sheet(isPresented:)` when the sheet needs data: no optional unwrap in
+the body. A popover becomes a sheet on iPhone by default — `.presentationCompactAdaptation(.sheet)`
+states that intent. `.interactiveDismissDisabled()` belongs only on screens with unsaved work; permanent
+use traps the user.
 
 ---
 
-## 6. Official HIG References
-- [Apple HIG - Navigation](https://developer.apple.com/design/human-interface-guidelines/navigation)
-- [Apple HIG - Tab Bars](https://developer.apple.com/design/human-interface-guidelines/tab-bars)
-- [Apple HIG - Toolbars](https://developer.apple.com/design/human-interface-guidelines/toolbars)
+## 7. Review checklist
+
+- [ ] No `NavigationView` anywhere (`PROJ008` is clean)
+- [ ] Every stack has a typed path; no `isActive`/`isPresented` booleans drive navigation
+- [ ] `.navigationDestination(for:)` sits inside the stack, outside lazy containers
+- [ ] Deep links replace the path on cold start and append on warm start
+- [ ] The path survives termination via `SceneStorage`
+- [ ] Split-view detail handles the empty selection with `ContentUnavailableView`
+- [ ] Tabs use `Tab` on iOS 18+ with a `.tabItem` fallback below it
+- [ ] Toolbar items use semantic placements, not `Spacer()` — see [iPhone Design](iphone-design.md)
+
+---
+
+## 8. Official HIG references
+
+- [Apple HIG — Navigation](https://developer.apple.com/design/human-interface-guidelines/navigation)
+- [Apple HIG — Tab bars](https://developer.apple.com/design/human-interface-guidelines/tab-bars)
+- [Apple HIG — Toolbars](https://developer.apple.com/design/human-interface-guidelines/toolbars)
+- [Apple HIG — Modality](https://developer.apple.com/design/human-interface-guidelines/modality)

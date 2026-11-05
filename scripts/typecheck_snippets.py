@@ -42,8 +42,22 @@ WORK = REPO / ".swiftwork" / "snippets-typecheck"
 TARGET = "arm64-apple-ios18.0-simulator"
 HEADER = "import SwiftUI\nimport Foundation\n"
 
-FENCE_RE = re.compile(r"```swift\n(.*?)```", re.DOTALL)
+#: A fence may name the platform the snippet targets: ```swift visionOS.
+#: Everything else is iOS, which is what the guides teach by default.
+FENCE_RE = re.compile(r"```swift(?:[ \t]+([A-Za-z]+))?[ \t]*\n(.*?)```", re.DOTALL)
 ERROR_RE = re.compile(r"^(.*?):(\d+):(\d+): error: (.*)$")
+
+#: platform → (SDK name for xcrun, swiftc target triple). The target embeds the
+#: repository's documented deployment floor (iOS 17 and its contemporaries), so a
+#: snippet that needs a newer OS fails here rather than in a reader's Xcode.
+PLATFORMS: Dict[str, Tuple[str, str]] = {
+    "ios": ("iphonesimulator", TARGET),
+    "visionos": ("xros", "arm64-apple-xros1.0"),
+    "macos": ("macosx", "arm64-apple-macos14.0"),
+    "watchos": ("watchsimulator", "arm64-apple-watchos10.0-simulator"),
+    "tvos": ("appletvsimulator", "arm64-apple-tvos17.0-simulator"),
+}
+DEFAULT_PLATFORM = "ios"
 
 #: A missing symbol means the block is a fragment: the type lives in another
 #: snippet, or in the prose around it. Consequences of that single problem (bad
@@ -81,12 +95,14 @@ class Snippet:
     document: str
     index: int
     code: str
+    platform: str = DEFAULT_PLATFORM
     status: str = "unknown"
     errors: List[str] = field(default_factory=list)
 
 
-def sdk_path() -> Path:
-    return Path(subprocess.check_output(["xcrun", "--sdk", "iphonesimulator", "--show-sdk-path"],
+def sdk_path(platform: str = DEFAULT_PLATFORM) -> Path:
+    sdk = PLATFORMS[platform][0]
+    return Path(subprocess.check_output(["xcrun", "--sdk", sdk, "--show-sdk-path"],
                                         text=True).strip())
 
 
@@ -94,8 +110,19 @@ def extract() -> List[Snippet]:
     snippets: List[Snippet] = []
     for directory in ("references", "examples"):
         for document in sorted((REPO / directory).glob("*.md")):
-            for index, block in enumerate(FENCE_RE.findall(document.read_text(errors="ignore"))):
-                snippets.append(Snippet(document=f"{directory}/{document.name}", index=index, code=block))
+            for index, match in enumerate(FENCE_RE.findall(document.read_text(errors="ignore"))):
+                declared, block = match
+                platform = (declared or DEFAULT_PLATFORM).lower()
+                snippets.append(
+                    Snippet(
+                        document=f"{directory}/{document.name}",
+                        index=index,
+                        code=block,
+                        # An unknown tag is an error in the guide, not a reason to
+                        # silently compile visionOS code against the iOS SDK.
+                        platform=platform if platform in PLATFORMS else "unknown",
+                    )
+                )
     return snippets
 
 
@@ -110,11 +137,18 @@ def classify(diagnostic: str) -> str:
 
 
 def compile_snippet(snippet: Snippet, sdk: Path, target_dir: Path) -> None:
+    if snippet.platform == "unknown":
+        snippet.status = "real"
+        snippet.errors = [
+            f"unknown platform tag in the fence — use one of {', '.join(sorted(PLATFORMS))}"
+        ]
+        return
+    target = PLATFORMS[snippet.platform][1]
     path = target_dir / f"snippet-{len(snippet.code):05d}-{snippet.index}.swift"
     path.write_text(HEADER + "\n" + snippet.code)
     proc = subprocess.run(
         [
-            "swiftc", "-typecheck", "-disable-sandbox", "-sdk", str(sdk), "-target", TARGET,
+            "swiftc", "-typecheck", "-disable-sandbox", "-sdk", str(sdk), "-target", target,
             "-module-cache-path", str(WORK / "mc"), str(path),
         ],
         capture_output=True, text=True, env={**os.environ, "TMPDIR": str(WORK / "tmp")},
@@ -139,11 +173,20 @@ def compile_snippet(snippet: Snippet, sdk: Path, target_dir: Path) -> None:
 
 
 def main(argv: List[str]) -> int:
-    try:
-        sdk = sdk_path()
-    except (OSError, subprocess.CalledProcessError):
-        print("error: xcrun is required (macOS with Xcode)", file=sys.stderr)
-        return 2
+    snippets = extract()
+    used = sorted({snippet.platform for snippet in snippets if snippet.platform in PLATFORMS})
+
+    sdks: Dict[str, Path] = {}
+    for platform in used:
+        try:
+            sdks[platform] = sdk_path(platform)
+        except (OSError, subprocess.CalledProcessError):
+            print(
+                f"error: xcrun could not find the {PLATFORMS[platform][0]} SDK, needed by "
+                f"{platform} snippets (macOS with Xcode required)",
+                file=sys.stderr,
+            )
+            return 2
 
     if WORK.exists():
         shutil.rmtree(WORK)
@@ -152,20 +195,22 @@ def main(argv: List[str]) -> int:
     target_dir = WORK / "src"
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    snippets = extract()
     for snippet in snippets:
-        compile_snippet(snippet, sdk, target_dir)
+        compile_snippet(snippet, sdks.get(snippet.platform, Path()), target_dir)
 
     counts = Counter(snippet.status for snippet in snippets)
     real = [snippet for snippet in snippets if snippet.status == "real"]
+    by_platform = Counter(snippet.platform for snippet in snippets)
 
     payload = {
-        "sdk": sdk.name,
+        "sdks": {platform: path.name for platform, path in sdks.items()},
+        "platforms": dict(by_platform),
         "snippets": len(snippets),
         "ok": counts.get("ok", 0),
         "fragments": counts.get("fragment", 0),
         "real_errors": [
-            {"document": s.document, "block": s.index, "errors": s.errors} for s in real
+            {"document": s.document, "block": s.index, "platform": s.platform, "errors": s.errors}
+            for s in real
         ],
         "unknown_errors": [
             {"document": s.document, "block": s.index, "stderr": s.errors}
@@ -176,13 +221,14 @@ def main(argv: List[str]) -> int:
     if "--json" in argv:
         print(json.dumps(payload, indent=2))
     else:
-        print(f"SDK:              {sdk.name}")
+        print("SDK:              " + ", ".join(f"{p} → {name}" for p, name in payload["sdks"].items()))
         print(f"Snippets:         {len(snippets)}")
+        print("Per platform:     " + ", ".join(f"{p} {n}" for p, n in sorted(by_platform.items())))
         print(f"Type-check clean: {payload['ok']}")
         print(f"Fragments:        {payload['fragments']}")
         print(f"Real errors:      {len(real)}")
         for snippet in real:
-            print(f"  ✖ {snippet.document} block {snippet.index}")
+            print(f"  ✖ {snippet.document} block {snippet.index} ({snippet.platform})")
             for error in snippet.errors:
                 print(f"      {error[:120]}")
 

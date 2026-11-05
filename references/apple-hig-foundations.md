@@ -1,67 +1,188 @@
-# Apple HIG Foundations & Core Philosophy
+# Apple HIG Foundations
 
-Apple's design philosophy is founded on three primary themes that distinguish Apple platforms from generic desktop and web environments: **Clarity**, **Deference**, and **Depth**. Understanding these foundational principles is essential before writing a single line of SwiftUI or UIKit code.
+> **Verified against** Xcode 27.2 · iOS 27.2 SDK · every API below exists in the installed SDK.
+> **Deployment floor**: iOS 17 for code without an availability guard; iOS 26+ APIs are always guarded.
 
----
-
-## 1. The Three Primary Themes
-
-### A. Clarity
-- **Text must be legible at every size**: Typography is not merely decorative; it carries critical information. Text must scale gracefully using Dynamic Type, maintain strict contrast ratios, and use standard font weights to convey visual hierarchy.
-- **Icons are precise and lucid**: SF Symbols provide mathematically harmonized glyphs aligned to text baselines and font weights.
-- **Adornments are purposeful**: Every border, divider, shadow, and tint must clarify the user's mental model rather than call attention to itself.
-- **Functionality motivates design**: An element's visual affordance must directly reveal its behavior. A button looks tappable; a slider looks draggable; an uneditable label looks static.
-
-### B. Deference
-- **The interface defers to the user's content**: UI components (toolbars, navigation bars, tab bars) recede into the background, providing context and navigation without competing with the primary data or media.
-- **Translucency and materials highlight content**: Rather than solid opaque colors, native materials (`.regularMaterial`, `.ultraThinMaterial`) allow subtle hints of background content to shine through, providing spatial awareness.
-- **Minimal chrome**: Avoid excessive borders, heavy drop shadows, or loud gradients that enclose content in artificial boxes. Let whitespace and typography delineate structure.
-
-### C. Depth
-- **Visual layers and realistic motion impart vitality**: Interfaces exist in a coherent 3D hierarchy. Navigation stacks push from the trailing edge; modals present upward from the bottom; popovers emerge directly from their triggering control.
-- **Physical plausibility**: Elevations are communicated through soft shadows, material blurring, and lighting effects rather than arbitrary z-index layering.
-- **Spatial awareness**: The user should always understand where they came from, where they are, and how to get back.
+The Human Interface Guidelines are a specification, not a mood board. Almost every rule in them already has a
+SwiftUI default that implements it; the job is to stop overriding that default. This page is the map from HIG
+chapter to the API that satisfies it.
 
 ---
 
-## 2. Core Apple Design Principles
+## 1. How the HIG is organised in 2026
 
-### Direct Manipulation
-Users feel greater control when they directly manipulate on-screen objects rather than using indirect controls.
-- **Example**: Swiping a list row to reveal actions, dragging an item directly to reorder, pinching an image to zoom.
-- **SwiftUI Rule**: Leverage native gesture modifiers (`.swipeActions()`, `.draggable()`, `.dropDestination()`) rather than clumsy "Edit" buttons or multi-step modal dialogs whenever possible.
-
-### Feedback
-Every interaction must yield immediate, discernible feedback.
-- **Visual Feedback**: Buttons depress slightly (`ButtonStyle`), selection states update synchronously, progress indicators reveal background tasks.
-- **Sensory & Haptic Feedback**: Use `UIImpactFeedbackGenerator` or SwiftUI's `.sensoryFeedback()` modifier for discreet tactile confirmation.
-- **Audio Feedback**: Reserved for significant events, always respecting the hardware mute switch.
-
-### Consistency
-Consistency builds familiarity and speed of comprehension.
-- **Internal Consistency**: Consistent icon metaphors, typography scales, and padding across all screens of the app.
-- **External Consistency**: Aligning with system conventions. For example, search belongs at the top of a scroll view; back buttons belong in the top-leading toolbar position; settings belong in standard locations.
-
-### User Control
-Users—not apps—drive the experience.
-- Keep decisions reversible: support Undo (`@Environment(\.undoManager)`), confirm only destructive actions, and never lock the user into uncancelable modals without an explicit dismissal path.
-- Avoid unexpected automations or mode switches that disorient the user.
-
----
-
-## 3. The 5 Human Interface Tenets
-
-| Tenet | Guideline | Anti-Pattern |
+| Section | Pages | What it settles |
 | :--- | :--- | :--- |
-| **Ergonomics** | Primary actions placed within comfortable thumb reach (bottom 60% of iPhone screen). | Placing frequent action buttons in the top-right navigation bar on large iPhones. |
-| **Density** | High information density on macOS/iPadOS; comfortable, spacious density on iPhone. | Cramming desktop-density tables with tiny fonts onto an iPhone screen. |
-| **Aesthetics** | Clean, unobtrusive styling utilizing SF Symbols and semantic colors. | Custom neon gradients, non-standard system icons, or web-like rectangular flat buttons. |
-| **Accessibility** | Built-in from day one: Dynamic Type scaling, VoiceOver labels, minimum 44×44pt touch targets. | Fixed frame heights (`.frame(height: 40)`) causing text truncation when user increases font size. |
-| **Resilience** | Flawless handling of Dark Mode, orientation changes, multitasking, and network failures. | Hardcoded `.white` backgrounds causing blinding glare in Dark Mode. |
+| Design fundamentals | *Design principles*, *Getting started*, *Designing for macOS*, *Designing for iPhone Duo* | The intent behind every rule |
+| Foundations | *Accessibility*, *App icons*, *Color*, *Layout*, *Materials*, *Typography* | Cross-platform rules for the raw materials |
+| Components | *Content*, *Menus and actions*, *Navigation and search*, *Presentation*, *Selection and input*, *Status*, *System experiences* | Which control, and why that one |
+| Patterns | *Loading*, *Searching*, *Modality*, *Settings*, *Onboarding*, *Feedback*, *Undo and redo* | Multi-screen behaviour |
+| Inputs, Technologies | *Gestures*, *Pointing devices*, *Widgets*, *Live Activities* | Platform capability |
+
+There is no *Motion* page in Foundations any more. Motion guidance lives in *Feedback* and in the Liquid Glass
+material guidance. Quote the page you actually read.
 
 ---
 
-## 4. Official Apple HIG Resources
-- [Apple HIG - Foundations](https://developer.apple.com/design/human-interface-guidelines/foundations)
-- [Apple HIG - Designing for iPadOS](https://developer.apple.com/design/human-interface-guidelines/layout)
-- [Apple HIG - Materials](https://developer.apple.com/design/human-interface-guidelines/materials)
+## 2. The eight principles, and what they cost in code
+
+The HIG's current *Design principles* page lists eight. Each one rules out a specific habit.
+
+| Principle | HIG wording | The habit it rules out |
+| :--- | :--- | :--- |
+| Purpose | "Make something meaningful." | Feature parity with a competitor nobody asked for |
+| Agency | "Let people do things their own way." | Onboarding that traps the user in a wizard |
+| Responsibility | "Act in people's best interest." | Permission prompts with no rationale string |
+| Familiarity | "Build on what people know." | A bespoke tab bar that behaves almost-but-not-quite like `TabView` |
+| Flexibility | "Adapt to diverse contexts and needs." | A layout that only survives one size class |
+| Simplicity | "Be clear and direct." | Three equally-weighted buttons in one toolbar |
+| Craft | "Care about every detail." | A 0.5pt stroke in one card and 1pt in the next |
+| Delight | "Make it human." | Motion on every tap, including the 40th item in a list |
+
+Clarity, deference and depth were the iOS 7 framing. They are not on the current page. Use the eight.
+
+---
+
+## 3. Hierarchy comes from type and space, not from boxes
+
+This is the rule that separates native from web-port. Before adding a card, border or shadow, ask what the
+grouping looks like with 8 more points of space and a `.secondary` label.
+
+```swift
+// ✅ Grouping from type and space
+VStack(alignment: .leading, spacing: 8) {
+    Text("Balance")
+        .font(.footnote)
+        .foregroundStyle(.secondary)
+    Text(balance, format: .currency(code: "USD"))
+        .font(.largeTitle.bold())
+        .contentTransition(.numericText())
+}
+
+// ❌ Grouping from a box: three decorations to say what spacing already says
+VStack(alignment: .leading, spacing: 8) {
+    Text("Balance").font(.footnote).foregroundStyle(.secondary)
+    Text(balance, format: .currency(code: "USD")).font(.largeTitle.bold())
+}
+.padding(16)
+.background(Color(uiColor: .secondarySystemBackground))
+.clipShape(RoundedRectangle(cornerRadius: 12))
+.overlay(RoundedRectangle(cornerRadius: 12).stroke(.quaternary))
+.shadow(radius: 8)   // SWU020
+```
+
+The HIG's *Layout* page says it directly: "you might use negative space, container shapes, or separator lines to
+show which elements are related". Negative space is listed first. Reach for it first.
+
+**When a container is correct:** a row that must be distinguishable while scrolling (a message bubble, a photo
+tile), or content that sits on a photographic/video backdrop. Not for two lines of text that already share a
+`VStack`.
+
+---
+
+## 4. The spacing rhythm
+
+The HIG does not publish a grid. What it does publish is a default text size (17pt on iOS) and margins that you
+inherit for free. In practice the system's own paddings land on multiples of 4, so a 4/8pt scale inherits the
+platform rhythm instead of fighting it.
+
+| Value | Use |
+| :--- | :--- |
+| 2pt | Hairline offsets, optical nudges |
+| 4pt | Icon-to-label gap, glyph padding inside a 44pt target |
+| 8pt | Default element spacing inside a group |
+| 16pt | Screen margin, list row inset |
+| 24–32pt | Section separation |
+
+`8.5`, `11`, `13` are the tell. A layout built on arbitrary values reads as a resized web page because nothing
+lines up with the system chrome beside it.
+
+**Optical alignment beats mathematical alignment.** A glyph with a rounded leading edge looks inset when aligned
+to a square text stem. Nudge the glyph, not the whole row.
+
+---
+
+## 5. Corner geometry
+
+`RoundedRectangle` uses a continuous (squircle) corner by default in the iOS 27.2 SDK:
+
+```text
+@frozen public struct RoundedRectangle : Shape {
+    public init(cornerRadius: CGFloat, style: RoundedCornerStyle = .continuous)
+}
+```
+
+So `.rect(cornerRadius: 12)` and `RoundedRectangle(cornerRadius: 12)` are already continuous. What is *not*
+continuous is the old `.cornerRadius(_:)` modifier and any `UIBezierPath(roundedRect:cornerRadius:)` you bring
+from UIKit. If you still ship `.cornerRadius`, replace it:
+
+```swift
+// ❌ Circular corners: the transition from straight edge to arc is abrupt
+card.cornerRadius(12)
+
+// ✅ Continuous corners: the same curve system chrome uses
+card.clipShape(.rect(cornerRadius: 12))
+```
+
+Match radius to size, not to taste: 10–12pt for a control, 16–20pt for a card, and never more than two distinct
+radii on one screen.
+
+---
+
+## 6. Materials, depth, and Liquid Glass
+
+*Materials* is a Foundations page and, since iOS 26, Liquid Glass is what the system uses for every control
+layer. The HIG's *Layout* page says controls should be differentiated by the material and a scroll edge effect,
+"instead of applying a solid or semi-opaque background color beneath controls".
+
+That means:
+
+- Toolbars, tab bars, sidebars and floating controls are glass by default. Do not paint a background under them.
+- A card in the content layer is **not** glass. Glass is for the layer above content.
+- Below iOS 26, one material surface. Never a material plus a blur plus a white gradient.
+
+Full API, guards and anti-patterns live in [liquid-glass.md](liquid-glass.md). Do not re-derive them here.
+
+---
+
+## 7. HIG page → the API that already implements it
+
+| HIG page | Rule | API |
+| :--- | :--- | :--- |
+| *Typography* | Use text styles, not point sizes | `.font(.body)`, `.font(.system(.title2, design: .rounded))` |
+| *Layout* | Adapt by size class, not device | `@Environment(\.horizontalSizeClass)`, `ViewThatFits` |
+| *Layout* | Respect safe areas and margins | `.safeAreaPadding(_:)`, `.contentMargins(_:_:for:)` |
+| *Color* | Supply light, dark and increased-contrast variants | Asset catalog appearances; `.foregroundStyle(.primary)` |
+| *Materials* | Controls float above content | `.glassEffect(_:in:)` (iOS 26+), `.scrollEdgeEffectStyle(_:for:)` (iOS 26+) |
+| *Lists and tables* | Use the list, not a scroll view of stacks | `List`, `.listStyle(.insetGrouped)` |
+| *Tab bars* | One system tab bar, not a custom bar | `TabView`, `Tab` (iOS 18+) |
+| *Search fields* | Search belongs in the navigation bar | `.searchable(text:placement:prompt:)` |
+| *Loading* | Never a blank screen | `ProgressView`, `.redacted(reason: .placeholder)` |
+| *Feedback* | Confirm with the platform's own feedback | `.sensoryFeedback(_:trigger:)` |
+
+Every row above is verified against the installed SDK; the type-and-colour rows are detailed in
+[typography-and-color.md](typography-and-color.md), the component rows in [native-components.md](native-components.md).
+
+---
+
+## 8. Review checklist
+
+- [ ] No container where 8pt of space and a `.secondary` label would group the content
+- [ ] Every padding and gap on the 4/8 scale; no 8.5, 11, 13
+- [ ] At most two corner radii on the screen, both continuous
+- [ ] No background painted under a toolbar, tab bar or sidebar
+- [ ] Glass used only in the control layer, never behind body text
+- [ ] Each screen rendered in Light, Dark, AX5 and RTL before it is called done
+- [ ] `lint_swiftui` reports zero `SWU001`, `SWU002`, `SWU012`, `SWU013`, `SWU020`
+
+---
+
+## 9. Sources
+
+- Apple HIG, *Design principles* — <https://developer.apple.com/design/human-interface-guidelines/design-principles>
+- Apple HIG, *Layout* — <https://developer.apple.com/design/human-interface-guidelines/layout>
+- Apple HIG, *Typography* — <https://developer.apple.com/design/human-interface-guidelines/typography>
+- Apple HIG, *Color* — <https://developer.apple.com/design/human-interface-guidelines/color>
+- Apple HIG, *Materials* — <https://developer.apple.com/design/human-interface-guidelines/materials>
+- Apple HIG, *Lists and tables* — <https://developer.apple.com/design/human-interface-guidelines/lists-and-tables>
+- `SwiftUICore` SDK interface, iOS 27.2 (`RoundedRectangle.init(cornerRadius:style:)`, `Shape.rect(cornerRadius:style:)`)

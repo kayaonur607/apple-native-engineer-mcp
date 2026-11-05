@@ -83,7 +83,7 @@ out = pathlib.Path(sys.argv[1])
 count = 0
 for md in sorted(pathlib.Path(".").glob("examples/*.md")) + sorted(pathlib.Path(".").glob("references/*.md")):
     text = md.read_text(encoding="utf-8", errors="ignore")
-    for index, block in enumerate(re.finditer(r"```swift\n(.*?)```", text, re.S)):
+    for index, block in enumerate(re.finditer(r"```swift(?:[ \t]+[A-Za-z]+)?[ \t]*\n(.*?)```", text, re.S)):
         count += 1
         (out / f"{md.parent.name}-{md.stem}-{index:02d}.swift").write_text(block.group(1), encoding="utf-8")
 print(count)

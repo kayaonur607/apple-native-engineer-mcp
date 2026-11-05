@@ -1,157 +1,220 @@
-# SwiftUI Architecture & Engineering
+# SwiftUI Engineering
 
-Modern SwiftUI (iOS 17+, Swift 5.9 / Swift 6) represents a mature, declarative UI framework with fine-grained reactivity, robust concurrency, and high-performance rendering. Writing production-quality SwiftUI requires adhering to modern state modeling patterns and avoiding architectural anti-patterns from the early SwiftUI eras.
+> **Verified against** Xcode 27.2 · iOS 27.2 SDK · every API below exists in the installed SDK.
+> **Deployment floor**: iOS 17 for code without an availability guard; iOS 26+ APIs are always guarded.
+
+SwiftUI is cheap to declare and expensive to evaluate. Every rule below protects one number: how many view
+bodies run per state change. State has one owner; concurrency has one boundary; identity is derived from data.
 
 ---
 
-## 1. Modern State Management: The Observation Framework
+## 1. State has one owner
 
-Starting in iOS 17 (macOS 14), Apple introduced the **Observation framework** (`@Observable`), which replaces `ObservableObject`, `@Published`, and `@StateObject`.
+| State | Reach for | Why |
+| :--- | :--- | :--- |
+| A model this screen owns | `@State private var model = Model(...)` | `@State` ties the object's lifetime to the view's identity. |
+| A model an ancestor owns | `.environment(model)` + `@Environment(Model.self)` | Descendants read it without threading initialisers through every view. |
+| A two-way control binding | `@Bindable var model: Model` | Produces `Binding`s into an `@Observable` object. |
+| Local UI state | `@State` on a value type | No object graph, no lifetime question. |
 
-### Advantages of `@Observable`:
-1. **Property-Level Tracking**: SwiftUI only re-renders views that access specific mutated properties, completely eliminating cascade re-renders.
-2. **Simplified Property Wrappers**: Use standard `@State` in views rather than `@StateObject`.
-3. **No `@Published` Ceremony**: Regular Swift properties are observed automatically.
+`ObservableObject`, `@StateObject` and `@Published` are legacy (`SWU011`): one change signal means **any** write
+invalidates **every** observing view. `@Observable` invalidates only the bodies that read the property changed.
 
 ```swift
-// ✅ Modern iOS 17+ State Model
 import SwiftUI
-import Observation
+
+struct Order: Identifiable, Sendable { let id: UUID; var name: String }
+
+struct OrderService: Sendable {
+    var submit: @Sendable ([Order]) async throws -> [Order]
+    static let live = OrderService { $0 }
+}
 
 @Observable
 @MainActor
-final class OrderViewModel {
-    var items: [OrderItem] = []
-    var isProcessing: Bool = false
-    var errorMessage: String?
-    
-    private let orderService: OrderServiceProtocol
-    
-    init(orderService: OrderServiceProtocol = OrderService()) {
-        self.orderService = orderService
-    }
-    
-    func placeOrder() async {
-        isProcessing = true
-        errorMessage = nil
+final class OrderModel {
+    var orders: [Order] = []
+    var isSubmitting = false
+    var submitError: String?
+    private let service: OrderService
+
+    init(service: OrderService) { self.service = service }
+
+    func submit() async {
+        isSubmitting = true
+        defer { isSubmitting = false }
         do {
-            try await orderService.submit(items: items)
-            items.removeAll()
+            orders = try await service.submit(orders)
+            submitError = nil
         } catch {
-            errorMessage = error.localizedDescription
+            submitError = error.localizedDescription   // failure is state, not a crash
         }
-        isProcessing = false
     }
 }
 
-struct OrderSummaryView: View {
-    // In iOS 17+, @State manages an @Observable class instance lifecycle!
-    @State private var viewModel = OrderViewModel()
-    
+struct CheckoutView: View {
+    @State private var model = OrderModel(service: .live)
+    var body: some View { CheckoutList().environment(model) }
+}
+
+struct CheckoutList: View {
+    @Environment(OrderModel.self) private var model
+
     var body: some View {
-        List {
-            ForEach(viewModel.items) { item in
-                Text(item.name)
-            }
+        List(model.orders) { order in
+            Text(order.name)
         }
-        .overlay {
-            if viewModel.isProcessing {
-                ProgressView("Placing order...")
-            }
+        .safeAreaInset(edge: .bottom) {
+            Button("Place order") { Task { await model.submit() } }   // iOS 26+: Task.immediate (§2)
+                .disabled(model.isSubmitting)
         }
     }
 }
 ```
 
+`@MainActor` is explicit so the snippet compiles anywhere; the default isolation in §2 makes it redundant.
+
 ---
 
-## 2. Swift 6 Concurrency & `@MainActor` Isolation
+## 2. Swift 6.2 concurrency: one boundary, no hop you did not ask for
 
-Swift 6 enforces strict data-race safety. All view models powering SwiftUI views must be explicitly isolated to `@MainActor` to prevent background thread mutations from causing UI glitches or crashes:
+Swift 6.2 makes the common case the default: UI code is main-actor isolated **without** annotating every type,
+and background work is opt-in per function.
+
+```text
+// Package.swift — the whole module is main-actor isolated unless it says otherwise.
+.target(name: "Feature", swiftSettings: [.defaultIsolation(MainActor.self)])
+```
+
+The same setting is `-default-isolation MainActor` in Xcode build settings or `OTHER_SWIFT_FLAGS`.
+
+| You want | Write | Effect |
+| :--- | :--- | :--- |
+| Stay on the caller's actor | `nonisolated(nonsending) func f() async` | No executor hop even though the function is not isolated. |
+| Leave for the global executor | `@concurrent func f() async` | Always runs off the caller's actor; use for CPU or blocking work. |
+| Start now, not next tick | `Task.immediate { … }` (iOS 26+) | Begins synchronously on the current actor until the first suspension; on iOS 17–25 use `Task { … }`. |
+| Fire and forget from a view | `.task { … }` | Structured to the view; cancelled when the view goes away. |
 
 ```swift
-// ❌ WRONG: Background closure mutating state without actor isolation
-class LegacyModel: ObservableObject {
-    @Published var count = 0
-    func increment() {
-        DispatchQueue.global().async {
-            self.count += 1 // Thread sanitizer crash in Swift 6!
+struct ThumbnailPipeline: Sendable {
+    // @concurrent: decoding never occupies the main actor.
+    @concurrent
+    func load(_ urls: [URL]) async -> [URL: Data] {
+        await withTaskGroup(of: (URL, Data).self) { group in
+            for url in urls { group.addTask { (url, (try? Data(contentsOf: url)) ?? Data()) } }
+            var result: [URL: Data] = [:]
+            for await (url, data) in group { result[url] = data }
+            return result
         }
     }
 }
+```
 
-// ✅ CORRECT: Explicit @MainActor isolation with async/await
+Three rules prevent most Swift 6 errors:
+
+1. Cross an isolation boundary with `Sendable` **values** — snapshots, not `@Observable` classes. An
+   `@Observable` class is never `Sendable`; pass the data it holds.
+2. `Task.detached` and `DispatchQueue` are last resorts (`SWU008`). Structured tasks inherit cancellation and
+   priority; detached tasks inherit neither.
+3. `defer` for the flag that must be reset (`isSubmitting` above). A thrown error must not leave the UI stuck.
+
+---
+
+## 3. Invalidation: identity first, then cost
+
+`body` re-runs when a dependency of *that* view changed. Two consequences decide your file layout:
+
+- A computed property inside the view re-runs on every body evaluation — move derived data into the model, or into a
+  child view that depends on less.
+- A child `View` struct is a separate dependency scope. Extracting a row into `PostRow` is not cosmetic; it is how
+  the parent stops re-evaluating rows it did not change.
+
+| Smell | Code | Why it costs |
+| :--- | :--- | :--- |
+| `AnyView` inside a row | `SWU015` | Erases the concrete type, so SwiftUI cannot diff the subtree. |
+| `.id(UUID())` | `SWU016` | New identity every evaluation: state and animations reset. |
+| `ForEach(0..<items.count)` | `SWU018` | Rows are matched by offset, not by data, so content jumps. |
+| `onAppear { await … }` | `SWU017` | `onAppear` is synchronous and may fire more than once; the task is unstructured. |
+| `.animation(_:)` with no `value:` | `SWU010` | Animates every change in the subtree. |
+
+```swift
+struct Post: Identifiable, Sendable { let id: UUID; var title: String }
+
+struct PostRow: View {
+    let post: Post
+    var body: some View { Text(post.title) }
+}
+
 @Observable
 @MainActor
-final class SecureModel {
-    var count = 0
-    
-    func increment() async {
-        let result = await performBackgroundCalculation()
-        self.count = result // Safe: Guaranteed execution on MainActor
+final class FeedModel {
+    enum Phase { case idle, loading, loaded, failed }
+    var posts: [Post] = []
+    var phase = Phase.idle
+
+    func search(_ query: String) async {
+        phase = .loaded              // replace with the real fetch
     }
 }
-```
 
----
-
-## 3. View Composition & Invalidation Optimization
-
-SwiftUI's declarative nature means the `body` property is called whenever observed state changes. To keep the interface buttery smooth at 120Hz ProMotion:
-
-1. **Extract Sub-views into Dedicated Structs**: Separate structs have their own identity and only invalidate when their inputs change. Computed `var` properties inside the parent view re-run every time the parent invalidates.
-2. **Never Perform Heavy Computation in `body`**: Move filtering, formatting, and sorting into view models or cache them.
-3. **Use `.task(id:)` for Data Loading**: Automatically cancels in-flight tasks when the view disappears or the identifier changes.
-
-```swift
 struct FeedView: View {
-    @State private var viewModel = FeedViewModel()
-    
+    @State private var model = FeedModel()
+    @State private var query = ""
+    @State private var isShowingError = false
+
     var body: some View {
-        List(viewModel.posts) { post in
-            // Dedicated struct preserves identity and avoids parent re-render cascades
-            PostRowView(post: post)
+        List(model.posts) { post in
+            PostRow(post: post)      // own body, own dependencies
         }
-        .task(id: viewModel.selectedFilter) {
-            await viewModel.loadPosts()
+        .searchable(text: $query)
+        .task(id: query) {           // cancels the previous run when query changes
+            try? await Task.sleep(for: .milliseconds(250))
+            await model.search(query)
         }
+        .onChange(of: model.phase, initial: true) { _, phase in
+            isShowingError = phase == .failed
+        }
+        .alert("Could not load", isPresented: $isShowingError) { Button("OK", role: .cancel) {} }
     }
 }
 ```
 
+`.task(id:)` and `.onChange(of:initial:_:)` replace most `onAppear` + `Task` code. `initial: true` fires once at
+mount, so "run on appear and on change" is one modifier instead of two code paths.
+
 ---
 
-## 4. Modern Unit Testing with Swift Testing
+## 4. Test the model, not the view
 
-In Xcode 16 / Swift 6, Apple introduced the modern **Swift Testing** framework (`import Testing`), replacing XCTest for idiomatic testing:
+Swift Testing (`import Testing`) is the default for new tests: `@Suite` groups, `#expect` reports, `#require`
+stops. Mark the suite `@MainActor` when the system under test is main-actor isolated. Test doubles are the
+injected `@Sendable` closures from §1 — no mocking framework.
 
 ```swift
 import Testing
 @testable import MyApp
 
-@Suite("Order Processing Suite")
-struct OrderViewModelTests {
-    
-    @Test("Submitting order clears cart on success")
-    @MainActor
-    func testOrderSuccess() async {
-        let mockService = MockOrderService()
-        let vm = OrderViewModel(orderService: mockService)
-        vm.items = [OrderItem(id: UUID(), name: "MacBook Pro")]
-        
-        await vm.placeOrder()
-        
-        #expect(vm.items.isEmpty)
-        #expect(vm.errorMessage == nil)
+@Suite("Order submission") @MainActor
+struct OrderModelTests {
+    @Test("Clears the cart on success")
+    func clearsOnSuccess() async {
+        let model = OrderModel(service: OrderService { _ in [] })
+        model.orders = [Order(id: UUID(), name: "MacBook Pro")]
+        await model.submit()
+
+        #expect(model.orders.isEmpty)
+        #expect(model.submitError == nil)
     }
 }
 ```
 
 ---
 
-## 5. Architectural Neutrality
+## 5. Before you open the PR
 
-Do not dogmatically force third-party architectures (such as The Composable Architecture or heavy coordinator patterns) into small-to-medium Apple apps. 
+No `ObservableObject` (`SWU011`), no `DispatchQueue` (`SWU008`), no `AnyView` in a row (`SWU015`), no
+`id(UUID())` (`SWU016`), no `ForEach(0..<n)` (`SWU018`), no legacy `onChange` (`SWU004`). Then `lint_swiftui`
+reports zero errors and `typecheck_snippets` is clean.
 
-- For **new or focused apps**: Native SwiftUI view composition + `@Observable` models + `NavigationStack` provides the highest velocity and lowest complexity.
-- For **existing apps with TCA or Clean Architecture**: Respect the existing architecture, ensure state mutations are isolated to `@MainActor`, and follow established codebase conventions.
+Related: [architecture-and-clean-code.md](architecture-and-clean-code.md),
+[performance-optimization.md](performance-optimization.md), [navigation-patterns.md](navigation-patterns.md).

@@ -18,30 +18,33 @@ cd integrations/mcp-server && npm install && cd ../..
 
 ```
 ▸ Repository structure and links
+  [PASS] skill name 'apple-native-engineer-mcp' is valid
+  [PASS] skill description is 660 characters
   [PASS] all 20 required paths present
   [PASS] 14 CLI tools structure validated
-  [PASS] 35 internal links resolve
+  [PASS] 83 internal links resolve
+  [PASS] README badge states 131 tests
   [PASS] README documents 14 CLI tools
-  [PASS] README documents 30 reference guides
+  [PASS] README documents 31 reference guides
   [PASS] README documents 12 checklists
   [PASS] README documents 9 worked examples
-  [PASS] README documents 13 MCP tools
+  [PASS] README documents 16 MCP tools
   [PASS] no personal absolute paths in documentation
   [PASS] SF Symbols catalogue is internally consistent (9649 symbols)
   ------------------------------------------------------------------
   ✓ validation passed: 0 warning(s)
 
 ▸ Python tests (shared library + tools)
-.......................................................
+.......................................................................................
 ----------------------------------------------------------------------
-Ran 85 tests in 1.287s
+Ran 87 tests in 1.339s
 
 OK
 
 ▸ MCP protocol tests
-ℹ tests 8
-ℹ suites 1
-ℹ pass 8
+ℹ tests 44
+ℹ suites 10
+ℹ pass 44
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
@@ -51,11 +54,22 @@ OK
   SDK: iPhoneSimulator27.2.sdk
   ✓ fixture: clean-app/App
   ✓ fixture: clean-app/Widgets
-  ✓ documentation snippets parse (118 blocks)
+  ✓ documentation snippets parse (162 blocks)
+  Type-check clean: 73
+  Fragments:        89
+  Real errors:      0
   checked 3 unit(s), 0 failure(s)
 
+▸ Documentation API claims
+SDK index:        21,998 symbols from iPhoneSimulator27.2.sdk
+Documents:        40
+Modifiers taught: 129
+Verified:         127
+Allowlisted:      2
+Unverified:       0
+
 ────────────────────────────────────────────
-  passed: 4   failed: 0   skipped: 0   13s
+  passed: 5   failed: 0   skipped: 0   51s
 ────────────────────────────────────────────
 ```
 
@@ -155,7 +169,10 @@ $ ./scripts/verify-swift.sh
   SDK: iPhoneSimulator27.2.sdk
   ✓ fixture: clean-app/App
   ✓ fixture: clean-app/Widgets
-  ✓ documentation snippets parse (118 blocks)
+  ✓ documentation snippets parse (162 blocks)
+  Type-check clean: 73
+  Fragments:        89
+  Real errors:      0
   checked 3 unit(s), 0 failure(s)
 ```
 
@@ -164,14 +181,24 @@ $ ./scripts/verify-swift.sh
 - `swiftc -typecheck` on `clean-app/Widgets` (ActivityAttributes, DynamicIsland with all four regions,
   AppIntentTimelineProvider, WidgetBundle `@main`).
 - `swiftc -parse` on every ```swift block in `references/` and `examples/`.
-- `swiftc -typecheck` on those blocks too, with a classifier that separates fragment noise from real errors:
+- `swiftc -typecheck` on those blocks too, against the SDK the snippet targets, with a classifier that separates
+  fragment noise from real errors:
 
 ```
-Snippets:         118
-Type-check clean: 35
-Fragments:        83
+SDK:              ios → iPhoneSimulator27.2.sdk, visionos → XROS27.2.sdk
+Snippets:         162
+Per platform:     ios 154, visionos 8
+Type-check clean: 73
+Fragments:        89
 Real errors:      0
 ```
+
+Platform-specific guidance is tagged in the fence — ` ```swift visionOS ` — and compiled against that platform's
+SDK and target instead of being skipped or checked against iOS. Before this existed, the visionOS guide was being
+typechecked against the iOS SDK, where `defaultSize(width:height:depth:)` and `.windowStyle(.volumetric)` do not
+exist; the check reported three "errors" that were really the harness checking the wrong platform. One genuine
+bug surfaced from the fix: `RealityKit` declares its own `Scene`, so importing it next to an `App` makes
+`some Scene` ambiguous. The guide now keeps the app's scene and the RealityKit content in separate files.
 
 The classifier is not hand-waving. A block with an undefined symbol (`cannot find 'Foo' in scope`) is a fragment;
 a block with a wrong argument label is a bug in the guide. The first run of this check found **14 occurrences of
@@ -185,20 +212,65 @@ The first run of this check found two real bugs in the fixture itself: a missing
 
 ## 5. The MCP server is protocol-tested, not just "smoke-tested"
 
-`npm test` drives a real SDK `Client` against a real `McpServer` over an in-memory transport:
+`npm test` drives a real SDK `Client` against a real `McpServer` over an in-memory transport, binds a real HTTP
+socket for the Streamable HTTP transport, and builds a throwaway git repository for `review_diff`:
 
 ```
+▶ command line
+  ✔ prints its version
+  ✔ documents every flag it accepts
+  ✔ reports a complete inventory without a client
+  ✔ exits 0 from --doctor when the machine can run everything
+  ✔ rejects an invalid port with a sentence, not a stack trace
+▶ review_diff
+  ✔ reports nothing when the working tree is clean
+  ✔ catches only the defect introduced by the change
+  ✔ passes when the change is clean even though the project is not
+  ✔ reviews the index when staged is set
+  ✔ says so instead of failing when the diff contains no Swift
+  ✔ explains that a non-repository directory cannot be diffed
+▶ check_environment
+  ✔ reports the runtime it actually found
+▶ streamable HTTP transport
+  ✔ binds a real port and reports its own URL
+  ✔ answers /health without touching the protocol layer
+  ✔ completes an MCP initialize handshake over POST /mcp
+  ✔ rejects a cross-origin browser request
+  ✔ rejects a non-JSON content type
+  ✔ rejects an unparseable body with 400 rather than crashing
+  ✔ refuses GET /mcp in stateless mode
+  ✔ documents the endpoint on an unknown path
+▶ network exposure
+  ✔ refuses a non-loopback bind without --allow-remote
 ▶ apple-native-engineer MCP server
-  ✔ advertises a complete tool inventory (17.7ms)
-  ✔ marks audit tools read-only (8.5ms)
-  ✔ exposes the knowledge base as resources (1.0ms)
-  ✔ exposes every command as a prompt (0.4ms)
-  ✔ runs a real audit and returns a structured envelope (39.2ms)
-  ✔ reports a lint failure with finding codes (37.5ms)
-  ✔ surfaces a missing path as an MCP error instead of crashing (0.4ms)
-  ✔ validates a single SF Symbol against the real catalogue (40.2ms)
-✔ apple-native-engineer MCP server (152.5ms)
-ℹ tests 8 · pass 8 · fail 0
+  ✔ advertises a complete tool inventory
+  ✔ marks audit tools read-only
+  ✔ exposes the knowledge base as resources
+  ✔ exposes every command as a prompt
+  ✔ names the umbrella prompt once, without a duplicated prefix
+  ✔ renders a prompt with its workflow body and optional focus
+  ✔ runs a real audit and returns a structured envelope
+  ✔ reports a lint failure with finding codes
+  ✔ surfaces a missing path as an MCP error instead of crashing
+  ✔ validates a single SF Symbol against the real catalogue
+  ✔ audits the whole project in one call and merges every report
+  ✔ reports progress for a long composite instead of going silent
+▶ telemetry is off unless explicitly enabled
+  ✔ defaults to off
+  ✔ treats an unrecognised value as off rather than collecting
+  ✔ requires https for the anonymous endpoint
+▶ the event shape is closed
+  ✔ drops every unexpected field, including hostile ones
+  ✔ coerces unknown outcomes to error instead of passing them through
+  ✔ rejects a malformed day
+  ✔ buckets duration instead of recording milliseconds
+▶ local recording
+  ✔ writes one aggregate line and nothing else
+  ✔ refuses to record a tool that does not exist
+▶ the preview is the same data that would be written
+  ✔ contains only the closed event shape plus explanatory metadata
+  ✔ reports no file and no endpoint when telemetry is off
+ℹ tests 44 · pass 44 · fail 0
 ```
 
 Inventory at runtime:
@@ -206,16 +278,74 @@ Inventory at runtime:
 ```json
 {
   "name": "apple-native-engineer",
-  "version": "2.0.0",
-  "tools": ["inspect_apple_project", "audit_privacy_manifest", "validate_app_icon", "validate_app_metadata",
-            "check_localization", "validate_widgets", "lint_swiftui", "audit_accessibility", "audit_liquid_glass",
+  "version": "2.1.0",
+  "transport": "stdio",
+  "tools": ["review_diff", "check_environment", "audit_project", "inspect_apple_project",
+            "audit_privacy_manifest", "validate_app_icon", "validate_app_metadata", "check_localization",
+            "validate_widgets", "lint_swiftui", "audit_accessibility", "audit_liquid_glass",
             "validate_sf_symbols", "forge_design_tokens", "generate_release_report", "app_store_connect"],
   "resources": 53,
-  "prompts": ["apple-native-apple-native", "apple-native-design", "apple-native-code", "apple-native-review",
-              "apple-native-privacy", "apple-native-icon", "apple-native-screenshots", "apple-native-connect",
-              "apple-native-metadata", "apple-native-widgets", "apple-native-localization", "apple-native-release"]
+  "prompts": ["apple-native", "apple-native-code", "apple-native-connect", "apple-native-design",
+              "apple-native-icon", "apple-native-localization", "apple-native-metadata", "apple-native-privacy",
+              "apple-native-release", "apple-native-review", "apple-native-screenshots", "apple-native-widgets"],
+  "telemetry": "off"
 }
 ```
+
+The umbrella prompt is `apple-native`, not `apple-native-apple-native` — that double prefix was a real bug, and
+one of the tests above exists to keep it from coming back.
+
+### The HTTP transport, by hand
+
+```
+$ node src/index.js --http 3931
+apple-native-engineer v2.1.0 ready (streamable-http)
+  MCP endpoint: POST http://127.0.0.1:3931/mcp
+  health:       GET  http://127.0.0.1:3931/health
+  bound to loopback only; other machines cannot reach it
+
+$ curl -s http://127.0.0.1:3931/health
+{"name":"apple-native-engineer","version":"2.1.0","transport":"streamable-http","status":"ok",
+ "uptime_seconds":1,"tools":16,"telemetry":"off"}
+
+$ curl -s -o /dev/null -w '%{http_code}\n' -X POST http://127.0.0.1:3931/mcp \
+    -H 'origin: https://evil.example' -H 'content-type: application/json' -d '{}'
+403
+
+$ node src/index.js --http --http-host 0.0.0.0
+error: Refusing to bind 0.0.0.0: this server runs project audits and has no authentication.
+Pass --allow-remote only when a reverse proxy in front of it authenticates callers.
+(exits 2)
+```
+
+### `review_diff` on a one-file change
+
+A throwaway repository: `App/ContentView.swift` is modified, `App/Legacy.swift` already contained the same
+defects in the baseline commit and is left untouched.
+
+```
+$ cd integrations/mcp-server && node --input-type=module -e '
+  const { TOOL_SPECS } = await import("./src/tools.js");
+  const run = await TOOL_SPECS.find(s => s.name === "review_diff").run({ path: "/tmp/diffdemo" });
+  console.log(run.summary);
+  for (const [file, info] of Object.entries(run.envelope.data.files))
+    console.log(`${file} · ${info.status.toUpperCase()} · ${info.findings} finding(s)`);
+  for (const f of run.envelope.findings) console.log(`  ${f.severity.padEnd(7)} ${f.code} — ${f.message}`);
+'
+
+diff-review · FAIL · 1 changed file(s) · 5 finding(s)
+App/ContentView.swift · FAIL · 5 finding(s)
+  warning SWU001 — Hardcoded hex colour breaks Dark Mode and Increase Contrast.
+  warning SWU002 — .foregroundColor(_:) is deprecated since iOS 17.
+  error   SWU003 — NavigationView is deprecated since iOS 16.
+  warning A11Y002 — Text colour #FF0000 is 4.00:1 at worst; below the 4.5:1 AA threshold for body text
+                    (light 4.00:1, dark 4.26:1).
+  info    LG020 — No Liquid Glass APIs detected.
+```
+
+`App/Legacy.swift` does not appear — it is unmodified, and a review is about the change, not the checkout. The
+same run over the whole project would have reported the legacy file too, which is exactly why a full sweep is the
+wrong tool inside an edit loop. One of the tests in the transcript above asserts this scoping.
 
 ---
 
@@ -229,8 +359,8 @@ inside a ```swift block, and looks each one up:
 $ python3 scripts/check_api_claims.py
 SDK index:        21,998 symbols from iPhoneSimulator27.2.sdk
 Documents:        40
-Modifiers taught: 96
-Verified:         94
+Modifiers taught: 129
+Verified:         127
 Allowlisted:      2
 Unverified:       0
 ```
@@ -320,7 +450,8 @@ Being explicit about this is the difference between evidence and marketing.
 | :--- | :--- | :--- |
 | Runtime UI behaviour | No simulator or device UI tests in CI | A screen that compiles can still look wrong; visual review is still required |
 | App Store approval | Only Apple can decide that | The gate models the *rules*, not the reviewer |
-| SwiftUI code in prose | Only fenced ```swift blocks are parsed | A snippet inside a sentence is not type-checked |
+| Snippets in prose | Only fenced ```swift blocks are parsed | A snippet inside a sentence is not type-checked |
+| A snippet's platform | Declared by the fence (` ```swift visionOS `); untagged means iOS | An untagged macOS snippet would be checked against the iOS SDK |
 | Accessibility beyond contrast/targets | VoiceOver order and rotor traversal need a device | `audit_accessibility` catches the measurable subset only |
 | Third-party SDK privacy manifests | The auditor scans app sources, not compiled frameworks | Check SDK manifest bundles separately |
 | App Store Connect live calls | Requires a real key; CI has none | Only the error paths and mock mode are tested |
@@ -334,9 +465,12 @@ severity reflects the confidence: `info` for suggestions, `error` for rules Appl
 
 | Claim | Command |
 | :--- | :--- |
-| "93 tests pass" | `./scripts/verify.sh` |
+| "131 tests pass" | `./scripts/verify.sh` |
 | "14 CLI tools" | `ls -d tools/*/ \| wc -l` |
-| "13 MCP tools" | `node integrations/mcp-server/src/index.js --selftest` |
+| "16 MCP tools" | `node integrations/mcp-server/src/index.js --selftest` |
+| "the HTTP transport rejects a foreign origin" | `node integrations/mcp-server/src/index.js --http 3931 &` then the `curl` above |
+| "a review only reports the diff" | `cd integrations/mcp-server && npm test` (`review_diff` suite) |
+| "telemetry records nothing identifying" | `node integrations/mcp-server/src/index.js --telemetry-preview` |
 | "every internal link resolves" | `python3 scripts/validate_repo.py --links` |
 | "Swift compiles" | `./scripts/verify-swift.sh` |
 | "The gate blocks a bad project" | `python3 tools/release-readiness/generate_report.py tests/fixtures/legacy-app --metadata tests/fixtures/legacy-app/metadata.json --icon tests/fixtures/legacy-app/Assets.xcassets/AppIcon.appiconset/AppIcon-512.png` |

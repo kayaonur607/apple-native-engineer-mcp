@@ -1,149 +1,329 @@
 # Widgets & Live Activities (WidgetKit & ActivityKit)
 
-> **Authority**: [Apple Human Interface Guidelines — Widgets](https://developer.apple.com/design/human-interface-guidelines/widgets), [Live Activities HIG](https://developer.apple.com/design/human-interface-guidelines/live-activities), [WWDC23: Bring widgets to new places](https://developer.apple.com/videos/play/wwdc2023/10027/), [WWDC24: Design with interactive widgets](https://developer.apple.com/videos/play/wwdc2024/10148/)  
-> **Status**: Official Apple Recommendations & Specifications
+> **Verified against** Xcode 27.2 · iOS 27.2 SDK · every API below exists in the installed SDK.
+> **Deployment floor**: iOS 17 for code without an availability guard; iOS 26+ APIs are always guarded.
 
-Widgets provide timely glanceable info on iOS, iPadOS, macOS, and watchOS. Live Activities display real-time events on the Lock Screen and Dynamic Island.
+> **Authority**: [Apple HIG — Widgets](https://developer.apple.com/design/human-interface-guidelines/widgets), [Live Activities HIG](https://developer.apple.com/design/human-interface-guidelines/live-activities), [WWDC23: Bring widgets to new places](https://developer.apple.com/videos/play/wwdc2023/10027/), [WWDC24: Design with interactive widgets](https://developer.apple.com/videos/play/wwdc2024/10148/)
+
+A widget is not a mini-app. It is an Archivable SwiftUI view the system renders at timestamps you compute, in
+a separate process, with no shared memory and no guarantee your app is running. A Live Activity is the same
+pipeline aimed at an event with a start and an end.
 
 ---
 
-## 1. WidgetKit Architecture
+## 1. The protocols, exactly
 
-A widget is not a mini-app; it is an archivable SwiftUI view rendered at discrete timestamps computed by a `TimelineProvider`.
+| Declaration | Framework | Since | What it is |
+| :--- | :--- | :--- | :--- |
+| `Widget` | SwiftUI | iOS 14 | `init()` + `var body: some WidgetConfiguration` |
+| `WidgetBundle` | SwiftUI | iOS 14 | `@main` entry point; `body` is `some Widget` |
+| `WidgetConfiguration` | SwiftUI | iOS 14 | The DSL — `.supportedFamilies`, `.configurationDisplayName` |
+| `TimelineProvider` | WidgetKit | iOS 14 | Completion-based: `placeholder`, `getSnapshot`, `getTimeline` |
+| `AppIntentTimelineProvider` | WidgetKit | iOS 17 | Async provider + `WidgetConfigurationIntent` |
+| `ControlWidget` | SwiftUI | iOS 18 | Control Center, Lock Screen control, Action Button — not a Home Screen widget |
+| `ActivityConfiguration` | WidgetKit | iOS 16.1 | Live Activity Lock Screen presentation plus Dynamic Island |
 
-### Supported Families
+`WidgetConfiguration.Body` is itself a `WidgetConfiguration`. That is why configuration modifiers return
+`some WidgetConfiguration`, and why a trailing `.padding()` on a configuration does not compile.
 
-| Family | Platform | Typical Layout |
-| :--- | :--- | :--- |
-| `.systemSmall` | iOS, iPadOS, macOS | 2x2 grid icon footprint, single focused metric |
-| `.systemMedium` | iOS, iPadOS, macOS | 2x4 footprint, list of 2-3 items or summary card |
-| `.systemLarge` | iOS, iPadOS, macOS | 4x4 footprint, detailed list or rich chart |
-| `.systemExtraLarge` | iPadOS, macOS | Wide canvas for complex dashboards |
-| `.accessoryCircular` | iOS Lock Screen, watchOS | Circular gauge, percentage ring, icon |
-| `.accessoryRectangular` | iOS Lock Screen, watchOS | 2-line textual status or small horizontal graph |
-| `.accessoryInline` | iOS Lock Screen, watchOS | Single line of text with optional icon |
+---
 
-### Interactive Widgets (iOS 17+)
+## 2. A provider worth shipping
 
-Widgets support buttons and toggles backed by **App Intents** without launching the parent app into the foreground.
+`TimelineProvider` is correct when the widget has no options. Once the user can choose what it shows,
+`AppIntentConfiguration` + `AppIntentTimelineProvider` is the answer; `IntentConfiguration` is the pre-iOS-17
+form.
 
 ```swift
-import WidgetKit
-import SwiftUI
 import AppIntents
+import SwiftUI
+import WidgetKit
 
-struct ToggleItemIntent: AppIntent {
-    static var title: LocalizedStringResource = "Toggle Task Status"
+struct HabitEntry: TimelineEntry {
+    let date: Date
+    let completed: Int
+    let total: Int
+}
 
-    @Parameter(title: "Task ID")
-    var taskId: String
+struct HabitWidgetIntent: WidgetConfigurationIntent {
+    static var title: LocalizedStringResource = "Habit Board"
+
+    @Parameter(title: "List")
+    var listName: String?
+}
+
+struct HabitProvider: AppIntentTimelineProvider {
+    func placeholder(in context: Context) -> HabitEntry {
+        HabitEntry(date: .now, completed: 3, total: 5)
+    }
+
+    func snapshot(for configuration: HabitWidgetIntent, in context: Context) async -> HabitEntry {
+        HabitEntry(date: .now, completed: 3, total: 5)
+    }
+
+    func timeline(for configuration: HabitWidgetIntent, in context: Context) async -> Timeline<HabitEntry> {
+        let refresh = Calendar.current.date(byAdding: .hour, value: 1, to: .now) ?? .now
+        return Timeline(entries: [HabitEntry(date: .now, completed: 3, total: 5)], policy: .after(refresh))
+    }
+}
+
+struct HabitWidget: Widget {
+    var body: some WidgetConfiguration {
+        AppIntentConfiguration(kind: "HabitWidget", intent: HabitWidgetIntent.self, provider: HabitProvider()) { entry in
+            HabitWidgetView(entry: entry)
+                .containerBackground(for: .widget) { Color(uiColor: .systemBackground) }
+        }
+        .configurationDisplayName("Habits")
+        .description("Today's completion at a glance.")
+        .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular])
+    }
+}
+```
+
+`containerBackground(for: .widget)` is required since iOS 17: the system draws the platter and pads your
+content, and a widget without one shows as an empty tile. `Timeline` takes `.atEnd`, `.after(_:)` or `.never`;
+a provider that returns `.never` without a `WidgetCenter` reload is frozen until the user removes the widget.
+
+---
+
+## 3. Families
+
+| Family | Platform | Layout budget |
+| :--- | :--- | :--- |
+| `.systemSmall` | iPhone, iPad, Mac | One number, one glyph |
+| `.systemMedium` | iPhone, iPad, Mac | Two or three rows |
+| `.systemLarge` | iPhone, iPad, Mac | A list, chart or short timeline |
+| `.systemExtraLarge` | iPad, Mac | Dashboard width; never assume it exists |
+| `.accessoryCircular` | Lock Screen, watchOS | A gauge or glyph on `AccessoryWidgetBackground()` |
+| `.accessoryRectangular` | Lock Screen, watchOS | Two lines of text or a sparkline |
+| `.accessoryInline` | Lock Screen, watchOS | One line, image plus text, no interaction |
+
+Declare only the families you draw for. WidgetKit does not scale `.systemSmall` content into `.systemLarge`; it
+renders your view in a bigger box and the layout falls apart.
+
+---
+
+## 4. Interactive widgets (iOS 17+)
+
+`Button(intent:)` and `Toggle(intent:)` run an `AppIntent` in the widget process without launching the app. The
+intent must be fast, local and idempotent — WidgetKit gives it a short window and may retry.
+
+```swift
+import AppIntents
+import SwiftUI
+import WidgetKit
+
+struct ToggleHabitIntent: AppIntent {
+    static var title: LocalizedStringResource = "Toggle Habit"
+    static var isDiscoverable: Bool = false
+
+    @Parameter(title: "Habit ID")
+    var habitID: String
 
     init() {}
-    init(taskId: String) { self.taskId = taskId }
+
+    init(habitID: String) {
+        self.habitID = habitID
+    }
 
     func perform() async throws -> some IntentResult {
-        await TaskManager.shared.toggleTask(id: taskId)
+        try await HabitStore.shared.toggle(id: habitID)
         return .result()
     }
 }
 
-struct TaskRowView: View {
-    let task: TaskItem
+struct HabitRow: View {
+    let habit: Habit
 
     var body: some View {
-        HStack {
-            Button(intent: ToggleItemIntent(taskId: task.id)) {
-                Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(task.isCompleted ? .green : .secondary)
-            }
-            .buttonStyle(.plain)
-
-            Text(task.title)
-                .font(.subheadline)
-                .strikethrough(task.isCompleted)
+        Button(intent: ToggleHabitIntent(habitID: habit.id)) {
+            Label(habit.name, systemImage: habit.isDone ? "checkmark.circle.fill" : "circle")
         }
+        .buttonStyle(.plain)
+        .accessibilityLabel(habit.isDone ? "\(habit.name), done" : "\(habit.name), not done")
     }
 }
 ```
 
+Use `Toggle(isOn:intent:)` for a real switch; it animates the state change. Anything needing a network round
+trip, a permission prompt or a sheet belongs in the app — `Button(intent:)` cannot present UI.
+
 ---
 
-## 2. ActivityKit & Live Activities
+## 5. Control Center controls (iOS 18+)
 
-Live Activities track time-sensitive tasks (flight status, food delivery, sports scores, workout timer) for up to 8 hours (or 12 hours max on Lock Screen).
+`ControlWidget` uses the `ControlWidgetConfiguration` DSL and is a different surface from `Widget`.
+`StaticControlConfiguration` for a fixed control, `AppIntentControlConfiguration` when the intent carries
+configuration; the templates are `ControlWidgetToggle` and `ControlWidgetButton`.
 
-### Dynamic Island Presentation Modes
+```swift
+import AppIntents
+import SwiftUI
+import WidgetKit
 
-When an iPhone 14 Pro, 15, or 16 is unlocked, the Live Activity presents across four possible Dynamic Island states:
+struct ToggleFocusIntent: SetValueIntent {
+    static var title: LocalizedStringResource = "Set Focus"
 
-1. **Compact**: Two separate areas (`leading` and `trailing`) flanking the camera pill when one activity is active.
-2. **Minimal**: A single circular pill when multiple live activities compete for the Dynamic Island.
-3. **Expanded**: Long-press on the island opens a larger banner overlay with detailed metrics and controls.
-4. **Lock Screen / StandBy**: Full-width interactive card shown when the device is locked or horizontally charging.
+    @Parameter(title: "State")
+    var value: Bool
+
+    func perform() async throws -> some IntentResult {
+        await FocusStore.shared.setActive(value)
+        return .result()
+    }
+}
+
+struct FocusControl: ControlWidget {
+    var body: some ControlWidgetConfiguration {
+        StaticControlConfiguration(kind: "FocusControl") {
+            ControlWidgetToggle("Focus", isOn: FocusStore.shared.isActive, action: ToggleFocusIntent()) { isOn in
+                Label(isOn ? "Focus on" : "Focus off", systemImage: isOn ? "moon.fill" : "moon")
+            }
+        }
+        .displayName("Focus")
+        .description("Start or end a focus session.")
+    }
+}
+```
+
+Controls have no timeline and no provider. When the app changes state in the background, request
+`ControlCenter.shared.reloadControls(ofKind: "FocusControl")`.
+
+---
+
+## 6. Live Activities
+
+`ActivityAttributes` is the static half (order number, courier); its nested `ContentState` is the mutable half.
+Both must be `Codable`, `ContentState` also `Hashable`. Every update replaces the whole state, so keep it small.
 
 ```swift
 import ActivityKit
-import WidgetKit
 import SwiftUI
+import WidgetKit
 
-struct FlightStatusAttributes: ActivityAttributes {
-    public struct ContentState: Codable, Hashable {
-        var flightStatus: String
-        var estimatedArrival: Date
-        var baggageClaimCarousel: String?
+struct DeliveryAttributes: ActivityAttributes {
+    struct ContentState: Codable, Hashable {
+        var stage: String
+        var eta: Date
     }
 
-    var flightNumber: String
-    var destinationCode: String
+    var orderNumber: String
+    var courier: String
 }
 
-struct FlightActivityWidget: Widget {
+struct DeliveryLiveActivity: Widget {
     var body: some WidgetConfiguration {
-        ActivityConfiguration(for: FlightStatusAttributes.self) { context in
-            // Lock Screen / StandBy banner
-            FlightLockScreenBanner(context: context)
+        ActivityConfiguration(for: DeliveryAttributes.self) { context in
+            HStack {
+                Text("Order \(context.attributes.orderNumber)")
+                Spacer()
+                Text(context.state.eta, style: .time)
+            }
+            .padding()
+            .activityBackgroundTint(.black.opacity(0.4))
+            .activitySystemActionForegroundColor(.white)
         } dynamicIsland: { context in
             DynamicIsland {
-                // Expanded Presentation
                 DynamicIslandExpandedRegion(.leading) {
-                    Label(context.attributes.flightNumber, systemImage: "airplane")
-                        .font(.headline)
+                    Label(context.attributes.courier, systemImage: "bicycle")
+                }
+                DynamicIslandExpandedRegion(.center) {
+                    Text(context.state.stage).font(.headline)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text(context.state.flightStatus)
-                        .foregroundStyle(.green)
+                    Text(context.state.eta, style: .time)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    HStack {
-                        Text("ETA:")
-                        Text(context.state.estimatedArrival, style: .time)
-                            .bold()
-                        Spacer()
-                        if let carousel = context.state.baggageClaimCarousel {
-                            Text("Baggage: Gate \(carousel)")
-                        }
-                    }
+                    ProgressView(value: 0.6)
                 }
             } compactLeading: {
-                Image(systemName: "airplane")
-                    .foregroundStyle(.blue)
+                Image(systemName: "bicycle")
             } compactTrailing: {
-                Text(context.state.flightStatus)
-                    .font(.caption2.bold())
+                Text(context.state.eta, style: .time).font(.caption2)
             } minimal: {
-                Image(systemName: "airplane")
-                    .foregroundStyle(.blue)
+                Image(systemName: "bicycle")
             }
+            .keylineTint(.orange)
         }
     }
 }
 ```
 
+The expanded positions are `.leading`, `.trailing`, `.center`, `.bottom`. `compactLeading`, `compactTrailing`
+and `minimal` are not optional decoration — leave one empty and the activity looks broken on device. On iOS 27,
+`@Environment(\.isDynamicIslandLimitedInWidth)` reports when the system is squeezing the island.
+
+### Lifecycle
+
+```swift
+import ActivityKit
+
+@MainActor
+func startDelivery(order: String, courier: String) throws {
+    let attributes = DeliveryAttributes(orderNumber: order, courier: courier)
+    let content = ActivityContent(
+        state: DeliveryAttributes.ContentState(stage: "Preparing", eta: .now.addingTimeInterval(1800)),
+        staleDate: .now.addingTimeInterval(1800)
+    )
+    // `content:` is current; `contentState:` was deprecated in iOS 16.2.
+    _ = try Activity.request(attributes: attributes, content: content, pushType: .token)
+}
+
+@MainActor
+func finishDelivery() async {
+    let final = DeliveryAttributes.ContentState(stage: "Delivered", eta: .now)
+    for activity in Activity<DeliveryAttributes>.activities {
+        await activity.end(
+            ActivityContent(state: final, staleDate: nil),
+            dismissalPolicy: .after(.now.addingTimeInterval(300))
+        )
+    }
+}
+```
+
+Updates arrive from `await activity.update(_:)`, from APNs when you pass `pushType: .token`, and from
+`Activity.activityUpdates`. Observe `activity.pushTokenUpdates` and re-register the token with your server —
+tokens rotate. `ActivityAuthorizationInfo().areActivitiesEnabled` tells you whether the user disabled Live
+Activities; `Activity.request` throws rather than failing silently.
+
+`NSSupportsLiveActivities` must be `true` in Info.plist or `Activity.request` fails at runtime. Add
+`NSSupportsLiveActivitiesFrequentUpdates` only if you genuinely push more than a few times an hour.
+
 ---
 
-## 3. Best Practices & App Store Review Rules
+## 7. Limits that come from the system
 
-- **Do NOT abuse Live Activities as advertisements**: Guideline 4.5.4 explicitly forbids promotional, marketing, or general news notifications in Live Activities.
-- **Update Frequency Budget**: ActivityKit allows updates up to once per second for rapid events, but throttles when bandwidth or battery is constrained.
-- **Keep Dynamic Island Minimalist**: The compact area is tiny (approx 50x20pt per side). Do not cram small unreadable text into `compactLeading` or `compactTrailing`.
-- **Include StandBy Support**: Test on iPhone horizontal charging mode with large night-adapted typography.
+| Limit | Reality |
+| :--- | :--- |
+| Live Activity lifetime | 8 hours active, then up to 4 hours on the Lock Screen |
+| Update rate | Throttled; once per second is a ceiling, not a target |
+| Widget timeline | A budget, not a contract — reloads are coalesced across apps |
+| Widget memory | Tens of MB; one large decoded image is enough to be killed |
+| Dynamic Island compact width | Roughly 50pt per side; two words maximum |
+| Advertising in a Live Activity | Forbidden by App Store Review Guideline 4.5.4 |
+
+---
+
+## 8. What the validator catches
+
+`tools/widget-validator/validate_widget.py` encodes the failures that only appear on a user's Home Screen.
+
+| Code | Severity | Trigger |
+| :--- | :--- | :--- |
+| `WID001` | info | No `import WidgetKit` / `import ActivityKit` source |
+| `WID010` | error | `Activity.request` without `NSSupportsLiveActivities` |
+| `WID011` | error | `Activity.request` with no `ActivityAttributes` type |
+| `WID013` | info | No push token handling; process-only updates |
+| `WID020` | warn | `DynamicIsland` missing compact, minimal or expanded content |
+| `WID021` | info | Default margins may clip edge-to-edge compact content |
+| `WID022` | warn | `ActivityAttributes` with no `DynamicIsland` presentation |
+| `WID030` | info | No `accessoryRectangular` family — no Lock Screen presence |
+| `WID031` | warn | No `.supportedFamilies(_:)` |
+| `WID032` | error | No `TimelineProvider`, `AppIntentTimelineProvider` or `WidgetBundle` |
+| `WID033` | info | Widget not configurable — `AppIntentConfiguration` is the iOS 17+ fix |
+| `WID034` | info | No App Group identifier, so the widget cannot read app data |
+| `WID035` | info | Widget sources declare no availability, hiding iOS 17+ API use |
+
+```bash
+python3 tools/widget-validator/validate_widget.py path/to/Project
+```

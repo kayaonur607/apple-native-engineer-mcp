@@ -40,7 +40,9 @@ DOC_DIRS = ("references", "examples")
 MIN_SDK_RELEASE = 26
 
 MODIFIER_RE = re.compile(r"^\s*\.([a-z][A-Za-z0-9_]*)\s*[({]", re.MULTILINE)
-FENCE_RE = re.compile(r"```swift\n(.*?)```", re.DOTALL)
+#: The info string may name a platform (```swift visionOS); the claim check does
+#: not care which one, because every platform's modifiers are still modifiers.
+FENCE_RE = re.compile(r"```swift(?:[ \t]+[A-Za-z]+)?[ \t]*\n(.*?)```", re.DOTALL)
 
 DECLARATION_PATTERNS = (
     r"\bfunc\s+([a-zA-Z_][\w]*)",

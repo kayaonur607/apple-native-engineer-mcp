@@ -1,190 +1,278 @@
-# Native UI Components Guide
+# Native Components
 
-Apple provides a rich set of native UI components designed for high performance, ergonomic touch response, keyboard and pointer navigation, and full accessibility compliance. Using native components ensures your app immediately inherits system behaviors and upgrades across iOS and iPadOS versions.
+> **Verified against** Xcode 27.2 · iOS 27.2 SDK · every API below exists in the installed SDK.
+> **Deployment floor**: iOS 17 for code without an availability guard; iOS 26+ APIs are always guarded.
 
----
+Every control in this page already handles: keyboard and pointer navigation, VoiceOver, Dynamic Type, RTL
+mirroring, Increase Contrast, Reduce Motion, the focus ring, and the next three OS releases. A hand-built
+imitation handles whatever you remembered on the day.
 
-## 1. Buttons & Controls
-
-### A. Standard Button Styles
-Never build custom button shapes with arbitrary `.background()` rectangles when SwiftUI's native button styles exist:
-
-```swift
-// ❌ ANTI-PATTERN: Custom button recreating system styles poorly without hit testing or press states
-Text("Continue")
-    .foregroundColor(.white)
-    .padding()
-    .background(Color.blue)
-    .cornerRadius(10)
-    .onTapGesture { submit() }
-
-// ✅ CORRECT: Semantic button styles with native press states, sound, and keyboard support
-Button("Continue") {
-    submit()
-}
-.buttonStyle(.borderedProminent)
-.controlSize(.large)
-.tint(.blue)
-```
-
-### B. Button Hierarchy & Roles
-- **`.borderedProminent`**: Use for the single primary call-to-action (CTA) on a screen. Avoid having more than one prominent button per visible viewport.
-- **`.bordered`**: Use for secondary actions (e.g., "Cancel", "Save Draft").
-- **`.borderless` / `.plain`**: Use for tertiary actions or inline list item buttons.
-- **Destructive Role**: Always flag destructive buttons with `role: .destructive`. This automatically styles the button in system red and marks it appropriately for VoiceOver.
-
-```swift
-Button("Delete Account", role: .destructive) {
-    showDeleteConfirmation = true
-}
-.buttonStyle(.bordered)
-```
+Reaching for the system control is the single highest-leverage decision in an iOS codebase.
 
 ---
 
-## 2. Lists & Forms
+## 1. Custom-drawn system chrome is a defect, not a style choice
 
-Lists and Forms represent the backbone of Apple data presentation.
+| Rebuilt by hand | Should be | Linter |
+| :--- | :--- | :--- |
+| `HStack` of `Text` + `.onTapGesture` as a button | `Button` | — |
+| Scroll view of `VStack` rows with dividers | `List` | `SWU018` |
+| Custom tab bar floating over content | `TabView` + `Tab` | — |
+| `TextField` in a `VStack` with a magnifier glyph | `.searchable(text:)` | — |
+| Card with `.ultraThinMaterial` + `.blur` | `.glassEffect(_:in:)` (iOS 26+) | `LG010` |
+| `.frame(height: 44)` press-state math | `.buttonStyle(.bordered)` + `.controlSize(.large)` | — |
+| "Nothing here" `Image` + two `Text` views | `ContentUnavailableView` | — |
+| `Rectangle().frame(height: 8)` as a progress bar | `ProgressView` / `Gauge` | — |
 
-### A. Choosing the Right Style
-- **`.insetGrouped`**: The standard for iOS settings, configuration screens, and content groupings.
-- **`.plain`**: Standard for continuous homogeneous data feeds (e.g., Mail message list, Notes list).
-- **`.sidebar`**: Exclusively used for top-level navigation on iPadOS and macOS.
+The tell for a rebuild is *state you have to manage yourself*: a pressed flag, a hover flag, a focus flag, a bar
+that has to be clipped. The system control owns that state; yours will drift out of sync with the platform.
+
+---
+
+## 2. Choosing the scrolling container
+
+| Need | Use | Why not the other |
+| :--- | :--- | :--- |
+| Heterogeneous, selectable rows | `List` | Gets swipe actions, edit mode, selection, separators free |
+| Settings with sections and footers | `Form` | Same machinery, correct grouping and insets |
+| A few cards, fixed count | `ScrollView { VStack }` | Everything is laid out eagerly, which is fine at 6 items |
+| Long homogeneous collection, custom cells | `ScrollView { LazyVStack }` | Lazy, but you lose selection and swipe actions |
+| Grid, bounded count | `LazyVGrid` inside `ScrollView` | `List` cannot do multi-column |
+| A single long document | `ScrollView` + `Text` | — |
 
 ```swift
-List {
+// ✅ Settings: Form supplies grouping, insets, footers and Dynamic Type rows
+Form {
     Section {
-        Toggle("Push Notifications", isOn: $notificationsEnabled)
-        Toggle("Face ID Unlock", isOn: $biometricsEnabled)
+        Toggle("Notifications", isOn: $notifications)
+        Toggle("Face ID", isOn: $biometrics)
     } header: {
-        Text("Security & Alerts")
+        Text("Security")
     } footer: {
-        Text("Biometric data is securely processed in the Secure Enclave and never leaves your device.")
+        Text("Biometric data stays in the Secure Enclave.")
     }
 }
-.listStyle(.insetGrouped)
 ```
 
-### B. Swipe Actions
-Provide direct manipulation shortcuts using `.swipeActions`:
-```swift
-.swipeActions(edge: .trailing, allowsFullSwipe: true) {
-    Button(role: .destructive) {
-        delete(item)
-    } label: {
-        Label("Delete", systemImage: "trash")
-    }
-    
-    Button {
-        archive(item)
-    } label: {
-        Label("Archive", systemImage: "archivebox")
-    }
-    .tint(.indigo)
-}
-```
+`Section { } header: { } footer: { }` is all a settings screen needs. `.insetGrouped` is a `List` style; `Form`
+already is one on iOS.
+
+`.listStyle(.sidebar)` is for `NavigationSplitView` on iPad and Mac only. Using it on iPhone gives you a list
+that looks wrong in a way users cannot name.
 
 ---
 
-## 3. Sheets, Popovers & Presentation Detents
+## 3. Tabs
 
-### Bottom Sheet Ergonomics (iOS 16+)
-Modal sheets should present with interactive detents that allow the user to reference underlying screen data while interacting with the sheet.
+`TabView` + `Tab` is the modern form (iOS 18+). `Tab` replaces `.tabItem` and is the only form that supports
+`TabSection` and sidebar adaptation.
 
 ```swift
-.sheet(isPresented: $showFilterSheet) {
-    FilterView()
-        .presentationDetents([.fraction(0.35), .medium, .large])
-        .presentationDragIndicator(.visible)
-        .presentationCornerRadius(24)
-        .presentationBackground(.regularMaterial)
+// ✅ iOS 18+: typed tabs, sidebar on iPad, tab bar on iPhone
+TabView(selection: $tab) {
+    Tab("Inbox", systemImage: "tray", value: TabItem.inbox) { InboxView() }
+    Tab("Archive", systemImage: "archivebox", value: TabItem.archive) { ArchiveView() }
+}
+.tabViewStyle(.sidebarAdaptable)   // iOS 18+
+```
+
+```swift
+// ✅ iOS 17 floor: same content, the pre-18 spelling
+TabView(selection: $tab) {
+    InboxView()
+        .tabItem { Label("Inbox", systemImage: "tray") }
+        .tag(TabItem.inbox)
+    ArchiveView()
+        .tabItem { Label("Archive", systemImage: "archivebox") }
+        .tag(TabItem.archive)
 }
 ```
 
-### Adapting Sheet to Popover on iPadOS
-On iPhone, secondary workflows present as bottom sheets. On iPad, presenting a giant full-screen sheet disorients the user; use `.popover` anchored to the triggering button:
+`.tabViewStyle(.sidebarAdaptable)` is iOS 18.0+, so on an iOS 17 floor it sits inside an availability guard or
+is omitted. Five tabs maximum on iPhone; the sixth becomes "More", which is a design smell, not a bug.
 
-```swift
-Button {
-    showInfo.toggle()
-} label: {
-    Image(systemName: "info.circle")
-}
-.popover(isPresented: $showInfo) {
-    InfoDetailView()
-        .frame(minWidth: 320, minHeight: 240)
-        .presentationCompactAdaptation(.sheet) // Sheet on iPhone, Popover on iPad!
-}
-```
+**Never float a custom bar over content.** It covers the safe area, ignores the scroll edge effect, breaks
+VoiceOver's traversal order, and cannot participate in the iOS 26 glass merging.
 
 ---
 
-## 4. Search Interfaces & Suggestions
+## 4. Search
 
-Native search integrates seamlessly into the navigation bar and hides/reveals automatically during scroll:
+`.searchable` places the field in the navigation bar, collapses it on scroll, and wires the cancel button:
 
 ```swift
 NavigationStack {
-    List(filteredItems) { item in
+    List(results) { item in
         ItemRow(item: item)
     }
     .navigationTitle("Documents")
-    .searchable(text: $searchText, prompt: "Search files, tags, or authors")
+    .searchable(text: $query, prompt: "Search files, tags, authors")
+    .searchScopes($scope) {
+        Text("All").tag(Scope.all)
+        Text("Shared").tag(Scope.shared)
+    }
     .searchSuggestions {
-        ForEach(recentSearches, id: \.self) { suggestion in
-            Text(suggestion).searchCompletion(suggestion)
+        ForEach(recent) { term in
+            Label(term.text, systemImage: "clock").searchCompletion(term.text)
         }
     }
-    .searchScopes($selectedScope) {
-        Text("All").tag(SearchScope.all)
-        Text("Favorites").tag(SearchScope.favorites)
-        Text("Shared").tag(SearchScope.shared)
-    }
 }
 ```
 
+`.searchable` needs a `NavigationStack` ancestor. Placed anywhere else it silently does nothing — the most
+common "search is broken" report that has no bug.
+
 ---
 
-## 5. Modern Empty, Loading & Error States (iOS 17+)
+## 5. Buttons and control size
 
-Never build home-grown empty states with disconnected text and icons. Use the official `ContentUnavailableView`:
+| Style | Role | Note |
+| :--- | :--- | :--- |
+| `.borderedProminent` | The one primary action | One per viewport |
+| `.bordered` | Secondary actions | Cancel, Save draft |
+| `.borderless` / `.plain` | Tertiary, inline in lists | — |
+| `.glass` / `.glassProminent` | iOS 26+ floating controls over content | Guard it |
 
 ```swift
-// ✅ Standard Empty State
-if items.isEmpty && searchText.isEmpty {
+Button("Continue") { submit() }
+    .buttonStyle(.borderedProminent)
+    .controlSize(.large)
+```
+
+`ControlSize` is `.mini`, `.small`, `.regular`, `.large`, `.extraLarge` (`.extraLarge` is iOS 17+). Set it where
+the control is dense; do not shrink the hit target — `.controlSize` shrinks the visual, and the system keeps the
+44pt target around it.
+
+On iOS 26+, floating controls over content use the system glass styles rather than a material behind a
+`.bordered` button:
+
+```swift
+if #available(iOS 26.0, macOS 26.0, *) {
+    Button("Share", systemImage: "square.and.arrow.up") { share() }
+        .buttonStyle(.glass)
+} else {
+    Button("Share", systemImage: "square.and.arrow.up") { share() }
+        .buttonStyle(.bordered)
+}
+```
+
+**Destructive actions** take `role: .destructive`; that supplies the red treatment *and* the VoiceOver
+announcement. Colour alone does not.
+
+---
+
+## 6. Menus and pickers
+
+```swift
+Menu("Sort") {
+    Picker("Sort by", selection: $sort) {
+        Text("Date").tag(Sort.date)
+        Text("Name").tag(Sort.name)
+    }
+    Divider()
+    Button("Clear filters", role: .destructive) { filters.removeAll() }
+}
+```
+
+A `Menu` containing a `Picker` renders the checkmark list users expect. `Menu` also gives you the press state,
+the dismiss-on-scroll-out, and the iPad pointer highlight — none of which a `.popover` of `Button`s does.
+
+`Picker` styles: `.segmented` for 2–5 mutually exclusive options, `.menu` for compact toolbar choices, `.wheel`
+for date and time only. `.segmented` with six options is unreadable at AX5.
+
+---
+
+## 7. Status: progress and gauges
+
+| Case | Control |
+| :--- | :--- |
+| Unknown duration | `ProgressView()` — determinate spinners do not exist |
+| Known fraction, inline | `ProgressView(value:)` with `.progressViewStyle(.linear)` |
+| A value in a range, with a scale | `Gauge(value:in:)` (iOS 16+) |
+| A ring in a widget or complication | `.gaugeStyle(.accessoryCircularCapacity)` |
+
+```swift
+Gauge(value: progress, in: 0...1) {
+    Text("Upload")
+} currentValueLabel: {
+    Text(progress, format: .percent.precision(.fractionLength(0)))
+}
+.gaugeStyle(.accessoryCircularCapacity)   // iOS 16+
+.tint(.accentColor)
+```
+
+A `Rectangle` with a computed width is not a progress bar: it does not animate, does not announce its value to
+VoiceOver, and cannot be read by Assistive Access.
+
+---
+
+## 8. Empty, search-empty and error states
+
+```swift
+if items.isEmpty {
     ContentUnavailableView(
-        "No Documents Yet",
+        "No Documents",
         systemImage: "doc.on.doc",
-        description: Text("Tap the + button to create your first document.")
+        description: Text("Tap + to create your first document.")
     )
-} else if items.isEmpty && !searchText.isEmpty {
-    // ✅ Standard Search Not Found State
-    ContentUnavailableView.search(text: searchText)
+} else if results.isEmpty {
+    ContentUnavailableView.search(text: query)   // iOS 17+
+} else {
+    List(results) { ItemRow(item: $0) }
 }
 ```
 
+`ContentUnavailableView` is iOS 17+. It centres correctly at every Dynamic Type size and provides the right
+VoiceOver grouping. A hand-built empty state is usually a `VStack` that drifts off-centre at AX5.
+
+Never ship a blank screen. `.redacted(reason: .placeholder)` for content that is loading, `ContentUnavailableView`
+for content that is absent.
+
 ---
 
-## 6. Pickers, Toggles & Sliders
-
-Use native pickers with appropriate styles:
-- **`.pickerStyle(.segmented)`**: For 2 to 5 mutually exclusive choices.
-- **`.pickerStyle(.menu)`**: For compact dropdown selections in toolbars or forms.
-- **`.pickerStyle(.wheel)`**: Reserved primarily for date/time selection or specialized countdown pickers.
+## 9. Scroll edges and presented sheets
 
 ```swift
-Picker("Filter Category", selection: $category) {
-    ForEach(Category.allCases) { cat in
-        Text(cat.title).tag(cat)
-    }
+List(items) { ItemRow(item: $0) }
+    .contentMargins(.horizontal, 16, for: .scrollContent)
+
+.sheet(isPresented: $showFilters) {
+    FilterView()
+        .presentationDetents([.fraction(0.35), .medium, .large])
+        .presentationDragIndicator(.visible)
 }
-.pickerStyle(.segmented)
 ```
+
+Since iOS 26 the soft fade under bars is a scroll edge effect, not a background colour — `.scrollEdgeEffectStyle(_:for:)`.
+Painting a solid background behind a navigation bar to "fix" text collision is the pre-26 workaround and it now
+fights the system. See [liquid-glass.md](liquid-glass.md).
+
+`.presentationDetents` needs the sheet's content to be scrollable for `.medium` and `.large` to behave; a
+fixed-height content view will jump.
 
 ---
 
-## 7. Official HIG References
-- [Apple HIG - Components](https://developer.apple.com/design/human-interface-guidelines/components)
-- [Apple HIG - Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons)
-- [Apple HIG - Sheets](https://developer.apple.com/design/human-interface-guidelines/sheets)
-- [Apple HIG - Popovers](https://developer.apple.com/design/human-interface-guidelines/popovers)
+## 10. Checklist
+
+- [ ] Every tappable thing is a `Button`, `Toggle`, `Picker` or `Link` — not a `.onTapGesture`
+- [ ] Collections use `List`, `Form` or a `Lazy*` container
+- [ ] Tabs use `TabView`; no custom bar
+- [ ] Search uses `.searchable` inside a `NavigationStack`
+- [ ] Pressed, focused and disabled states come from a `ButtonStyle`, not from `@State`
+- [ ] `ContentUnavailableView` for every empty and search-empty branch
+- [ ] Progress uses `ProgressView` or `Gauge`
+- [ ] No `.ultraThinMaterial` + `.blur` imitation of system chrome (`LG010`)
+- [ ] Every iOS 18+ and iOS 26+ control is behind an availability guard with a real fallback
+
+---
+
+## 11. Sources
+
+- Apple HIG, *Lists and tables* — <https://developer.apple.com/design/human-interface-guidelines/lists-and-tables>
+- Apple HIG, *Tab bars* — <https://developer.apple.com/design/human-interface-guidelines/tab-bars>
+- Apple HIG, *Search fields* — <https://developer.apple.com/design/human-interface-guidelines/search-fields>
+- Apple HIG, *Buttons* — <https://developer.apple.com/design/human-interface-guidelines/buttons>
+- Apple HIG, *Gauges* — <https://developer.apple.com/design/human-interface-guidelines/gauges>
+- Apple HIG, *Menus* — <https://developer.apple.com/design/human-interface-guidelines/menus>
+- `SwiftUI` iOS 27.2 — `Tab`, `.tabViewStyle(.sidebarAdaptable)`, `.buttonStyle(.glass)`, `Gauge`,
+  `ContentUnavailableView.search(text:)`, `.controlSize(_:)`

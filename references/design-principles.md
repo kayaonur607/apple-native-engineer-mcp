@@ -1,186 +1,218 @@
 # Design Principles & Authority Classification
 
-When architecting, reviewing, or refactoring native Apple applications, precision regarding **why** a decision is made is paramount. AI agents often conflate personal aesthetic tastes with mandatory platform requirements, eroding developer trust. 
+> **Verified against** Xcode 27.2 · iOS 27.2 SDK · every API below exists in the installed SDK.
+> **Deployment floor**: iOS 17 for code without an availability guard; iOS 26+ APIs are always guarded.
 
-This document defines the 5-tiered authority taxonomy used throughout this skill.
+Agents erode trust by presenting taste as requirement. This document is the antidote: five authority levels, each
+with a test you can apply to a line of Swift, and each with the language you should use when you report a finding.
 
----
-
-## 1. The 5-Tiered Authority Taxonomy
-
-```
-┌───────────────────────────────────────────────────────────┐
-│ Level 1: Official Apple Requirement                       │  Mandatory (App Store / System Contract)
-├───────────────────────────────────────────────────────────┤
-│ Level 2: Official Apple Recommendation                    │  HIG Standard (Strong Architectural Guidance)
-├───────────────────────────────────────────────────────────┤
-│ Level 3: Platform Convention                              │  User Expectation (Native Platform Idiom)
-├───────────────────────────────────────────────────────────┤
-│ Level 4: Community Best Practice                          │  Industry Consensus (Swift / SwiftUI Engineering)
-├───────────────────────────────────────────────────────────┤
-│ Level 5: Design Engineering Recommendation                 │  Taste & Polish (Kowalski Motion, Micro-Delight)
-└───────────────────────────────────────────────────────────┘
-```
+The purpose is not classification for its own sake. It is so that a reviewer can say *"this is Level 5, my
+preference, take it or leave it"* instead of *"Apple requires this"* when Apple does not.
 
 ---
 
-## 2. Detailed Breakdown & Concrete Examples
+## 1. The five levels
 
-### Level 1: Official Apple Requirement
-Enforced directly by App Store Review Guidelines, Apple Platform Human Interface Guidelines strict minimums, or runtime crash-prevention contracts.
+| Level | Name | Test | Enforcement |
+| :--- | :--- | :--- | :--- |
+| 1 | Apple requirement | Would this crash, fail review, or break a platform contract? | Reject |
+| 2 | Apple recommendation | Is it stated on a HIG page? | Strongly recommend, explain exceptions |
+| 3 | Platform convention | Would a long-time iOS user notice the difference? | Recommend unless branding justifies departure |
+| 4 | Engineering best practice | Does it make the code testable, or the diff smaller? | Adapt to the existing codebase |
+| 5 | Design engineering taste | Is the only argument "it feels better"? | Optional; say so |
 
-- **Examples**:
-  - **Touch Target Size**: Minimum 44×44pt tappable area for all interactive elements (except inline text links in body copy).
-  - **Safe Area Insets**: Interactive controls must not overlap the Home Indicator, Dynamic Island, or status bar.
-  - **Main Thread Execution**: All UI updates and view modifications must execute on the `@MainActor`.
-  - **Privacy Strings**: `Info.plist` usage descriptions for Camera, Location, Photos, etc., must explicitly explain why the app needs the capability.
-  - **App Icon Alpha**: App icon assets must not contain transparency / alpha channels.
+If you cannot name the HIG page for a Level 2 claim, it is Level 5.
+
+---
+
+## 2. Level 1 — Apple requirement
+
+Enforced by App Store Review, by a HIG minimum, or by the runtime.
+
+- 44×44pt minimum hit target for anything tappable.
+- Content must not sit under the Home indicator, the Dynamic Island or the status bar.
+- Every UI mutation on `@MainActor`.
+- `Info.plist` usage strings for every capability you call.
+- App icon: 1024×1024, no alpha channel.
+- A `PrivacyInfo.xcprivacy` with valid reason codes for every Required-Reason API.
 
 ```swift
-// ❌ FAILS LEVEL 1 (Touch target is only 24x24pt)
-Button {
-    dismiss()
-} label: {
-    Image(systemName: "xmark")
-        .frame(width: 24, height: 24)
-}
+// ❌ Level 1 failure: the button's hit area is 24×24pt
+Button("Close", systemImage: "xmark") { dismiss() }
+    .labelStyle(.iconOnly)
+    .frame(width: 24, height: 24)
 
-// ✅ COMPLIES WITH LEVEL 1 (Visual glyph is 16pt, but hit-testing target is 44x44pt)
-Button {
-    dismiss()
-} label: {
-    Image(systemName: "xmark")
-        .font(.system(size: 16, weight: .semibold))
-        .foregroundStyle(.secondary)
-        .frame(width: 44, height: 44) // Explicit minimum hit area
-        .contentShape(Rectangle())    // Ensures clear hit-testing
-}
+// ✅ Level 1: the glyph keeps its semantic size, the target reaches 44pt
+Button("Close", systemImage: "xmark") { dismiss() }
+    .labelStyle(.iconOnly)
+    .font(.body)
+    .frame(minWidth: 44, minHeight: 44)
+    .contentShape(.rect)
 ```
+
+`Button(_:systemImage:action:)` gives VoiceOver a label for free. An `Image(systemName:)` inside a `Button` does
+not — that is `A11Y030`.
 
 ---
 
-### Level 2: Official Apple Recommendation
-Documented directly in the Apple Human Interface Guidelines as the official, intended way to build native experiences.
+## 3. Level 2 — Apple recommendation
 
-- **Examples**:
-  - Use `NavigationSplitView` instead of custom multi-column hacks for iPadOS and macOS.
-  - Use semantic colors (`Color(uiColor: .systemBackground)`, `.secondaryLabel`, `.tint`) rather than hardcoded hex values.
-  - Use standard typography text styles (`.title`, `.headline`, `.body`) to ensure automatic Dynamic Type support.
-  - Avoid custom tab bars that recreate system tab bars poorly; use SwiftUI `TabView`.
+Stated on a HIG page. Quote the page, not the vibe.
+
+- Navigation: `NavigationStack` / `NavigationSplitView`, typed `path`.
+- Colour: semantic (`Color(uiColor: .systemBackground)`, `.primary`, `.secondary`) or an asset colour.
+- Type: text styles, so Dynamic Type, Bold Text and the accessibility sizes are automatic.
+- Containers: `List`, `Form`, `TabView`, `.searchable` — not reconstructions of them.
+- Glass: `.glassEffect(_:in:)` on iOS 26+, one material below it.
 
 ```swift
-// ❌ FAILS LEVEL 2 (Hardcoded hex values break in Dark Mode and ignore High Contrast)
-Text("Account Settings")
-    .foregroundColor(Color(hex: "#1A1A1A"))
+// ❌ Level 2 failure: hex literals plus a fixed point size
+Text("Account")
+    .font(.system(size: 20, weight: .semibold))
+    .foregroundStyle(Color(hex: "#1A1A1A"))
     .background(Color(hex: "#F5F5F7"))
 
-// ✅ COMPLIES WITH LEVEL 2 (Semantic styles automatically adapt to Light, Dark, and Contrast modes)
-Text("Account Settings")
+// ✅ Level 2: the platform supplies size, weight and colour for both appearances
+Text("Account")
+    .font(.headline)
     .foregroundStyle(.primary)
-    .background(Color(uiColor: .systemGroupedBackground))
+    .background(.background)
 ```
+
+Two linter codes cover the ❌: `SWU001` (hex literal) and `SWU012` (fixed point size).
+
+**Level 2 includes exit ramps.** An iOS 26 API on an iOS 17 floor needs `if #available(iOS 26.0, macOS 26.0, *)`
+*and* a fallback that is not a worse-looking copy. Missing the guard is `LG001`, an error.
 
 ---
 
-### Level 3: Platform Convention
-Unwritten or conventional rules that users have internalized over years of using Apple devices. Violating these makes the app feel "foreign" or like a lazy web port.
+## 4. Level 3 — Platform convention
 
-- **Examples**:
-  - **Pull-to-refresh**: Available on chronological or feed-like lists, but not on static forms.
-  - **Back navigation gesture**: Interactive edge-swipe from the leading edge to pop a navigation stack. Never disable this gesture unless handling conflicting canvas drawing gestures.
-  - **Destructive Actions**: Placed at the bottom of action sheets on iPhone, colored `.red` (`role: .destructive`), and requiring confirmation if data loss is permanent.
-  - **Form Alignment**: Section titles in grouped lists should be concise, uppercase/capitalized consistently, and aligned with standard section headers.
+Unwritten rules users have internalised. Breaking them makes an app feel foreign without failing any check.
+
+| Convention | Why it matters |
+| :--- | :--- |
+| Edge-swipe pops the navigation stack | Users navigate without looking for a button |
+| Pull-to-refresh on feeds, not on static forms | The gesture implies freshness the form cannot deliver |
+| Search lives in the navigation bar | `.searchable` places it where the thumb and the eye expect it |
+| Destructive actions use `role: .destructive` and sit last | Red plus position is the confirmation |
+| Sheets dismiss downward; popovers dismiss by tapping out | Each has one dismissal gesture, and it is learned |
 
 ```swift
-// ❌ FAILS LEVEL 3 (Disables interactive pop gesture and replaces standard navigation back)
-.navigationBarBackButtonHidden(true) // Forcing custom button often breaks edge-swipe gesture!
+// ❌ Level 3 failure: a custom back button also kills the interactive pop gesture
+.navigationBarBackButtonHidden(true)
 
-// ✅ COMPLIES WITH LEVEL 3 (Native toolbar items preserving system gestures)
+// ✅ Level 3: keep the system back button; add your action beside it
 .toolbar {
-    ToolbarItem(placement: .topBarLeading) {
-        // Standard back or dismiss button
+    ToolbarItem(placement: .topBarTrailing) {
+        Button("Edit") { isEditing = true }
     }
 }
 ```
 
+If you hide the back button, you must re-implement the edge-swipe yourself or accept that the app feels broken to
+anyone who has used an iPhone since 2013.
+
 ---
 
-### Level 4: Community Best Practice
-Architecture, state management, and code organization patterns validated across the professional Swift and iOS engineering ecosystem.
+## 5. Level 4 — Engineering best practice
 
-- **Examples**:
-  - Prefer the **Observation framework** (`@Observable`) over `ObservableObject` and `@Published` in iOS 17+.
-  - Modularize view hierarchies into small, reusable structs rather than massive monolithic views with deep closures.
-  - Encapsulate design tokens into type-safe namespaces (e.g., `DesignSystem.Spacing.medium`).
-  - Write testable domain logic using Swift Testing (`@Test`, `#expect`) or XCTest without coupling views directly to network singletons.
+Validated across the Swift ecosystem rather than documented by Apple.
+
+- `@Observable` over `ObservableObject`; per-property tracking instead of whole-view invalidation.
+- Feature folders (`Feature/Detail/DetailView.swift`), not layer folders.
+- Design tokens in a namespace (`Spacing.md`), so a spacing change is one edit.
+- `List` for collections; `ForEach` over `Identifiable` values, never over `0..<count`.
+- Swift Testing (`@Test`, `#expect`) for new tests.
 
 ```swift
-// ❌ FAILS LEVEL 4 (Monolithic view with embedded networking, impossible to test or preview)
-struct UserProfileView: View {
-    @State private var userData: [String: Any] = [:]
-    
-    var body: some View {
-        VStack {
-            // 200 lines of inline UI logic and URLSession calls
-        }
-    }
-}
-
-// ✅ COMPLIES WITH LEVEL 4 (Modern Observation, dependency-injected model, testable and previewable)
+// ✅ Level 4: one owner per piece of state, injected, testable
 @Observable
-@MainActor
-final class ProfileViewModel {
-    private(set) var user: User?
-    private let userService: UserServiceProtocol
-    
-    init(userService: UserServiceProtocol) {
-        self.userService = userService
+final class BalanceModel {
+    private(set) var balance: Decimal = 0
+    private let service: BalanceService
+
+    init(service: BalanceService) { self.service = service }
+
+    func refresh() async throws {
+        balance = try await service.currentBalance()
     }
-    
-    func load() async {
-        user = try? await userService.fetchCurrentUser()
+}
+
+struct BalanceView: View {
+    @State private var model: BalanceModel
+
+    init(service: BalanceService) {
+        _model = State(initialValue: BalanceModel(service: service))
+    }
+
+    var body: some View {
+        Text(model.balance, format: .currency(code: "USD"))
+            .task { try? await model.refresh() }
     }
 }
 ```
 
+`.task` cancels with the view. `onAppear { Task { … } }` does not, and leaks work into the next screen.
+
 ---
 
-### Level 5: Design Engineering Recommendation
-Advanced craftsmanship principles (advocated by design engineers like Emil Kowalski, Apple Design Award winners, and motion specialists) that elevate a functional app into an extraordinary, tactile experience.
+## 6. Level 5 — Design engineering taste
 
-- **Examples**:
-  - **Spring Physics**: Use `.spring(.snappy)` or `.spring(.bouncy)` over linear or basic easing.
-  - **No `scale(0)` pops**: Animate scale from `0.85` or `0.9` to `1.0` combined with opacity fade for grounded entry transitions.
-  - **Haptic Tactility**: Trigger `.sensoryFeedback(.selection, trigger:)` when a picker snaps into place or a tab switches.
-  - **Micro-interactivity**: Interactive card presses that scale down subtly (`0.98`) with spring recovery when depressed.
+The polish layer. Real, valuable, and optional. Say so when you recommend it.
+
+| Recommendation | The argument |
+| :--- | :--- |
+| Springs over linear/ease curves | Real objects carry momentum; linear motion reads as mechanical |
+| Enter from `0.92`–`0.95` scale plus opacity, never from `0` | Zero reads as a glitch, not an arrival (`SWU009`) |
+| `.sensoryFeedback(.selection, trigger:)` on a snap | Confirms the state change without a visual |
+| 2% press scale on a card | The surface acknowledges the touch before the action fires |
+| `.contentTransition(.numericText())` on changing numbers | The digits travel; the eye keeps its place |
 
 ```swift
-// ❌ FAILS LEVEL 5 (Linear animation and scale(0) feels abrupt, robotic, and unpolished)
-withAnimation(.linear(duration: 0.3)) {
-    isPresented.toggle()
-}
-// with: .scaleEffect(isPresented ? 1.0 : 0.0)
+// ❌ Level 5 failure: pops from nothing, and the cost is a visible snap
+.scaleEffect(isVisible ? 1 : 0)
 
-// ✅ COMPLIES WITH LEVEL 5 (Subtle, physical spring with realistic scale entry and haptic feedback)
-withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
-    isPresented.toggle()
-}
-// with:
-.scaleEffect(isPresented ? 1.0 : 0.92)
-.opacity(isPresented ? 1.0 : 0.0)
-.sensoryFeedback(.impact(weight: .light), trigger: isPresented)
+// ✅ Level 5: a body arriving, with the same curve as system chrome
+.scaleEffect(isVisible ? 1 : 0.94)
+.opacity(isVisible ? 1 : 0)
+.animation(.snappy(duration: 0.28), value: isVisible)
 ```
+
+Every Level 5 item must survive Reduce Motion. If it does not, it is Level 1 broken.
 
 ---
 
-## 3. Decision Matrix for AI Agents
+## 7. Language for findings
 
-When advising a developer or proposing code changes:
+| Level | Say | Do not say |
+| :--- | :--- | :--- |
+| 1 | "Required by HIG / App Review / runtime" | "Best practice" |
+| 2 | "The HIG *{page name}* page recommends …" | "Apple requires …" |
+| 3 | "iOS users expect …" | "Everyone does it this way" |
+| 4 | "This makes the view testable" | "This is the correct architecture" |
+| 5 | "Polish suggestion, optional" | "This is wrong" |
 
-| Level | Classification | Language to Use | Enforcement |
-| :--- | :--- | :--- | :--- |
-| **Level 1** | Requirement | *"Must", "Required by App Store / HIG / Runtime"* | Strict rejection if violated |
-| **Level 2** | Recommendation | *"Apple HIG recommends", "The standard pattern is"* | Highly encouraged, explain exceptions |
-| **Level 3** | Convention | *"Apple platform convention expects", "iOS users anticipate"* | Recommend unless custom branding requires departure |
-| **Level 4** | Best Practice | *"Architectural best practice suggests", "Modern Swift pattern"* | Adapt to existing codebase architecture |
-| **Level 5** | Design Engineering | *"To elevate polish and tactile feel", "Recommended motion refinement"* | Polish enhancement; make optional |
+One finding per line, with `file:line`, the level, and the fix. Severity `critical` means rejection or crash —
+not "I would have done it differently".
+
+---
+
+## 8. Decision procedure
+
+1. Does it crash, fail review, or break a platform contract? → Level 1, fix it, no discussion.
+2. Is it on a HIG page? → Level 2, cite the page.
+3. Would a long-time user notice? → Level 3, recommend with the reason.
+4. Does it affect testability or maintainability? → Level 4, adapt to the codebase.
+5. None of the above → Level 5. Say "optional" and move on.
+
+The failure mode this prevents: an agent rewrites a working design system to Level 5 taste and calls it a bug fix.
+
+---
+
+## 9. Sources
+
+- Apple HIG, *Design principles* — <https://developer.apple.com/design/human-interface-guidelines/design-principles>
+- Apple HIG, *Accessibility* — <https://developer.apple.com/design/human-interface-guidelines/accessibility>
+- Apple HIG, *Layout* — <https://developer.apple.com/design/human-interface-guidelines/layout>
+- Rule codes: `tools/swiftui-linter/lint_swiftui.py`, `tools/accessibility-auditor/audit_accessibility.py`

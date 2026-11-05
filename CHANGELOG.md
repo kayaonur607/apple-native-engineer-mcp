@@ -4,6 +4,88 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] — 2026-11-05
+
+The MCP server stops being a wrapper and becomes the product: sixteen tools, a transport for containers and
+shared machines, and privacy claims that a test enforces.
+
+### Added
+
+- **`review_diff`** — reads `git diff --name-only` (against `HEAD`, the index with `staged`, or any `base`
+  revision), keeps the changed `.swift` files and runs the SwiftUI, accessibility and Liquid Glass auditors on
+  each one. Findings are grouped under `data.files` and every finding names the auditor that produced it. This is
+  the tool an agent should call in an edit loop: a project that was already non-compliant does not drown the
+  review in pre-existing findings.
+- **`check_environment`** — diagnoses the server's own runtime: Node and Python versions against their minimums,
+  the presence of the auditors and the reference guides, git, Xcode and its iOS SDK, App Store Connect credentials
+  (presence only, never the value) and the telemetry mode. Run it before reporting a bug.
+- **Streamable HTTP transport** — `node src/index.js --http [port]` serves `POST /mcp` and an unauthenticated
+  `GET /health`, stateless, one server instance per request. The defaults are deliberately unfriendly: loopback
+  bind only, `--allow-remote` required for anything else, a hard `Origin` check as the DNS-rebinding defence, and
+  `application/json` only under a 4 MiB cap. There is no CORS support, by design.
+- **Progress notifications** — `audit_project` and `review_diff` emit one `notifications/progress` per completed
+  audit when the client supplies a `progressToken`, instead of going silent for several seconds.
+- **Cancellation** — the MCP request `AbortSignal` is threaded into the child-process runner; a cancelled call
+  kills its child and returns `TOOL_CANCELLED` rather than orphaning a process.
+- **Self-contained npm package** — `scripts/pack-vendor.mjs` stages the auditors and the knowledge base into
+  `vendor/` on `prepack`, so `npx apple-native-engineer-mcp` works without a repository checkout. Development
+  still resolves the live repository, so an edited auditor takes effect immediately. Verified end-to-end by
+  packing, installing in a clean directory and running a real tool call.
+- **Publishing metadata and pipeline** — `mcpName`, keywords, repository, `files` and a `Dockerfile` (two-stage,
+  non-root, `HEALTHCHECK`) plus `smithery.yaml`, `server.json` for the MCP registry, and
+  `.github/workflows/publish.yml`, which publishes with provenance on an `mcp-v*` tag and then installs the
+  published tarball and runs `--selftest` against it.
+- **`--telemetry-preview`** — prints the exact JSON that telemetry would write, including the closed five-key
+  event shape.
+
+### Changed
+
+- **All 29 reference guides rewritten against the installed SDK.** Every symbol, modifier and framework name is
+  grepped from `iPhoneOS27.2.sdk` / `XROS27.2.sdk` rather than recalled; every finding code cited in a guide now
+  exists in the tool that emits it (113 codes cross-checked). Guides that described the wrong OS for Liquid Glass,
+  listed one required-reason code per privacy category, or cited a session number nobody published are corrected
+  in place, with the correction stated where it matters.
+- **Snippet verification is platform-aware.** A fence may name its platform — ` ```swift visionOS ` — and the
+  type-checker compiles it against that platform's SDK and target instead of the iOS SDK. Eight visionOS snippets
+  are now genuinely type-checked; before, they were checked against iOS, where `.windowStyle(.volumetric)` and
+  `defaultSize(width:height:depth:)` do not exist, and the harness reported the mismatch as three documentation
+  bugs. One real bug surfaced: `RealityKit` declares its own `Scene`, so importing it next to an `App` makes
+  `some Scene` ambiguous. The guide now keeps the scene and the RealityKit content in separate files.
+- **MCP server documentation rewritten** — install matrix (npx, repository, Docker), HTTP mode, the tool table,
+  the result envelope, the privacy model and the limits, each stated rather than implied.
+- **`--http` configuration errors** now print one sentence and exit 2 instead of a stack trace.
+- **Envelope, resource and prompt counts corrected in the README** — 16 tools, 53 resources, 12 prompts, and the
+  badge now tracks the real suite size (131 tests).
+- **`CHANGELOG`, `SECURITY.md` and `docs/PROOF.md` brought up to date.** `SECURITY.md` had a supported-versions
+  table that stopped at 1.0.x and no mention of the unauthenticated HTTP transport; both are fixed, and the
+  security scope is now written down instead of implied.
+
+### Fixed
+
+- **The umbrella prompt was named `apple-native-apple-native`.** `commands/apple-native.md` was being namespaced
+  like every other command. It is now `apple-native`, and a test asserts that no prompt is double-prefixed.
+- **`graph` cycles in the server modules** — identity moved to `src/constants.js` so `environment.js` can report
+  the server name without importing `server.js`.
+- **`git` detection no longer parses stderr.** "Not a git repository" is decided from `git rev-parse
+  --is-inside-work-tree`'s exit status, because git's messages are localised and a translated one used to be
+  reported as `GIT_DIFF_FAILED`.
+- **Three auditors rejected a single file.** `lint_swiftui`, `audit_accessibility` and `audit_liquid_glass` now
+  accept a `.swift` path as their target (via `swiftscan.iter_files` and `guard_directory(allow_file=True)`), which
+  is what makes a file-scoped review possible from the CLI as well as from MCP.
+- **SDK declarations were being compiled as if they were code.** Two guides quote an interface signature
+  (`EnvironmentValues.colorSchemeContrast`, `RoundedRectangle`) in a `swift` fence; the type-checker read them as
+  snippets and reported an error in the guide. They are now `text` fences, which is what they always were.
+
+### Security
+
+- **Telemetry is off by default and enforced by an allowlist.** When enabled it records `schema`, `tool`,
+  `outcome`, `duration_bucket` and `day` — nothing else. Unknown fields are dropped, unknown tools are refused,
+  and `anonymous` mode requires an HTTPS endpoint you supply (there is no default endpoint, so there is nothing
+  to phone home to). `test/telemetry.test.js` feeds the sanitiser paths, file names, prompts, credentials and
+  identifiers, and fails if any of them survive.
+- **The HTTP transport has no authentication.** That is stated in the README, in `SECURITY.md` and in the startup
+  banner, and a non-loopback bind is refused without an explicit flag.
+
 ## [2.0.0] — 2026-11-05
 
 A ground-up rebuild. Version 1 shipped the right idea with an unverified knowledge base, a MCP server that

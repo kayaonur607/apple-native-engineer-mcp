@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml"><img src="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/tests-93_passing-30D158" alt="93 tests">
+  <img src="https://img.shields.io/badge/tests-131_passing-30D158" alt="131 tests">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT"></a>
   <img src="https://img.shields.io/badge/protocol-MCP_1.32-8A2BE2" alt="MCP 1.32">
   <img src="https://img.shields.io/badge/Swift-6.x-F05138" alt="Swift 6">
@@ -31,15 +31,15 @@ Liquid Glass, SwiftUI engineering, StoreKit 2, SwiftData, privacy, performance.
 *does this symbol exist on iOS 17? does this text colour pass contrast in Dark Mode? is the privacy manifest
 missing a reason code? would the App Store reject this icon?* They print finding codes, not opinions.
 
-**3. An MCP server.** All 13 checks, the whole knowledge base and the twelve workflows exposed to Claude Desktop,
+**3. An MCP server.** Every audit, the whole knowledge base and the twelve workflows exposed to Claude Desktop,
 Claude Code, Cursor, Codex or any MCP client — over the official SDK, with typed, versioned results.
 
 The point is not to generate more Swift. The point is to make the agent **unable to claim it is done** without
 evidence.
 
 > [!IMPORTANT]
-> Every number on this page is produced by `./scripts/verify.sh`: 93 tests, a link and count validator, a real
-> Swift compile of the fixtures, and a type-check of all 118 documented snippets. See [Proof](#proof).
+> Every number on this page is produced by `./scripts/verify.sh`: 131 tests, a link and count validator, a real
+> Swift compile of the fixtures, and a type-check of every documented snippet. See [Proof](#proof).
 
 ---
 
@@ -109,8 +109,18 @@ Then the same gate on a project that follows the rules: **READY FOR SUBMISSION, 
 
 ```bash
 cd integrations/mcp-server && npm install
-node src/index.js --selftest   # 13 tools · 53 resources · 12 prompts
+node src/index.js --selftest   # 16 tools · 53 resources · 12 prompts
 ```
+
+Or without cloning anything:
+
+```bash
+npx -y apple-native-engineer-mcp --selftest
+```
+
+For a shared endpoint or a container, the same server speaks Streamable HTTP:
+`node src/index.js --http` serves `POST /mcp` plus a `GET /health` probe, loopback-bound and origin-checked by
+default.
 
 ```json
 {
@@ -215,11 +225,21 @@ These are the rules that separate "looks like iOS" from "is iOS":
 
 ---
 
-## The 13 MCP tools
+## The 16 MCP tools
 
-`inspect_apple_project` · `audit_privacy_manifest` · `validate_app_icon` · `validate_app_metadata` ·
-`check_localization` · `validate_widgets` · `lint_swiftui` · `audit_accessibility` · `audit_liquid_glass` ·
-`validate_sf_symbols` · `forge_design_tokens` · `generate_release_report` · `app_store_connect`
+`audit_project` · `review_diff` · `check_environment` · `inspect_apple_project` · `audit_privacy_manifest` ·
+`validate_app_icon` · `validate_app_metadata` · `check_localization` · `validate_widgets` · `lint_swiftui` ·
+`audit_accessibility` · `audit_liquid_glass` · `validate_sf_symbols` · `forge_design_tokens` ·
+`generate_release_report` · `app_store_connect`
+
+Two of them change how an agent works rather than just what it can check:
+
+- **`audit_project`** runs eight audits concurrently and returns one envelope where every finding is tagged with
+  the audit that produced it. One call instead of eight round trips.
+- **`review_diff`** reads `git diff`, keeps the changed Swift files and audits only those. It is the tool for an
+  edit loop: seconds instead of a full sweep, and findings grouped by file.
+
+Neither is a second implementation — both compose the same scripts the CLI runs.
 
 Built on the official `@modelcontextprotocol/sdk` (v1.32) rather than a hand-rolled JSON-RPC loop. That buys:
 
@@ -229,9 +249,12 @@ Built on the official `@modelcontextprotocol/sdk` (v1.32) rather than a hand-rol
 - **53 resources.** The 31 guides, 12 checklists, 9 examples and `SKILL.md`, addressable as `apple-native://`
   URIs. The agent loads the design standard on demand instead of you pasting it into the prompt.
 - **12 prompts.** Every slash command (`/apple-native`, `/apple-native-design`, `/apple-native-release`, …) is a
-  first-class MCP prompt with a `project` argument.
+  first-class MCP prompt with a `project` argument and an optional `focus`.
 - **Read-only annotations.** Audit tools are `readOnlyHint: true, destructiveHint: false`. The server cannot mutate
   your project or your App Store account.
+- **No data collection.** No audit makes a network call. Telemetry is off by default; when you turn it on it records
+  five fields — tool, outcome, duration bucket, day, schema — and an allowlist drops everything else.
+  `--telemetry-preview` prints the exact bytes, and a test feeds it paths and prompts to prove they do not survive.
 
 ---
 
@@ -262,10 +285,10 @@ disagrees with the documentation:
 | Stage | Result | How it is measured |
 | :--- | :--- | :--- |
 | Repository validation | **pass** | Frontmatter, 20 required paths, every internal link, and every count in this README cross-checked against the filesystem |
-| Python tests | **85 pass** | `python3 -m unittest` across 3.10 / 3.12 / 3.13 in CI |
-| MCP protocol tests | **8 pass** | A real `Client` ↔ `McpServer` pair over the SDK's in-memory transport |
-| Swift compilation | **pass** | `swiftc -typecheck` on both fixtures and on all 118 documented snippets |
-| Documentation claims | **pass** | 96 modifiers looked up in 21,998 SDK symbols; 64 iOS 27 declarations generated from the SDK |
+| Python tests | **87 pass** | `python3 -m unittest` across 3.10 / 3.12 / 3.13 in CI |
+| MCP protocol tests | **44 pass** | A real `Client` ↔ `McpServer` pair over the SDK's in-memory transport, a real HTTP socket, a throwaway git repo, and hostile telemetry payloads |
+| Swift compilation | **pass** | `swiftc -typecheck` on both fixtures, `swiftc -parse` on all 162 documented snippets, and a full type-check of 73 of them against the SDK each one targets — iOS or visionOS |
+| Documentation claims | **pass** | 129 taught modifiers looked up in 21,998 SDK symbols; 64 iOS 27 declarations generated from the SDK |
 
 Both directions are tested, which is the point:
 
@@ -359,7 +382,7 @@ apple-native-engineer-mcp/
 ├── integrations/mcp-server/     # official-SDK MCP server (tools + resources + prompts)
 ├── references/  checklists/  examples/  commands/
 ├── data/sf-symbols.json         # 9,649 SF Symbols with per-OS availability
-├── tests/                       # 85 Python tests + two fixture projects
+├── tests/                       # 87 Python tests + two fixture projects
 ├── scripts/                     # verify, doctor, demo, benchmark, generators
 ├── docs/PROOF.md                # raw verification transcripts
 └── .github/workflows/ci.yml     # repository · python ×3 · mcp · swift
