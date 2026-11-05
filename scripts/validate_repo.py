@@ -208,6 +208,18 @@ def check_links() -> int:
 
 # -- documented counts ------------------------------------------------------
 
+def count_tests() -> int:
+    """Count declared tests without running them (fast, deterministic)."""
+
+    python_tests = 0
+    for path in (REPO / "tests").glob("test_*.py"):
+        python_tests += len(re.findall(r"^\s+def test_", path.read_text(errors="ignore"), re.MULTILINE))
+    js_tests = 0
+    for path in (REPO / "integrations" / "mcp-server" / "test").glob("*.test.js"):
+        js_tests += len(re.findall(r"^\s+it\(", path.read_text(errors="ignore"), re.MULTILINE))
+    return python_tests + js_tests
+
+
 def mcp_tool_count() -> int:
     source = (REPO / "integrations/mcp-server/src/tools.js").read_text()
     block = source.split("TOOL_SPECS = [", 1)[-1]
@@ -222,6 +234,13 @@ def check_counts(tool_count: int) -> None:
         "worked examples": len(list((REPO / "examples").glob("*.md"))),
         "MCP tools": mcp_tool_count(),
     }
+    test_count = count_tests()
+    readme = (REPO / "README.md").read_text()
+    if f"tests-{test_count}_passing" in readme:
+        ok(f"README badge states {test_count} tests")
+    else:
+        fail(f"README badge does not state 'tests-{test_count}_passing' (suite has {test_count} tests)")
+
     for label, count in expectations.items():
         pattern = re.compile(rf"\b{count}\s+{re.escape(label)}\b")
         if pattern.search(readme):

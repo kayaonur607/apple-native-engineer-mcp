@@ -12,7 +12,7 @@
 
 <p align="center">
   <a href="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml"><img src="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/tests-63_passing-30D158" alt="63 tests">
+  <img src="https://img.shields.io/badge/tests-74_passing-30D158" alt="74 tests">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT"></a>
   <img src="https://img.shields.io/badge/MCP-1.32-8A2BE2" alt="MCP">
   <img src="https://img.shields.io/badge/Swift-6.x-F05138" alt="Swift 6">
@@ -41,7 +41,7 @@ This repository is that feedback loop. It ships:
    as resources and the workflows as prompts.
 
 > [!IMPORTANT]
-> **Nothing here is vibes.** Every number in this README is produced by `./scripts/verify.sh`, which runs 63
+> **Nothing here is vibes.** Every number in this README is produced by `./scripts/verify.sh`, which runs 74
 > tests, a link/count validator and a real Swift type-check. See [Proof](#proof).
 
 ---
@@ -74,7 +74,7 @@ Verify it is alive before blaming the client:
 ```bash
 node integrations/mcp-server/src/index.js --selftest
 # {"name":"apple-native-engineer","version":"2.0.0",
-#  "tools":[...13...],"resources":52,"prompts":12}
+#  "tools":[...13...],"resources":53,"prompts":12}
 ```
 
 ### 2. Use it as a skill (no server)
@@ -186,7 +186,7 @@ Built on the official `@modelcontextprotocol/sdk` (v1.32), not a hand-rolled JSO
   `summary`, `findings[]` and `data{}` — validated against a declared `outputSchema`, so clients get typed fields
   instead of a blob of text.
 - **Honest errors.** A missing path returns `isError: true` with a machine-readable code, never a stack trace.
-- **52 resources.** The 30 reference guides, 12 checklists, 9 examples and `SKILL.md` are exposed as
+- **53 resources.** The 31 reference guides, 12 checklists, 9 examples and `SKILL.md` are exposed as
   `apple-native://` resources, so the agent loads the design standard on demand instead of you pasting it.
 - **12 prompts.** Every slash command (`/apple-native`, `/apple-native-design`, `/apple-native-release`, …) is a
   first-class MCP prompt with a `project` argument.
@@ -201,7 +201,7 @@ cannot mutate your project or your App Store account.
 | Section | Count | What it is |
 | :--- | ---: | :--- |
 | [`SKILL.md`](SKILL.md) | — | The operating standard: what "native" means, decision tables, refusal rules |
-| [`references/`](references/) | 30 reference guides | HIG foundations, Liquid Glass, SwiftUI engineering, StoreKit 2, SwiftData, privacy, performance |
+| [`references/`](references/) | 31 reference guides | HIG foundations, Liquid Glass, SwiftUI engineering, StoreKit 2, SwiftData, privacy, performance |
 | [`checklists/`](checklists/) | 12 checklists | Review protocols to run before a PR, a design review or a submission |
 | [`examples/`](examples/) | 9 worked examples | Navigation, adaptive layout, animation, Live Activities, StoreKit paywalls |
 | [`commands/`](commands/) | 12 commands | Slash-command specs that drive the tools |
@@ -218,11 +218,12 @@ This is the part most repositories skip. Here is what `./scripts/verify.sh` actu
 
 | Stage | Result | How it is measured |
 | :--- | :--- | :--- |
-| Repository validation | **pass** | Frontmatter, 20 required paths, 116 internal links, and every count in this README cross-checked against the filesystem |
-| Python tests | **55 pass** | `python3 -m unittest` across 3.10 / 3.12 / 3.13 in CI |
+| Repository validation | **pass** | Frontmatter, 20 required paths, every internal link, and every count in this README cross-checked against the filesystem |
+| Python tests | **66 pass** | `python3 -m unittest` across 3.10 / 3.12 / 3.13 in CI |
 | MCP protocol tests | **8 pass** | A real `Client` ↔ `McpServer` pair over the SDK's in-memory transport |
 | Swift compilation | **pass** | `swiftc -typecheck` on both fixtures, `swiftc -parse` on all 118 documentation snippets |
 | SF Symbols catalogue | **9,649 symbols** | Extracted from `CoreGlyphs.bundle`, internally consistent |
+| SDK reference | **64 iOS 27 declarations** | Generated from the installed `.swiftinterface`, drift-checked in CI |
 
 Both directions are tested, which is the point:
 

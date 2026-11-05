@@ -28,6 +28,8 @@ Version 2 replaces all three.
   correct tool annotations, real `isError` handling.
 - **Knowledge base exposed as MCP resources** — the 30 references, 12 checklists and 9 examples are addressable
   as `apple-native://` URIs instead of being pasted into prompts.
+- **Generated SDK reference** — `references/whats-new-ios-27.md` lists the 64 declarations the installed SDK
+  annotates `@available(iOS 27.0, …)`, grouped by framework. Generated, not recalled, and drift-checked in CI.
 - **Verification harness** — `scripts/verify.sh` runs repository validation, 55 Python tests, 8 MCP protocol tests
   and real `swiftc` compilation; `docs/PROOF.md` records the transcripts.
 - **Two fixture projects** — `clean-app` (must produce zero findings) and `legacy-app` (must trip every rule), so

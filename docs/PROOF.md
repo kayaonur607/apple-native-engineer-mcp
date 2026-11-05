@@ -20,7 +20,7 @@ cd integrations/mcp-server && npm install && cd ../..
 ▸ Repository structure and links
   [PASS] all 20 required paths present
   [PASS] 14 CLI tools structure validated
-  [PASS] 116 internal links resolve
+  [PASS] 35 internal links resolve
   [PASS] README documents 14 CLI tools
   [PASS] README documents 30 reference guides
   [PASS] README documents 12 checklists
@@ -34,7 +34,7 @@ cd integrations/mcp-server && npm install && cd ../..
 ▸ Python tests (shared library + tools)
 .......................................................
 ----------------------------------------------------------------------
-Ran 55 tests in 1.245s
+Ran 66 tests in 1.324s
 
 OK
 
@@ -78,6 +78,9 @@ expectations = {
     "MCP tools": mcp_tool_count(),                            # parsed from TOOLS array
 }
 ```
+
+The test badge is verified the same way: `count_tests()` counts `def test_` and `it(` declarations and fails the
+build if the README badge disagrees. A badge that lies is worse than no badge.
 
 ---
 
@@ -194,7 +197,7 @@ Inventory at runtime:
   "tools": ["inspect_apple_project", "audit_privacy_manifest", "validate_app_icon", "validate_app_metadata",
             "check_localization", "validate_widgets", "lint_swiftui", "audit_accessibility", "audit_liquid_glass",
             "validate_sf_symbols", "forge_design_tokens", "generate_release_report", "app_store_connect"],
-  "resources": 52,
+  "resources": 53,
   "prompts": ["apple-native-apple-native", "apple-native-design", "apple-native-code", "apple-native-review",
               "apple-native-privacy", "apple-native-icon", "apple-native-screenshots", "apple-native-connect",
               "apple-native-metadata", "apple-native-widgets", "apple-native-localization", "apple-native-release"]
@@ -219,6 +222,18 @@ PY
 
 That is why the tool can answer "is `square.and.pencil` available on iOS 17?" and "which symbol did you mean?"
 instead of guessing.
+
+The same principle produces `references/whats-new-ios-27.md`: every row is a declaration the installed SDK
+annotates `@available(iOS 27.0, …)`. CI runs the generator in `--check` mode, so a stale SDK index fails the
+build instead of silently ageing.
+
+```bash
+$ python3 scripts/generate_whats_new.py
+wrote references/whats-new-ios-27.md: 64 declarations across 11 frameworks
+  SwiftUI        34
+  AppIntents     16
+  StoreKit        9
+```
 
 The Liquid Glass API surface in `references/liquid-glass.md` is verified the same way — by grepping the actual
 SDK interface:
@@ -256,10 +271,10 @@ severity reflects the confidence: `info` for suggestions, `error` for rules Appl
 
 | Claim | Command |
 | :--- | :--- |
-| "63 tests pass" | `./scripts/verify.sh` |
+| "74 tests pass" | `./scripts/verify.sh` |
 | "14 CLI tools" | `ls -d tools/*/ \| wc -l` |
 | "13 MCP tools" | `node integrations/mcp-server/src/index.js --selftest` |
-| "116 links resolve" | `python3 scripts/validate_repo.py --links` |
+| "every internal link resolves" | `python3 scripts/validate_repo.py --links` |
 | "Swift compiles" | `./scripts/verify-swift.sh` |
 | "The gate blocks a bad project" | `python3 tools/release-readiness/generate_report.py tests/fixtures/legacy-app --metadata tests/fixtures/legacy-app/metadata.json --icon tests/fixtures/legacy-app/Assets.xcassets/AppIcon.appiconset/AppIcon-512.png` |
 | "9,649 SF Symbols" | `python3 -c "import json;print(json.load(open('data/sf-symbols.json'))['count'])"` |

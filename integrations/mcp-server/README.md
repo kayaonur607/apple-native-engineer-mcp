@@ -15,7 +15,7 @@ integrations/mcp-server  ──►  python3 tools/<tool>/<script>.py --json
         │                          │
         │                          └── stable envelope (schema_version 2.0)
         ├── 13 tools
-        ├── 52 resources  (references, checklists, examples, SKILL.md)
+        ├── 53 resources  (references, checklists, examples, SKILL.md)
         └── 12 prompts    (the slash commands)
 ```
 
