@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml"><img src="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/tests-148_passing-30D158" alt="148 tests">
+  <img src="https://img.shields.io/badge/tests-151_passing-30D158" alt="151 tests">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT"></a>
   <img src="https://img.shields.io/badge/protocol-MCP_1.32-8A2BE2" alt="MCP 1.32">
   <img src="https://img.shields.io/badge/Swift-6.x-F05138" alt="Swift 6">
@@ -23,7 +23,7 @@
 
 <p align="center">
   <sub>
-  <b>148 tests</b> · <b>5/5 CI stages</b> · <b>162 snippets compiled</b> · <b>129 API claims checked against the SDK</b> · <b>9,649 SF Symbols</b> · <b>16 MCP tools</b><br>
+  <b>151 tests</b> · <b>5/5 CI stages</b> · <b>162 snippets compiled</b> · <b>129 API claims checked against the SDK</b> · <b>9,649 SF Symbols</b> · <b>16 MCP tools</b><br>
   every number produced by <code>./scripts/verify.sh</code> — see <a href="#proof">Proof</a> and <a href="docs/PROOF.md">docs/PROOF.md</a>
   </sub>
 </p>
@@ -102,7 +102,7 @@ cd apple-native-engineer-mcp
 
 make doctor   # is this machine ready? (Python, Node, Xcode, SDK)
 make demo     # 30 seconds: the audits on a deliberately broken app
-make verify   # everything CI runs, including 148 tests and a real Swift compile
+make verify   # everything CI runs, including 151 tests and a real Swift compile
 ```
 
 What `make demo` shows, trimmed:
@@ -300,7 +300,7 @@ disagrees with the documentation:
 | Stage | Result | How it is measured |
 | :--- | :--- | :--- |
 | Repository validation | **pass** | Frontmatter, 20 required paths, every internal link, and every count in this README cross-checked against the filesystem |
-| Python tests | **87 pass** | `python3 -m unittest` across 3.10 / 3.12 / 3.13 in CI |
+| Python tests | **90 pass** | `python3 -m unittest` across 3.10 / 3.12 / 3.13 in CI |
 | MCP protocol tests | **61 pass** | A real `Client` ↔ `McpServer` pair over the SDK's in-memory transport, a real HTTP socket, a throwaway git repo, the publish metadata, and hostile telemetry payloads |
 | Swift compilation | **pass** | `swiftc -typecheck` on both fixtures, `swiftc -parse` on all 162 documented snippets, and a full type-check of 73 of them against the SDK each one targets — iOS or visionOS |
 | Documentation claims | **pass** | 129 taught modifiers looked up in 21,998 SDK symbols; 64 iOS 27 declarations generated from the SDK |

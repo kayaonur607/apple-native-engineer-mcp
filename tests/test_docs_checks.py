@@ -22,6 +22,7 @@ def load(name: str, relative: str):
 
 
 CLAIMS = load("check_api_claims", "scripts/check_api_claims.py")
+TYPECHECK = load("typecheck_snippets", "scripts/typecheck_snippets.py")
 
 MARKDOWN = """
 Text("hello")
@@ -82,6 +83,24 @@ class ClaimCheckTests(unittest.TestCase):
         finding = findings[0]
         self.assertIn("files", finding)
         self.assertIn("api-allowlist.json", finding["hint"])
+
+
+class SnippetAvailabilityTests(unittest.TestCase):
+    """A snippet documenting iOS 27 cannot be verified against an iOS 18 SDK."""
+
+    def test_reads_availability_gate(self):
+        self.assertEqual(TYPECHECK.availability_major("if #available(iOS 27.0, *) { }"), 27)
+        self.assertEqual(TYPECHECK.availability_major("@available(macOS 26.0, *)"), 26)
+        self.assertEqual(TYPECHECK.availability_major("Text(\"plain\")"), 0)
+
+    def test_takes_the_highest_gate(self):
+        code = "if #available(iOS 17.0, *) { } else if #available(iOS 27.0, *) { }"
+        self.assertEqual(TYPECHECK.availability_major(code), 27)
+
+    def test_parses_sdk_major_from_name(self):
+        self.assertEqual(TYPECHECK.sdk_major_from_name("iPhoneSimulator27.2.sdk"), 27)
+        self.assertEqual(TYPECHECK.sdk_major_from_name("MacOSX18.5.sdk"), 18)
+        self.assertEqual(TYPECHECK.sdk_major_from_name("XROS27.2.sdk"), 27)
 
 
 class RepositoryAllowlistTests(unittest.TestCase):

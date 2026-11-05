@@ -37,7 +37,7 @@ cd integrations/mcp-server && npm install && cd ../..
 ▸ Python tests (shared library + tools)
 .......................................................................................
 ----------------------------------------------------------------------
-Ran 87 tests in 1.339s
+Ran 90 tests in 1.339s
 
 OK
 

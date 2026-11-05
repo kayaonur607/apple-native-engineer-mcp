@@ -47,6 +47,26 @@ HEADER = "import SwiftUI\nimport Foundation\n"
 FENCE_RE = re.compile(r"```swift(?:[ \t]+([A-Za-z]+))?[ \t]*\n(.*?)```", re.DOTALL)
 ERROR_RE = re.compile(r"^(.*?):(\d+):(\d+): error: (.*)$")
 
+#: `if #available(iOS 27.0, *)` / `@available(macOS 26.0, *)` — the gate a snippet
+#: declares for itself. A snippet documenting an OS newer than the installed SDK
+#: cannot be verified here, and pretending otherwise fails CI on older Xcode.
+AVAILABILITY_RE = re.compile(
+    r"[@#]available\s*\(\s*(?:iOS|macOS|watchOS|tvOS|visionOS)\s+(\d+)")
+
+
+def availability_major(code: str) -> int:
+    """Highest OS major a snippet explicitly gates itself behind (0 if none)."""
+
+    majors = [int(match) for match in AVAILABILITY_RE.findall(code)]
+    return max(majors) if majors else 0
+
+
+def sdk_major_from_name(name: str) -> int:
+    """`iPhoneSimulator27.2.sdk` → 27; `MacOSX18.5.sdk` → 18."""
+
+    match = re.search(r"(\d+)\.", name)
+    return int(match.group(1)) if match else 0
+
 #: platform → (SDK name for xcrun, swiftc target triple). The target embeds the
 #: repository's documented deployment floor (iOS 17 and its contemporaries), so a
 #: snippet that needs a newer OS fails here rather than in a reader's Xcode.
@@ -215,9 +235,17 @@ def main(argv: List[str]) -> int:
     target_dir = WORK / "src"
     target_dir.mkdir(parents=True, exist_ok=True)
 
+    too_new: Dict[str, str] = {}
     for snippet in snippets:
         if snippet.platform in skipped:
             snippet.status = "skipped"
+            continue
+        required = availability_major(snippet.code)
+        available = sdk_major_from_name(sdks[snippet.platform].name)
+        if required > available:
+            snippet.status = "skipped"
+            too_new[f"{snippet.document} block {snippet.index}"] = (
+                f"documents {snippet.platform} {required}, this SDK is {available}")
             continue
         compile_snippet(snippet, sdks[snippet.platform], target_dir)
 
@@ -236,6 +264,7 @@ def main(argv: List[str]) -> int:
             for s in real
         ],
         "skipped": skipped,
+        "newer_than_sdk": too_new,
         "unknown_errors": [
             {"document": s.document, "block": s.index, "stderr": s.errors}
             for s in snippets if s.status == "unknown-error"
@@ -250,6 +279,10 @@ def main(argv: List[str]) -> int:
         print("Per platform:     " + ", ".join(f"{p} {n}" for p, n in sorted(by_platform.items())))
         if skipped:
             print("Skipped:          " + ", ".join(f"{p} ({name} SDK missing)" for p, name in skipped.items()))
+        if too_new:
+            print(f"Skipped (newer):  {len(too_new)} snippet(s) document an OS newer than the installed SDK")
+            for location, reason in list(too_new.items())[:5]:
+                print(f"                  {location} — {reason}")
         print(f"Type-check clean: {payload['ok']}")
         print(f"Fragments:        {payload['fragments']}")
         print(f"Real errors:      {len(real)}")
