@@ -272,6 +272,26 @@ class DesignTokenForgeTests(unittest.TestCase):
             self.assertEqual(len(payload["colors"]), 2, "light and dark entries")
 
 
+class AppStoreReviewTests(unittest.TestCase):
+    def test_clean_project_has_no_review_errors(self):
+        envelope = run_tool("app-store-review/review.py", str(CLEAN), expect=0)
+        self.assertNotIn("error", {f["severity"] for f in envelope["findings"]})
+
+    def test_legacy_project_trips_the_guidelines(self):
+        envelope = run_tool("app-store-review/review.py", str(LEGACY),
+                            "--metadata", str(LEGACY / "metadata.json"), expect=2)
+        found = codes(envelope)
+        self.assertIn("RVW101", found, "camera used without NSCameraUsageDescription")
+        self.assertIn("RVW301", found, "account creation without deletion")
+        self.assertIn("RVW401", found, "external payment provider referenced")
+        self.assertIn("RVW601", found, "private selector use")
+        self.assertIn("RVW803", found, "http:// URL in listing metadata")
+
+    def test_metadata_is_optional(self):
+        envelope = run_tool("app-store-review/review.py", str(CLEAN), expect=0)
+        self.assertIn("RVW801", codes(envelope))
+
+
 class MarketingCompositionTests(unittest.TestCase):
     def test_composes_exact_size_svg(self):
         import tempfile

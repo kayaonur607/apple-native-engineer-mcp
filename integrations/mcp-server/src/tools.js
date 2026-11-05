@@ -443,6 +443,23 @@ export const TOOL_SPECS = [
       runTool("tools/icon-studio/icon_studio.py", ["verify", resolveTarget(args.path)]),
   },
   {
+    name: "audit_app_store_review",
+    title: "Audit App Store Review risk",
+    description:
+      "Finds the specific conditions that appear in App Store rejection letters — missing usage descriptions, " +
+      "placeholder copy, account creation without deletion, external payment links, web-wrapper apps, private " +
+      "APIs — and names the guideline section for each. Never promises approval.",
+    inputSchema: {
+      path: OPTIONAL_PATH,
+      metadata_path: z.string().optional().describe("Optional listing metadata JSON for 2.3.1 checks"),
+    },
+    run: async (args) => {
+      const cliArgs = [resolveTarget(args.path)];
+      if (args.metadata_path) cliArgs.push("--metadata", resolveTarget(args.metadata_path));
+      return runTool("tools/app-store-review/review.py", cliArgs);
+    },
+  },
+  {
     name: "compose_marketing_screenshots",
     title: "Compose marketing screenshots",
     description:

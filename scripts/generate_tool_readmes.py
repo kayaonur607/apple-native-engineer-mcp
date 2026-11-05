@@ -252,6 +252,27 @@ TOOLS: Dict[str, dict] = {
                   "DOC010": "served from cache", "DOC011": "API is deprecated on a platform",
                   "DOC030": "no symbol matched", "DOC040": "HIG page rendered empty"},
     },
+    "app-store-review": {
+        "script": "review.py",
+        "title": "App Store Review Risk",
+        "summary": "Finds the conditions that appear in rejection letters, each tied to a guideline section.",
+        "usage": [
+            "python3 tools/app-store-review/review.py .",
+            "python3 tools/app-store-review/review.py . --metadata metadata.json --json",
+        ],
+        "checks": [
+            "sensor use without a matching NS*UsageDescription (5.1.1)",
+            "placeholder copy: TODO, FIXME, lorem ipsum, “coming soon” (2.1)",
+            "account creation with no in-app deletion path (5.1.1(v))",
+            "external payment providers where In-App Purchase is required (3.1.1)",
+            "web-wrapper apps with no native navigation (4.2)",
+            "private or deprecated API use: UIWebView, performSelector, reflective UIKit access (2.5.1)",
+            "listing metadata: http:// links and unreplaced example.com URLs (2.3.1)",
+        ],
+        "codes": {"RVW101": "usage description missing", "RVW201": "placeholder content",
+                  "RVW301": "no account deletion", "RVW401": "external payments",
+                  "RVW501": "web wrapper", "RVW601": "private API", "RVW803": "http:// URL in metadata"},
+    },
     "aso-engine": {
         "script": "aso.py",
         "title": "ASO Engine",

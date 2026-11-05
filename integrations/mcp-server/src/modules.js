@@ -69,7 +69,7 @@ export const MODULES = [
     id: "app-store-review",
     label: "App Store review",
     description: "Listing metadata limits and URL validation.",
-    tools: ["validate_app_metadata"],
+    tools: ["validate_app_metadata", "audit_app_store_review"],
     defaultEnabled: true,
   },
   {

@@ -22,6 +22,10 @@ shared machines, and privacy claims that a test enforces.
   own output that no search-volume or competitor data is used.
 - **Marketing screenshot composition** — exact-size SVG frames around real captures (background, headline,
   subheadline, embedded screenshot, three themes), optionally rasterised when a renderer is installed.
+- **App Store Review risk engine** — `tools/app-store-review/`: usage descriptions against real sensor use (5.1.1),
+  placeholder copy (2.1), account creation without deletion (5.1.1(v)), external payment providers (3.1.1),
+  web-wrapper apps (4.2), private API usage (2.5.1) and listing URLs (2.3.1). Every finding names the section and
+  the file.
 - **Capability modules** — the sixteen tools are grouped into nine modules (`core`, `swift-engineering`,
   `sf-symbols`, `design-tokens`, `privacy-security-audit`, `app-store-review`, `app-store-assets`,
   `release-readiness`, `app-store-connect`) and gated by `APPLE_NATIVE_MODULES`. `core` cannot be disabled, an

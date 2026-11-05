@@ -106,6 +106,12 @@ let b = realCall()
         self.assertEqual(strip_comments(source).count("comment"), 0)
         self.assertIn("b", strip_comments(source))
 
+    def test_url_literals_are_not_treated_as_comments(self):
+        source = 'let a = "https://example.com/x" // real comment\n'
+        stripped = strip_comments(source)
+        self.assertIn("https://example.com/x", stripped, "// inside a literal is not a comment")
+        self.assertNotIn("real comment", stripped)
+
     def test_declared_types(self):
         types = declared_types("struct A {}\nclass B {}\nactor C {}\nprotocol D {}")
         self.assertEqual(types, {"A": "struct", "B": "class", "C": "actor", "D": "protocol"})

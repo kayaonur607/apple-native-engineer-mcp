@@ -90,35 +90,31 @@ def _strip(source: str, blank_strings: bool) -> str:
             continue
 
         # Raw string literals: #"..."#, ##"..."##
-        if blank_strings and ch == "#":
+        if ch == "#":
             match = re.match(r'(#+)"', source[i:])
             if match:
                 hashes = match.group(1)
                 closing = '"' + hashes
                 start_content = i + len(hashes) + 1
-                end = source.find(closing, start_content)
-                if end == -1:
-                    end = n
-                    stop = n
-                else:
-                    stop = end + len(closing)
-                out.append('"' + _blank(source[start_content:end]) + '"')
+                found = source.find(closing, start_content)
+                stop = n if found == -1 else found + len(closing)
+                literal = source[i:stop]
+                out.append(_blank(literal) if blank_strings else literal)
                 i = stop
                 continue
 
         # Multi-line string literal: """..."""
-        if blank_strings and source.startswith('"""', i):
-            end = source.find('"""', i + 3)
-            if end == -1:
-                out.append(_blank(source[i:]))
-                i = n
-            else:
-                out.append('"""' + _blank(source[i + 3:end]) + '"""')
-                i = end + 3
+        if source.startswith('"""', i):
+            found = source.find('"""', i + 3)
+            stop = n if found == -1 else found + 3
+            literal = source[i:stop]
+            out.append(_blank(literal) if blank_strings else literal)
+            i = stop
             continue
 
-        # Single-line string literal
-        if blank_strings and ch == '"':
+        # Single-line string literal. Skipped even when we keep its text, so that
+        # a `//` inside "https://…" is never mistaken for a comment.
+        if ch == '"':
             j = i + 1
             while j < n:
                 if source[j] == "\\":
@@ -127,10 +123,11 @@ def _strip(source: str, blank_strings: bool) -> str:
                 if source[j] == '"':
                     j += 1
                     break
-                if source[j] == "\n":  # unterminated - bail out at newline
+                if source[j] == "\n":
                     break
                 j += 1
-            out.append('"' + _blank(source[i + 1:max(j - 1, i + 1)]) + '"')
+            literal = source[i:j]
+            out.append(_blank(literal) if blank_strings else literal)
             i = j
             continue
 
