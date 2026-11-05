@@ -418,6 +418,48 @@ export const TOOL_SPECS = [
       runTool("tools/apple-docs-research/apple_docs.py", ["guidelines", args.page]),
   },
   {
+    name: "prepare_icon_assets",
+    title: "Prepare app icon assets",
+    description:
+      "Turns one 1024×1024 opaque PNG into a complete AppIcon.appiconset: 18 slots downscaled with a box filter, " +
+      "plus the Contents.json Xcode expects. Refuses a master that is not 1024×1024, not PNG, or has alpha.",
+    inputSchema: {
+      source: z.string().describe("Path to the 1024×1024 master PNG"),
+      out: z.string().describe("Destination .appiconset directory to write"),
+    },
+    run: async (args) =>
+      runTool("tools/icon-studio/icon_studio.py", ["prepare", resolveTarget(args.source), "--out", resolveTarget(args.out)]),
+  },
+  {
+    name: "verify_icon_set",
+    title: "Verify app icon assets",
+    description:
+      "Checks an .appiconset against its Contents.json: every referenced file exists and has the pixel size the " +
+      "slot declares.",
+    inputSchema: {
+      path: z.string().describe("Path to the .appiconset directory"),
+    },
+    run: async (args) =>
+      runTool("tools/icon-studio/icon_studio.py", ["verify", resolveTarget(args.path)]),
+  },
+  {
+    name: "analyze_app_store_optimization",
+    title: "Analyse App Store optimization",
+    description:
+      "Deterministic ASO pass over listing copy: character budgets, duplicated or wasted keywords, keyword coverage " +
+      "against the visible copy, risky claims reviewers push back on, and candidate keywords extracted from your " +
+      "own description. Uses no search-volume or competitor data and says so in its output.",
+    inputSchema: {
+      path: z.string().describe("Path to the listing metadata JSON"),
+      locale: z.string().optional().describe("Analyse one locale only, e.g. en-US"),
+    },
+    run: async (args) => {
+      const cliArgs = [resolveTarget(args.path)];
+      if (args.locale) cliArgs.push("--locale", args.locale);
+      return runTool("tools/aso-engine/aso.py", cliArgs);
+    },
+  },
+  {
     name: "app_store_connect",
     title: "App Store Connect (read-only)",
     description:

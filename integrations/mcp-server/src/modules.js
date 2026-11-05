@@ -73,10 +73,17 @@ export const MODULES = [
     defaultEnabled: true,
   },
   {
+    id: "aso-engine",
+    label: "App Store optimization",
+    description: "Budgets, keyword coverage and risky claims in listing copy. No invented market data.",
+    tools: ["analyze_app_store_optimization"],
+    defaultEnabled: true,
+  },
+  {
     id: "app-store-assets",
     label: "App Store assets",
     description: "Icon and screenshot validation.",
-    tools: ["validate_app_icon"],
+    tools: ["validate_app_icon", "prepare_icon_assets", "verify_icon_set"],
     defaultEnabled: true,
   },
   {

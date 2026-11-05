@@ -272,6 +272,77 @@ class DesignTokenForgeTests(unittest.TestCase):
             self.assertEqual(len(payload["colors"]), 2, "light and dark entries")
 
 
+class IconStudioTests(unittest.TestCase):
+    def test_generates_a_complete_set_and_verifies_it(self):
+        import tempfile
+        master = CLEAN / "Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png"
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "AppIcon.appiconset"
+            generated = run_tool("icon-studio/icon_studio.py", "prepare", str(master), "--out", str(out), expect=0)
+            self.assertEqual(generated["data"]["slots"], 18)
+            self.assertEqual(len(list(out.glob("*.png"))), 18)
+            self.assertTrue((out / "Contents.json").exists())
+
+            verified = run_tool("icon-studio/icon_studio.py", "verify", str(out), expect=0)
+            self.assertEqual(verified["data"]["missing"], 0)
+            self.assertEqual(verified["data"]["wrong_size"], 0)
+
+    def test_refuses_a_transparent_master(self):
+        legacy = LEGACY / "Assets.xcassets/AppIcon.appiconset/AppIcon-512.png"
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "set"
+            envelope = run_tool("icon-studio/icon_studio.py", "prepare", str(legacy), "--out", str(out), expect=2)
+            found = codes(envelope)
+            self.assertIn("ICON003", found, "512x512 master must be rejected")
+            self.assertIn("ICON004", found, "alpha channel must be rejected")
+
+    def test_preview_is_smaller(self):
+        import tempfile
+        master = CLEAN / "Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png"
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "preview.png"
+            envelope = run_tool("icon-studio/icon_studio.py", "preview", str(master),
+                                "--at", "120", "--out", str(out), expect=0)
+            self.assertEqual(envelope["data"]["width"], 120)
+            self.assertTrue(out.exists())
+
+    def test_verify_reports_a_missing_file(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            asset_set = Path(tmp) / "Broken.appiconset"
+            asset_set.mkdir()
+            (asset_set / "Contents.json").write_text(json.dumps({
+                "images": [{"filename": "nope.png", "idiom": "iphone", "scale": "2x", "size": "20x20"}],
+                "info": {"author": "xcode", "version": 1},
+            }))
+            envelope = run_tool("icon-studio/icon_studio.py", "verify", str(asset_set), expect=2)
+            self.assertIn("ICON021", codes(envelope))
+
+
+class ASOTests(unittest.TestCase):
+    def test_clean_listing_passes_with_coverage_hints(self):
+        envelope = run_tool("aso-engine/aso.py", str(CLEAN / "metadata.json"), expect=0)
+        self.assertEqual(envelope["status"], "pass")
+        found = codes(envelope)
+        self.assertIn("ASO012", found, "keywords absent from visible copy are a coverage hint")
+        analysis = envelope["data"]["analysis"]
+        self.assertIn("default", analysis, "a flat listing is analysed as the default locale")
+        self.assertGreater(len(analysis["default"]["keyword_suggestions"]), 0)
+
+    def test_legacy_listing_fails_on_budget_and_claims(self):
+        envelope = run_tool("aso-engine/aso.py", str(LEGACY / "metadata.json"), expect=2)
+        found = codes(envelope)
+        self.assertIn("ASO001", found, "name over 30 characters")
+        self.assertIn("ASO020", found, "‘best’ is an unverifiable claim")
+
+    def test_reports_that_it_invents_nothing(self):
+        envelope = run_tool("aso-engine/aso.py", str(CLEAN / "metadata.json"), expect=0)
+        method = envelope["data"]["method"].lower()
+        self.assertIn("no search-volume", method)
+        self.assertIn("or invented", method)
+
+
 class ScreenshotStudioTests(unittest.TestCase):
     def test_audits_known_slots(self):
         envelope = run_tool("screenshot-studio/screenshot_studio.py",
