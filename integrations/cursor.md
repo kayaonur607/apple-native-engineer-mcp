@@ -32,7 +32,44 @@ ln -s ~/Desktop/apple-native-engineer .cursor/skills/apple-native-engineer
 
 ---
 
-## 3. Configuring Cursor Rules (`.cursorrules`)
+## 3. The MCP server — the version that actually checks the code
+
+A `.cursorrules` file is advice. The MCP server is 16 tools that run the same audits a senior reviewer would, and
+return finding codes instead of opinions. Cursor supports both, and they compose.
+
+Project config, `.cursor/mcp.json` (or `~/.cursor/mcp.json` for every workspace):
+
+```json
+{
+  "mcpServers": {
+    "apple-native-engineer": {
+      "command": "npx",
+      "args": ["-y", "apple-native-engineer-mcp"],
+      "env": { "APPLE_NATIVE_PYTHON": "python3" }
+    }
+  }
+}
+```
+
+Restart Cursor, then check **Settings → MCP** for a green connection. The server registers three things beyond
+tools:
+
+- **12 prompts** become slash commands — type `/` and look for `apple-native-review`.
+- **53 resources** — ask for `apple-native://references/liquid-glass` by URI and Cursor reads the guide instead of
+  you pasting it.
+- **Server instructions** — the operating loop arrives with the tools, not in your prompt.
+
+The first message worth sending:
+
+```text
+Use review_diff from apple-native-engineer to audit only what I changed, then explain each finding code.
+```
+
+`review_diff` reads `git diff`, so an edit loop costs seconds and reports nothing you did not just write.
+
+---
+
+## 4. Configuring Cursor Rules (`.cursorrules`)
 
 To ensure Cursor's agent model prioritizes the skill during all Swift and SwiftUI editing sessions, reference the skill in your project's `.cursorrules`:
 
@@ -46,7 +83,7 @@ When generating, modifying, or reviewing Swift and SwiftUI code:
 
 ---
 
-## 4. Example Prompts in Cursor Composer
+## 5. Example Prompts in Cursor Composer
 
 Open Cursor Composer (`⌘-I` or `Ctrl-I`) and prompt:
 

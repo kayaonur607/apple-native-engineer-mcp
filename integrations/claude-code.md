@@ -39,7 +39,49 @@ ln -s ~/Desktop/apple-native-engineer ~/.claude/skills/apple-native-engineer
 
 ---
 
-## 3. Verification
+## 3. The MCP server — where the audits actually run
+
+The skill is a policy document. The MCP server adds 16 tools that run the audits, 53 resources and 12 prompts.
+Claude Code supports both, and the server is the one that can say `status: fail`.
+
+```bash
+claude mcp add apple-native-engineer -- npx -y apple-native-engineer-mcp
+```
+
+Add `--scope project` to write a committed `.mcp.json` instead of the default local scope. This repository ships
+one, so a clone is already configured:
+
+```json
+{
+  "mcpServers": {
+    "apple-native-engineer": {
+      "command": "node",
+      "args": ["integrations/mcp-server/src/index.js"],
+      "env": { "APPLE_NATIVE_PYTHON": "python3" }
+    }
+  }
+}
+```
+
+What shows up in Claude Code:
+
+| Surface | How to reach it |
+| :--- | :--- |
+| Tools | `mcp__apple-native-engineer__audit_project`, `…__review_diff`, `…__check_environment` |
+| Prompts | `/mcp__apple-native-engineer__apple-native-release` |
+| Resources | the `apple-native://` URIs, read on demand instead of pasted |
+
+Check the connection with `/mcp`. Then:
+
+```text
+Use review_diff from apple-native-engineer, then fix every finding it reports and re-run until it passes.
+```
+
+That loop is the reason to install it: the agent stops guessing when it is finished.
+
+---
+
+## 4. Verification
 
 To verify that Claude Code recognizes the skill:
 1. Launch Claude Code:
@@ -54,7 +96,7 @@ To verify that Claude Code recognizes the skill:
 
 ---
 
-## 4. Example Invocation Prompts
+## 5. Example Invocation Prompts
 
 Once installed, Claude Code activates the skill automatically when working on Apple platform code, or when directly commanded:
 

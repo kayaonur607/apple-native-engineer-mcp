@@ -89,9 +89,16 @@ curl -s http://127.0.0.1:3927/health
 | Claude Desktop | `~/Library/Application Support/Claude/claude_desktop_config.json` | stdio |
 | Claude Code | `claude mcp add` or `.mcp.json` | stdio |
 | Cursor | `.cursor/mcp.json` (project) or `~/.cursor/mcp.json` (global) | stdio |
-| Codex / Cline / Zed / Windsurf | their own `mcpServers` block, same shape | stdio |
+| OpenAI Codex | `~/.codex/config.toml` → `[mcp_servers.<name>]` | stdio |
+| Gemini CLI | `~/.gemini/settings.json` → `mcpServers` | stdio |
+| VS Code / Copilot | `.vscode/mcp.json` → `servers` (portable: `.mcp.json` → `mcpServers`) | stdio |
+| OpenCode | `opencode.jsonc` → `mcp.servers` | stdio |
+| Cline / Zed / Windsurf | their own `mcpServers` block, same shape | stdio |
 | Anything that speaks HTTP | POST `http://127.0.0.1:3927/mcp` | Streamable HTTP |
 | A container platform | the image above, `--http` | Streamable HTTP |
+
+Per-client walkthroughs — including how each one surfaces the prompts and resources — are in the guides one
+directory up: [`integrations/`](../README.md).
 
 Project-local Cursor config:
 

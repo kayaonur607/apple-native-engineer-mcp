@@ -25,7 +25,52 @@ Key Mandates:
 
 ---
 
-## 2. Invocation in Copilot Chat
+## 2. The MCP server — agent mode with real checks
+
+Custom instructions are advice Copilot may follow. The MCP server is 16 tools that run the audits and return
+finding codes, and VS Code's agent mode supports it directly.
+
+This repository already ships a portable `.mcp.json` at the root, which VS Code offers as a workspace
+configuration. To write it by hand, use `.vscode/mcp.json` — note that this file uses `servers`, not `mcpServers`:
+
+```json
+{
+  "servers": {
+    "apple-native-engineer": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "apple-native-engineer-mcp"],
+      "env": { "APPLE_NATIVE_PYTHON": "python3" }
+    }
+  }
+}
+```
+
+Or use the guided flow: **Chat: Open Customizations → MCP Servers → Add Server → Command (stdio)**, and enter
+`npx -y apple-native-engineer-mcp`. Choose **Workspace** to share it with the repository, or **Copilot Global** to
+write `~/.copilot/mcp-config.json` for every project.
+
+Inside a session:
+
+| Surface | Where |
+| :--- | :--- |
+| Tools | the tool picker, or let the agent choose — the tool descriptions say what each answers |
+| Prompts | `/<server>.<prompt>`, for example `/apple-native-engineer.apple-native-release` |
+| Resources | **Add Context → MCP Resources**, or **MCP: Browse Resources** |
+
+Ask for one named call the first time, so you can see it happen rather than trust it:
+
+```text
+Use the apple-native-engineer audit_project tool on this workspace, then fix every error-severity finding and
+re-run until it passes. Do not change files outside the findings.
+```
+
+The value over instructions alone: `status: "fail"` is a blocker the model cannot argue with, and `review_diff`
+scopes the check to your `git diff` so the loop stays fast.
+
+---
+
+## 3. Invocation in Copilot Chat
 
 In VS Code or Xcode, prompt GitHub Copilot Chat:
 

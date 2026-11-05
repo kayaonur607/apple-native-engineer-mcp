@@ -56,7 +56,31 @@ npx skills remove apple-native-engineer
 
 ---
 
-## 3. Dependency Tracking
+## 3. The other distribution surface: MCP
+
+The skills CLI installs instructions — one `SKILL.md` per agent. It does **not** install the MCP server, which is
+what runs the audits. If your client speaks MCP, that is the surface with the executable checks:
+
+```bash
+npx -y apple-native-engineer-mcp --doctor    # Node, Python, auditors, git, Xcode
+npx -y apple-native-engineer-mcp --selftest  # 16 tools, 53 resources, 12 prompts
+```
+
+Either point the client at the package directly, or install it through the client's own command:
+
+```bash
+codex    mcp add apple-native-engineer -- npx -y apple-native-engineer-mcp
+gemini   mcp add apple-native-engineer npx -y apple-native-engineer-mcp
+opencode mcp add apple-native-engineer -- npx -y apple-native-engineer-mcp
+claude   mcp add apple-native-engineer -- npx -y apple-native-engineer-mcp
+```
+
+Install both when the client supports both: the skill carries the standards, the server enforces them with finding
+codes. Per-client details are in the sibling guides in this directory.
+
+---
+
+## 4. Dependency Tracking
 
 When installed in a project, the CLI creates and maintains:
 - `.skills.json`: Declares the skill dependency and target agent configurations.

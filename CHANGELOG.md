@@ -35,8 +35,19 @@ shared machines, and privacy claims that a test enforces.
   non-root, `HEALTHCHECK`) plus `smithery.yaml`, `server.json` for the MCP registry, and
   `.github/workflows/publish.yml`, which publishes with provenance on an `mcp-v*` tag and then installs the
   published tarball and runs `--selftest` against it.
-- **`--telemetry-preview`** — prints the exact JSON that telemetry would write, including the closed five-key
-  event shape.
+- **`--doctor` and `--telemetry-preview`** — `--doctor` prints the same environment report `check_environment`
+  returns, with a matching exit code (0 healthy, 1 degraded, 2 blocked), so a CI job can gate on it.
+  `--telemetry-preview` prints the exact JSON that telemetry would write, including the closed five-key event
+  shape.
+- **Publish-metadata test** — the server is described in `package.json`, `server.json`, `smithery.yaml` and the
+  `Dockerfile`, each read by a different pipeline. One test asserts a single version across all four, that
+  `mcpName` equals the registry name, that every URL points at the real repository, that the tarball ships
+  `vendor/`, and that every local `COPY` source exists.
+- **`docs/PUBLISHING.md`** — the release runbook: which files carry the version, how to verify the packed tarball
+  rather than the source tree, the `mcp-v*` tag that publishes with provenance, the registry submissions npm does
+  not perform, and how to roll back (deprecate, never unpublish).
+- **`.mcp.json`** — project-scoped MCP configuration, so a client that reads it discovers the server without a
+  hand-edited `claude_desktop_config.json`.
 
 ### Changed
 

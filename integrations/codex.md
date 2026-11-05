@@ -39,7 +39,45 @@ ln -s ~/Desktop/apple-native-engineer ~/.agents/skills/apple-native-engineer
 
 ---
 
-## 3. Verification & Usage
+## 3. The MCP server — stronger than the skill
+
+The skill is instructions. The MCP server is instructions **plus 16 tools that actually check the code**, 53
+resources and 12 prompts. If Codex is your daily client, use both: the skill sets policy, the server enforces it.
+
+```bash
+codex mcp add apple-native-engineer -- npx -y apple-native-engineer-mcp
+```
+
+Or in `~/.codex/config.toml` (project-scoped: `.codex/config.toml`, trusted projects only):
+
+```toml
+[mcp_servers.apple-native-engineer]
+command = "npx"
+args = ["-y", "apple-native-engineer-mcp"]
+# Every tool is read-only, so this never prompts for writes.
+default_tools_approval_mode = "writes"
+startup_timeout_sec = 20
+tool_timeout_sec = 120
+
+[mcp_servers.apple-native-engineer.env]
+APPLE_NATIVE_PYTHON = "python3"
+```
+
+Codex reads the server's `instructions` field as server-wide guidance, so the operating loop — inspect, read the
+reference, `review_diff`, then `generate_release_report` — arrives with the tools rather than in your prompt.
+
+Verify with `codex mcp list`, then ask for one named tool so the call is visible rather than inferred:
+
+```text
+Run the apple-native-engineer audit_project tool on this repository and quote the finding codes.
+```
+
+Why it is worth the extra step: the server returns finding codes (`SWU003`, `A11Y002`, `PRIV010`) rather than
+prose, and `status: fail` is a blocker the agent cannot talk its way past.
+
+---
+
+## 4. Verification & Usage
 
 Codex evaluates skill descriptions in `SKILL.md` frontmatter at startup. When user prompts touch on SwiftUI, Apple HIG, iOS, iPadOS, macOS, or UI auditing, Codex dynamically loads the skill's instructions.
 
