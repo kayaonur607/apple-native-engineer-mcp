@@ -1,10 +1,10 @@
 ---
 name: apple-native-engineer-mcp
-description: "Operating standard and executable toolkit for shipping genuinely native Apple software. Use when building, reviewing or auditing SwiftUI/UIKit/AppKit apps for iOS 17–27, iPadOS, macOS 14–27, visionOS or watchOS: enforces Human Interface Guidelines, Liquid Glass (iOS 26+) adoption with availability guards, Dynamic Type, semantic colour, VoiceOver, 44pt targets, Swift 6 concurrency and @Observable state, Required-Reason API privacy manifests, String Catalog localisation and RTL, WidgetKit/Live Activity completeness, App Store metadata limits, and a weighted release gate. Ships 14 CLI auditors and an MCP server that returns machine-readable finding codes."
+description: "Operating standard and executable toolkit for shipping genuinely native Apple software. Use when building, reviewing or auditing SwiftUI/UIKit/AppKit apps for iOS 17–27, iPadOS, macOS 14–27, visionOS or watchOS: enforces Human Interface Guidelines, Liquid Glass (iOS 26+) adoption with availability guards, Dynamic Type, semantic colour, VoiceOver, 44pt targets, Swift 6 concurrency and @Observable state, Required-Reason API privacy manifests, String Catalog localisation and RTL, WidgetKit/Live Activity completeness, App Store metadata limits, and a weighted release gate. Ships 14 CLI auditors and 16 MCP tools that return machine-readable finding codes."
 license: MIT
 compatibility: "MCP clients (Claude Desktop, Claude Code, Cursor, Codex, Copilot, Gemini CLI), Agent Skills runtimes, or plain CLI on macOS/Linux with Python 3.10+."
 metadata:
-  version: "2.0.0"
+  version: "2.1.0"
   category: "developer-toolkit"
   platforms: "iOS 17-27, iPadOS, macOS 14-27, watchOS 10+, visionOS 1+"
   frameworks: "SwiftUI, UIKit, AppKit, Observation, SwiftData, StoreKit 2, WidgetKit, ActivityKit, AppIntents, Swift Concurrency"
@@ -28,12 +28,17 @@ Follow this order for every Apple task. Skipping step 1 is the single most commo
 
 | Step | Do this | Tool |
 | :--- | :--- | :--- |
-| 1 | Discover targets, OS floor, Swift version, frameworks, architecture | `inspect_apple_project` |
-| 2 | Load only the references that match the task | `apple-native://references/...` |
-| 3 | Write code that satisfies §3–§7 below | — |
-| 4 | Lint, then fix, then re-lint | `lint_swiftui`, `audit_accessibility`, `audit_liquid_glass` |
-| 5 | Prove platform completeness before claiming done | `validate_widgets`, `audit_privacy_manifest`, `check_localization` |
-| 6 | Certify with the release gate and quote its verdict | `generate_release_report` |
+| 1 | One call that answers "what is this and what is wrong with it" | `audit_project` |
+| 2 | Need the detail behind one audit? Ask for it directly | `inspect_apple_project`, `lint_swiftui`, `audit_accessibility`, `audit_liquid_glass` |
+| 3 | Load only the references that match the task | `apple-native://references/...` |
+| 4 | Write code that satisfies §3–§7 below | — |
+| 5 | In an edit loop, re-audit only what changed | `review_diff` (`staged`, `HEAD` or a `base` revision) |
+| 6 | Prove platform completeness before claiming done | `validate_widgets`, `audit_privacy_manifest`, `check_localization` |
+| 7 | Certify with the release gate and quote its verdict | `generate_release_report` |
+
+`audit_project` runs eight audits concurrently and tags every finding with the audit that produced it — use it
+instead of six round trips. `review_diff` reads `git diff` and audits only the changed Swift files, which is what
+an edit loop needs: seconds, and no pre-existing findings drowning the review.
 
 Never report "done" based on reading your own diff. Report "done" when step 6 returns `READY FOR SUBMISSION`, and
 quote the score.
