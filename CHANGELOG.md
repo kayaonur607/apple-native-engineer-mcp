@@ -11,6 +11,7 @@ shared machines, and privacy claims that a test enforces.
 
 ### Added
 
+- **Logo** — `assets/logo.svg`, a native squircle mark (brackets plus a check) used at the top of the README.
 - **`review_diff`** — reads `git diff --name-only` (against `HEAD`, the index with `staged`, or any `base`
   revision), keeps the changed `.swift` files and runs the SwiftUI, accessibility and Liquid Glass auditors on
   each one. Findings are grouped under `data.files` and every finding names the auditor that produced it. This is
@@ -72,6 +73,15 @@ shared machines, and privacy claims that a test enforces.
   security scope is now written down instead of implied.
 
 ### Fixed
+
+- **`SKILL.md` lagged the server.** It still described the six-call loop and claimed version 2.0.0. The operating
+  loop now leads with `audit_project` and re-audits with `review_diff`, and the metadata version matches the
+  package.
+- **README quickstart said 93 tests** while the suite had grown to 138. The prose count is now part of the review
+  checklist for any change that adds tests.
+- **CI never exercised the npm artefact.** `pack -> install -> --selftest -> --doctor` and the `vendor/` drift
+  check ran only from the publish workflow, so a packaging regression could only be found at release time. They
+  now run on every push.
 
 - **The umbrella prompt was named `apple-native-apple-native`.** `commands/apple-native.md` was being namespaced
   like every other command. It is now `apple-native`, and a test asserts that no prompt is double-prefixed.

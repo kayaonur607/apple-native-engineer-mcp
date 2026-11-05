@@ -1,4 +1,8 @@
 <p align="center">
+  <img src="assets/logo.svg" alt="apple-native-engineer-mcp" width="96" height="96">
+</p>
+
+<p align="center">
   <img src="assets/hero.svg" alt="apple-native-engineer-mcp — Apple's rules expressed as exit codes" width="100%">
 </p>
 
@@ -15,6 +19,13 @@
   <strong>AI writes iOS apps that compile and still look wrong.</strong><br>
   Hardcoded colours that vanish in Dark Mode, fixed font sizes that break Dynamic Type, deprecated navigation,<br>
   fake glass, missing privacy manifests. This project turns Apple's rules into checks an agent has to pass.
+</p>
+
+<p align="center">
+  <sub>
+  <b>138 tests</b> · <b>5/5 CI stages</b> · <b>162 snippets compiled</b> · <b>129 API claims checked against the SDK</b> · <b>9,649 SF Symbols</b> · <b>16 MCP tools</b><br>
+  every number produced by <code>./scripts/verify.sh</code> — see <a href="#proof">Proof</a> and <a href="docs/PROOF.md">docs/PROOF.md</a>
+  </sub>
 </p>
 
 ---
@@ -91,7 +102,7 @@ cd apple-native-engineer-mcp
 
 make doctor   # is this machine ready? (Python, Node, Xcode, SDK)
 make demo     # 30 seconds: the audits on a deliberately broken app
-make verify   # everything CI runs, including 93 tests and a real Swift compile
+make verify   # everything CI runs, including 138 tests and a real Swift compile
 ```
 
 What `make demo` shows, trimmed:
