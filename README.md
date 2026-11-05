@@ -30,6 +30,38 @@
 
 ---
 
+## Install
+
+```bash
+npx -y apple-native-engineer-mcp --selftest   # 24 tools, 53 resources, 12 prompts
+npx -y apple-native-engineer-mcp --doctor     # Node, Python, Xcode, SDK, auditors
+```
+
+That is the whole setup for an MCP client: point it at `npx apple-native-engineer-mcp` and nothing else. No clone,
+no Python install, no credentials. Prefer a checkout? `git clone`, `cd integrations/mcp-server && npm install`.
+
+<details>
+<summary><b>Client configuration and the other entry points</b></summary>
+
+```json
+{
+  "mcpServers": {
+    "apple-native-engineer": {
+      "command": "npx",
+      "args": ["-y", "apple-native-engineer-mcp"]
+    }
+  }
+}
+```
+
+As an agent skill (no server, no tools): `npx skills add kayaonur607/apple-native-engineer-mcp`.
+
+As a CLI on any machine with Python 3.10+: `python3 tools/swiftui-linter/lint_swiftui.py .`
+
+</details>
+
+---
+
 ## What this actually is
 
 **One MCP server that refuses to let an agent declare an Apple app finished without evidence.** Three layers, in
@@ -411,6 +443,22 @@ apple-native-engineer-mcp/
 ├── docs/PUBLISHING.md           # release runbook: version, tag, npm, registries
 └── .github/workflows/ci.yml     # repository · python ×3 · mcp · swift
 ```
+
+---
+
+## Security
+
+| Question | Answer |
+| :--- | :--- |
+| Does it upload my source? | No. Audit tools read files locally and print JSON to stdout. |
+| What talks to the network? | Only two things, and only when called: `developer.apple.com` (documentation research) and `api.appstoreconnect.apple.com` (read-only App Store Connect). |
+| How are credentials stored? | `ASC_*` environment variables or a `.p8` path for App Store Connect; the macOS app keeps assistant keys in the Keychain. Never in tool results, never in logs. |
+| Telemetry? | Off by default. `APPLE_NATIVE_TELEMETRY=local` or `anonymous` writes a closed five-key event; a test feeds the sanitiser hostile payloads and fails if anything else escapes. `--telemetry-preview` prints the exact bytes first. |
+| Can a tool modify my account? | Not today: the App Store Connect client only issues GET requests. Any write capability would arrive as its own module with a preview → approve → apply → read-back flow. |
+| What about secrets in the repo? | `.env`, `*.p8`, `*.pem` are git-ignored; documentation is validated for leaked personal paths in CI. |
+
+The full threat model and reporting process are in [SECURITY.md](SECURITY.md). Modules let you disable the
+network-facing capabilities entirely: `APPLE_NATIVE_MODULES=core,swift-engineering`.
 
 ---
 
