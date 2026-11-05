@@ -164,6 +164,19 @@ $ ./scripts/verify-swift.sh
 - `swiftc -typecheck` on `clean-app/Widgets` (ActivityAttributes, DynamicIsland with all four regions,
   AppIntentTimelineProvider, WidgetBundle `@main`).
 - `swiftc -parse` on every ```swift block in `references/` and `examples/`.
+- `swiftc -typecheck` on those blocks too, with a classifier that separates fragment noise from real errors:
+
+```
+Snippets:         118
+Type-check clean: 35
+Fragments:        83
+Real errors:      0
+```
+
+The classifier is not hand-waving. A block with an undefined symbol (`cannot find 'Foo' in scope`) is a fragment;
+a block with a wrong argument label is a bug in the guide. The first run of this check found **14 occurrences of
+`.spring(response:dampingRatio:)`** across six guides — an argument label SwiftUI does not have. Every one is now
+`.spring(response:dampingFraction:)`, and the check fails CI if the pattern returns.
 
 The first run of this check found two real bugs in the fixture itself: a missing `import AppIntents`, and an
 `@main` bundle compiled without `-parse-as-library`. That is the check earning its keep.

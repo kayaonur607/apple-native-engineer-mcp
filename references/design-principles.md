@@ -162,7 +162,7 @@ withAnimation(.linear(duration: 0.3)) {
 // with: .scaleEffect(isPresented ? 1.0 : 0.0)
 
 // ✅ COMPLIES WITH LEVEL 5 (Subtle, physical spring with realistic scale entry and haptic feedback)
-withAnimation(.spring(response: 0.32, dampingRatio: 0.82)) {
+withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
     isPresented.toggle()
 }
 // with:

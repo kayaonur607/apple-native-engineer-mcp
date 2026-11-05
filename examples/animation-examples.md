@@ -62,11 +62,11 @@ struct GroundedCardDialog: View {
                 )
             }
         }
-        .animation(.spring(response: 0.34, dampingRatio: 0.8), value: isPresented)
+        .animation(.spring(response: 0.34, dampingFraction: 0.8), value: isPresented)
     }
     
     private func dismiss() {
-        withAnimation(.spring(response: 0.28, dampingRatio: 0.85)) {
+        withAnimation(.spring(response: 0.28, dampingFraction: 0.85)) {
             isPresented = false
         }
     }
@@ -152,7 +152,7 @@ struct ExpandableNoteCard: View {
         )
         .contentShape(Rectangle())
         .onTapGesture {
-            withAnimation(.spring(response: 0.36, dampingRatio: 0.82)) {
+            withAnimation(.spring(response: 0.36, dampingFraction: 0.82)) {
                 isExpanded.toggle()
             }
         }

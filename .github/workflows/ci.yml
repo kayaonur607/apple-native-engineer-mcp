@@ -75,3 +75,5 @@ jobs:
         run: python3 scripts/generate_whats_new.py --validate
       - name: Verify documented API exists in the SDK
         run: python3 scripts/check_api_claims.py
+      - name: Type-check documented snippets
+        run: python3 scripts/typecheck_snippets.py --strict

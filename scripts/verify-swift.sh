@@ -106,5 +106,14 @@ else
     failures=$((failures + 1))
 fi
 
+echo "  type-checking every snippet against the iOS SDK..."
+if python3 scripts/typecheck_snippets.py --strict > "$WORK/snippets-typecheck.log" 2>&1; then
+    sed 's/^/  /' "$WORK/snippets-typecheck.log" | grep -E "Type-check clean|Fragments|Real errors"
+else
+    checked=$((checked + 1))
+    failures=$((failures + 1))
+    sed 's/^/  /' "$WORK/snippets-typecheck.log" | tail -20
+fi
+
 printf '  checked %d unit(s), %d failure(s)\n' "$checked" "$failures"
 [ "$failures" -eq 0 ]

@@ -34,9 +34,9 @@ public enum AppTheme {
     
     // MARK: - Motion Tokens
     public enum Motion {
-        public static let snappy  = Animation.spring(response: 0.26, dampingRatio: 0.8)
-        public static let bouncy  = Animation.spring(response: 0.34, dampingRatio: 0.65)
-        public static let gentle  = Animation.spring(response: 0.42, dampingRatio: 0.88)
+        public static let snappy  = Animation.spring(response: 0.26, dampingFraction: 0.8)
+        public static let bouncy  = Animation.spring(response: 0.34, dampingFraction: 0.65)
+        public static let gentle  = Animation.spring(response: 0.42, dampingFraction: 0.88)
     }
 }
 ```

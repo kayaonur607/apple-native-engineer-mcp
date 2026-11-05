@@ -32,9 +32,9 @@ public enum DesignSystem {
     
     // MARK: - Physics Springs (Emil Kowalski Presets)
     public enum Motion {
-        public static let snappy = Animation.spring(response: 0.28, dampingRatio: 0.82)
-        public static let bouncy = Animation.spring(response: 0.35, dampingRatio: 0.65)
-        public static let smooth = Animation.spring(response: 0.42, dampingRatio: 0.90)
+        public static let snappy = Animation.spring(response: 0.28, dampingFraction: 0.82)
+        public static let bouncy = Animation.spring(response: 0.35, dampingFraction: 0.65)
+        public static let smooth = Animation.spring(response: 0.42, dampingFraction: 0.90)
     }
 }
 

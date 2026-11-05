@@ -228,6 +228,7 @@ This is the part most repositories skip. Here is what `./scripts/verify.sh` actu
 | SF Symbols catalogue | **9,649 symbols** | Extracted from `CoreGlyphs.bundle`, internally consistent |
 | SDK reference | **64 iOS 27 declarations** | Generated from the installed `.swiftinterface`, drift-checked in CI |
 | Documented API | **94 verified, 2 allowlisted, 0 invented** | Every modifier in every guide looked up in the SDK |
+| Snippet type-check | **35 compile, 83 classified fragments, 0 real errors** | `swiftc -typecheck` on all 118 blocks |
 
 Both directions are tested, which is the point:
 

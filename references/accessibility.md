@@ -113,7 +113,7 @@ struct FluidAccordion: View {
                     }
                 } else {
                     // Full rich Kowalski spring
-                    withAnimation(.spring(response: 0.35, dampingRatio: 0.8)) {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                         isExpanded.toggle()
                     }
                 }

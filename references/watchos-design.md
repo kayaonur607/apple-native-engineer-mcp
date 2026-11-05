@@ -67,7 +67,7 @@ struct TimerAdjustmentView: View {
 
 On Apple Watch Series 9 and Ultra 2 (and later), users can perform a primary action by tapping their index finger and thumb together twice.
 
-- **Primary Action**: Maps to the primary button in a view automatically if using standard buttons or `.handGestureShortcut(.primary)`.
+- **Primary Action**: Maps to the primary button in a view automatically if using standard buttons or `.handGestureShortcut(.primaryAction)`.
 - Use for answer/hang up call, stop timer, scroll Smart Stack, or advance audio track.
 
 ```swift
@@ -75,7 +75,7 @@ Button("Confirm Delivery") {
     confirmDelivery()
 }
 .buttonStyle(.borderedProminent)
-.handGestureShortcut(.primary) // Triggers on Double Tap
+.handGestureShortcut(.primaryAction) // Triggers on Double Tap
 ```
 
 ---

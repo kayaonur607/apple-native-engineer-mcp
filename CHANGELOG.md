@@ -30,6 +30,9 @@ Version 2 replaces all three.
   as `apple-native://` URIs instead of being pasted into prompts.
 - **Generated SDK reference** — `references/whats-new-ios-27.md` lists the 64 declarations the installed SDK
   annotates `@available(iOS 27.0, …)`, grouped by framework. Generated, not recalled, and drift-checked in CI.
+- **Snippet type-checking** — `scripts/typecheck_snippets.py` compiles all 118 documented Swift blocks, separates
+  fragment noise from real errors, and runs in `--strict` mode in CI. Its first run found 14 occurrences of the
+  invalid `dampingRatio:` label across six guides.
 - **Documentation API verification** — `scripts/check_api_claims.py` indexes 21,998 SDK symbols and proves that
   every SwiftUI modifier taught in the guides exists, with a two-entry, reasoned allowlist for visionOS-only API.
 - **Verification harness** — `scripts/verify.sh` runs repository validation, 55 Python tests, 8 MCP protocol tests

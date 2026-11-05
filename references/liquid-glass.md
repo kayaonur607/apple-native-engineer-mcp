@@ -89,7 +89,8 @@ Button("Cancel") { dismiss() }
 content
     .background(.ultraThinMaterial)
     .blur(radius: 12)
-    .overlay(LinearGradient(colors: [.white.opacity(0.3), .clear], …))
+    .overlay(LinearGradient(colors: [.white.opacity(0.3), .clear],
+                            startPoint: .top, endPoint: .bottom))
     .shadow(color: .black.opacity(0.2), radius: 24)
 ```
 

@@ -23,7 +23,7 @@ In iOS 17+, Apple introduced first-class spring presets that map directly to des
 | `.spring(.snappy)` | High response, zero perceived overshoot. Crisp and immediate. | Toggles, segmented controls, small icon badge changes, tab switches. |
 | `.spring(.bouncy)` | Controlled playful overshoot with quick settling. | Favorite heart pops, completion badges, celebratory notifications. |
 | `.spring(.smooth)` | Fluid, gentle deceleration with no bounce. | Expanding bottom sheets, card accordion expansion, modal reveals. |
-| Custom `.spring(response:dampingRatio:)` | Finely tuned response (frequency) and damping ratio. | Drag gestures, physics card dismissals, custom carousels. |
+| Custom `.spring(response:dampingFraction:)` | Finely tuned response (frequency) and damping ratio. | Drag gestures, physics card dismissals, custom carousels. |
 
 ```swift
 // Example: Interactive Spring Toggle
@@ -52,7 +52,7 @@ Button {
 // ✅ CORRECT: Grounded subtle entrance from 0.92 with opacity fade
 .scaleEffect(isVisible ? 1.0 : 0.92)
 .opacity(isVisible ? 1.0 : 0.0)
-.animation(.spring(response: 0.32, dampingRatio: 0.82), value: isVisible)
+.animation(.spring(response: 0.32, dampingFraction: 0.82), value: isVisible)
 ```
 
 ### Anti-Pattern 2: Linear Spatial Animation
@@ -63,7 +63,7 @@ withAnimation(.linear(duration: 0.4)) {
 }
 
 // ✅ CORRECT: Decelerating spring preserving natural inertia
-withAnimation(.spring(response: 0.38, dampingRatio: 0.78)) {
+withAnimation(.spring(response: 0.38, dampingFraction: 0.78)) {
     sheetOffset = 0
 }
 ```
