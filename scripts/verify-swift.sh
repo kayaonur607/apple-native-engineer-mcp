@@ -41,6 +41,10 @@ compile() {
         printf '  ✗ %s\n' "$label"
         sed 's/^/      /' "$WORK/out.log" | head -12
         failures=$((failures + 1))
+        # Surface the first compiler error as a GitHub annotation: the job log is
+        # not always reachable, the check-run annotations are.
+        first_error="$(grep -m1 -E 'error:' "$WORK/out.log" | tr '\n' ' ' | cut -c1-900)"
+        echo "::error title=Swift fixture: $label::${first_error:-swiftc failed, see the step log}"
     fi
 }
 
@@ -95,6 +99,8 @@ for snippet in "$SNIPPET_DIR"/*.swift; do
     if ! swiftc -parse "$snippet" > /dev/null 2>&1; then
         syntax_failures=$((syntax_failures + 1))
         echo "  ✗ syntax: $(basename "$snippet")"
+        first_error="$(swiftc -parse "$snippet" 2>&1 | grep -m1 -E 'error:' | tr '\n' ' ' | cut -c1-900)"
+        echo "::error title=Swift snippet: $(basename "$snippet")::${first_error:-parse failed}"
     fi
 done
 
@@ -113,6 +119,8 @@ else
     checked=$((checked + 1))
     failures=$((failures + 1))
     sed 's/^/  /' "$WORK/snippets-typecheck.log" | tail -20
+    summary="$(grep -m3 -E '✖|error:' "$WORK/snippets-typecheck.log" | tr '\n' ' ' | cut -c1-900)"
+    echo "::error title=Snippet type-check::${summary:-see the step log}"
 fi
 
 printf '  checked %d unit(s), %d failure(s)\n' "$checked" "$failures"
