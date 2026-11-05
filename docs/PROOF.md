@@ -16,45 +16,38 @@ cd integrations/mcp-server && npm install && cd ../..
 ./scripts/verify.sh
 ```
 
+<!-- proof:begin -->
+Recorded by `./scripts/update_proof.py` on 2026-11-06. Re-run it after any change that could affect these numbers.
+
 ```
 ▸ Repository structure and links
-  [PASS] skill name 'apple-native-engineer-mcp' is valid
-  [PASS] skill description is 660 characters
-  [PASS] all 20 required paths present
-  [PASS] 15 CLI tools structure validated
-  [PASS] 84 internal links resolve
-  [PASS] README badge states 131 tests
-  [PASS] README documents 15 CLI tools
-  [PASS] README documents 31 reference guides
-  [PASS] README documents 12 checklists
-  [PASS] README documents 9 worked examples
-  [PASS] README documents 16 MCP tools
-  [PASS] no personal absolute paths in documentation
   [PASS] SF Symbols catalogue is internally consistent (9649 symbols)
   ------------------------------------------------------------------
   ✓ validation passed: 0 warning(s)
 
 ▸ Python tests (shared library + tools)
-.......................................................................................
+........................................................................................................................
 ----------------------------------------------------------------------
-Ran 90 tests in 1.339s
+Ran 120 tests in 3.981s
 
-OK
 
 ▸ MCP protocol tests
-ℹ tests 44
-ℹ suites 10
-ℹ pass 44
+ℹ tests 61
+ℹ suites 13
+ℹ pass 61
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
+ℹ duration_ms 655.48475
 
 ▸ Swift compilation (fixtures + documentation snippets)
   SDK: iPhoneSimulator27.2.sdk
   ✓ fixture: clean-app/App
   ✓ fixture: clean-app/Widgets
+162
   ✓ documentation snippets parse (162 blocks)
+  type-checking every snippet against the iOS SDK...
   Type-check clean: 73
   Fragments:        89
   Real errors:      0
@@ -69,9 +62,10 @@ Allowlisted:      2
 Unverified:       0
 
 ────────────────────────────────────────────
-  passed: 5   failed: 0   skipped: 0   51s
+  passed: 5   failed: 0   skipped: 0   56s
 ────────────────────────────────────────────
 ```
+<!-- proof:end -->
 
 Exit code `0`. Any failure in any stage returns non-zero, which is exactly what CI runs.
 
@@ -474,8 +468,8 @@ severity reflects the confidence: `info` for suggestions, `error` for rules Appl
 | Claim | Command |
 | :--- | :--- |
 | "138 tests pass" | `./scripts/verify.sh` |
-| "15 CLI tools" | `ls -d tools/*/ \| wc -l` |
-| "16 MCP tools" | `node integrations/mcp-server/src/index.js --selftest` |
+| "18 CLI tools" | `ls -d tools/*/ \| wc -l` |
+| "25 MCP tools" | `node integrations/mcp-server/src/index.js --selftest` |
 | "the HTTP transport rejects a foreign origin" | `node integrations/mcp-server/src/index.js --http 3931 &` then the `curl` above |
 | "a review only reports the diff" | `cd integrations/mcp-server && npm test` (`review_diff` suite) |
 | "telemetry records nothing identifying" | `node integrations/mcp-server/src/index.js --telemetry-preview` |
