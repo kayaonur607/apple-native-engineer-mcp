@@ -22,7 +22,7 @@ cd integrations/mcp-server && npm install && cd ../..
   [PASS] skill description is 660 characters
   [PASS] all 20 required paths present
   [PASS] 14 CLI tools structure validated
-  [PASS] 83 internal links resolve
+  [PASS] 84 internal links resolve
   [PASS] README badge states 131 tests
   [PASS] README documents 14 CLI tools
   [PASS] README documents 31 reference guides
@@ -267,10 +267,18 @@ socket for the Streamable HTTP transport, and builds a throwaway git repository 
 ▶ local recording
   ✔ writes one aggregate line and nothing else
   ✔ refuses to record a tool that does not exist
+▶ publish metadata
+  ✔ uses one version everywhere
+  ✔ names the package the registry points at
+  ✔ points every URL at the repository that actually exists
+  ✔ ships the runtime it needs and nothing more
+  ✔ declares the same tools the server registers
+  ✔ has a Dockerfile that copies paths that exist
+  ✔ describes itself to Smithery without inventing configuration
 ▶ the preview is the same data that would be written
   ✔ contains only the closed event shape plus explanatory metadata
   ✔ reports no file and no endpoint when telemetry is off
-ℹ tests 44 · pass 44 · fail 0
+ℹ tests 51 · pass 51 · fail 0
 ```
 
 Inventory at runtime:
@@ -465,7 +473,7 @@ severity reflects the confidence: `info` for suggestions, `error` for rules Appl
 
 | Claim | Command |
 | :--- | :--- |
-| "131 tests pass" | `./scripts/verify.sh` |
+| "138 tests pass" | `./scripts/verify.sh` |
 | "14 CLI tools" | `ls -d tools/*/ \| wc -l` |
 | "16 MCP tools" | `node integrations/mcp-server/src/index.js --selftest` |
 | "the HTTP transport rejects a foreign origin" | `node integrations/mcp-server/src/index.js --http 3931 &` then the `curl` above |

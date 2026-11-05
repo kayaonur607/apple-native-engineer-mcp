@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml"><img src="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/tests-131_passing-30D158" alt="131 tests">
+  <img src="https://img.shields.io/badge/tests-138_passing-30D158" alt="138 tests">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT"></a>
   <img src="https://img.shields.io/badge/protocol-MCP_1.32-8A2BE2" alt="MCP 1.32">
   <img src="https://img.shields.io/badge/Swift-6.x-F05138" alt="Swift 6">
@@ -38,7 +38,7 @@ The point is not to generate more Swift. The point is to make the agent **unable
 evidence.
 
 > [!IMPORTANT]
-> Every number on this page is produced by `./scripts/verify.sh`: 131 tests, a link and count validator, a real
+> Every number on this page is produced by `./scripts/verify.sh`: 138 tests, a link and count validator, a real
 > Swift compile of the fixtures, and a type-check of every documented snippet. See [Proof](#proof).
 
 ---
@@ -286,7 +286,7 @@ disagrees with the documentation:
 | :--- | :--- | :--- |
 | Repository validation | **pass** | Frontmatter, 20 required paths, every internal link, and every count in this README cross-checked against the filesystem |
 | Python tests | **87 pass** | `python3 -m unittest` across 3.10 / 3.12 / 3.13 in CI |
-| MCP protocol tests | **44 pass** | A real `Client` ↔ `McpServer` pair over the SDK's in-memory transport, a real HTTP socket, a throwaway git repo, and hostile telemetry payloads |
+| MCP protocol tests | **51 pass** | A real `Client` ↔ `McpServer` pair over the SDK's in-memory transport, a real HTTP socket, a throwaway git repo, the publish metadata, and hostile telemetry payloads |
 | Swift compilation | **pass** | `swiftc -typecheck` on both fixtures, `swiftc -parse` on all 162 documented snippets, and a full type-check of 73 of them against the SDK each one targets — iOS or visionOS |
 | Documentation claims | **pass** | 129 taught modifiers looked up in 21,998 SDK symbols; 64 iOS 27 declarations generated from the SDK |
 
@@ -385,6 +385,7 @@ apple-native-engineer-mcp/
 ├── tests/                       # 87 Python tests + two fixture projects
 ├── scripts/                     # verify, doctor, demo, benchmark, generators
 ├── docs/PROOF.md                # raw verification transcripts
+├── docs/PUBLISHING.md           # release runbook: version, tag, npm, registries
 └── .github/workflows/ci.yml     # repository · python ×3 · mcp · swift
 ```
 

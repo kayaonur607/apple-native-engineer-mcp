@@ -299,7 +299,7 @@ credentials, and fails if any of it survives.
 node src/index.js --selftest        # inventory: 16 tools, 53 resources, 12 prompts
 node src/index.js --doctor          # Node, Python, auditors, git, Xcode, credentials
 node src/index.js --telemetry-preview
-npm test                            # 44 protocol, CLI, diff, HTTP and telemetry tests
+npm test                            # 51 protocol, CLI, diff, HTTP, metadata and telemetry tests
 ```
 
 `--doctor` exits 0 when the machine can run everything, 2 when something blocks it, and 1 when it can run but
@@ -328,6 +328,10 @@ test/              protocol tests via InMemoryTransport, real HTTP sockets, a th
 `npm run vendor` stages the auditors and the reference library into `vendor/` so the published tarball is
 self-contained. `runner.js` prefers the live repository during development and the staged copy in a published
 package, so both run the same code path. `vendor/` is generated and gitignored.
+
+Releasing is written down in [`docs/PUBLISHING.md`](../../docs/PUBLISHING.md): which files carry the version, how
+to verify the packed tarball rather than the source tree, the `mcp-v*` tag that publishes with provenance, and the
+registry submissions that npm does not do for you.
 
 ## Limits, stated plainly
 

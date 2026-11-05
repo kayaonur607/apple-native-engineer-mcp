@@ -55,7 +55,7 @@ shared machines, and privacy claims that a test enforces.
   the result envelope, the privacy model and the limits, each stated rather than implied.
 - **`--http` configuration errors** now print one sentence and exit 2 instead of a stack trace.
 - **Envelope, resource and prompt counts corrected in the README** — 16 tools, 53 resources, 12 prompts, and the
-  badge now tracks the real suite size (131 tests).
+  badge now tracks the real suite size (138 tests).
 - **`CHANGELOG`, `SECURITY.md` and `docs/PROOF.md` brought up to date.** `SECURITY.md` had a supported-versions
   table that stopped at 1.0.x and no mention of the unauthenticated HTTP transport; both are fixed, and the
   security scope is now written down instead of implied.
