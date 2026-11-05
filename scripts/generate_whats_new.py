@@ -277,12 +277,22 @@ def main(argv: List[str]) -> int:
     out = OUT_DIR / f"whats-new-ios-{release}.md"
 
     if "--validate" in argv:
-        problems = validate_doc(OUT_DIR / f"whats-new-ios-{release}.md")
+        # Validate every generated reference on disk. The file was produced with
+        # whichever SDK the author had; CI only proves it is internally sound.
+        documents = sorted(OUT_DIR.glob("whats-new-ios-*.md"))
+        if not documents:
+            print("no generated references found", file=sys.stderr)
+            return 1
+        problems: List[str] = []
+        for document in documents:
+            for problem in validate_doc(document):
+                problems.append(f"{document.name}: {problem}")
         if problems:
             for problem in problems:
                 print(f"invalid: {problem}", file=sys.stderr)
             return 1
-        print(f"references/whats-new-ios-{release}.md is structurally consistent")
+        for document in documents:
+            print(f"references/{document.name} is structurally consistent")
         return 0
 
     if "--check" in argv:
