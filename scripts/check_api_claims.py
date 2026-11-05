@@ -15,7 +15,11 @@ Usage::
     python3 scripts/check_api_claims.py --json
     python3 scripts/check_api_claims.py --list   # show every modifier found
 
-Exit codes: 0 all verified, 2 at least one unverified modifier.
+The check only means something on an SDK at least as new as the API the docs
+teach, so it skips (exit 0) when the installed SDK is older than the documented
+baseline. Pass `--strict-sdk` to turn that skip into a failure.
+
+Exit codes: 0 all verified (or skipped), 2 at least one unverified modifier.
 """
 
 from __future__ import annotations
@@ -31,6 +35,9 @@ from typing import Dict, Iterable, List, Optional, Set
 REPO = Path(__file__).resolve().parents[1]
 ALLOWLIST = REPO / "data" / "api-allowlist.json"
 DOC_DIRS = ("references", "examples")
+
+#: The oldest SDK this repository's documentation is written against.
+MIN_SDK_RELEASE = 26
 
 MODIFIER_RE = re.compile(r"^\s*\.([a-z][A-Za-z0-9_]*)\s*[({]", re.MULTILINE)
 FENCE_RE = re.compile(r"```swift\n(.*?)```", re.DOTALL)
@@ -129,6 +136,19 @@ def main(argv: List[str]) -> int:
     except (OSError, subprocess.CalledProcessError):
         print("error: xcrun is required (macOS with Xcode); nothing to verify against", file=sys.stderr)
         return 2
+
+    release_match = re.search(r"iPhoneSimulator(\d+)\.", sdk.name)
+    release = int(release_match.group(1)) if release_match else 0
+    if release < MIN_SDK_RELEASE:
+        message = (
+            f"skipped: installed SDK is iOS {release}, documentation targets "
+            f"iOS {MIN_SDK_RELEASE}+ — select a newer Xcode to run this check"
+        )
+        if "--strict-sdk" in argv:
+            print(message, file=sys.stderr)
+            return 2
+        print(message)
+        return 0
 
     index = build_index(sdk)
     if not index:

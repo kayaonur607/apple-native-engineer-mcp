@@ -61,6 +61,14 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
+      - name: Select the newest installed Xcode
+        run: |
+          newest="$(ls -d /Applications/Xcode_2*.app 2>/dev/null | sort -V | tail -1 || true)"
+          if [ -n "$newest" ]; then
+            echo "selecting $newest"
+            sudo xcode-select -s "$newest"
+          fi
+          xcodebuild -version
       - name: Type-check fixtures and parse documentation snippets
         run: ./scripts/verify-swift.sh
       - name: Validate generated SDK reference
