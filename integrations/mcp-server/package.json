@@ -1,18 +1,58 @@
 {
   "name": "apple-native-engineer-mcp",
-  "version": "2.0.0",
-  "description": "MCP server exposing Apple native engineering audits, App Store checks and design references to AI coding agents.",
+  "version": "2.1.0",
+  "mcpName": "io.github.kayaonur607/apple-native-engineer",
+  "description": "MCP server for Apple-platform engineering: 14 verifiable audits (SwiftUI, Liquid Glass, accessibility, privacy manifest, localisation, widgets, App Store) plus the reference knowledge base as resources, for any MCP client.",
   "license": "MIT",
+  "author": "Onur Kaya",
   "type": "module",
   "main": "src/index.js",
   "bin": {
     "apple-native-engineer-mcp": "src/index.js"
   },
+  "files": [
+    "src/",
+    "vendor/",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=20"
   },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "apple",
+    "swift",
+    "swiftui",
+    "ios",
+    "macos",
+    "app-store",
+    "liquid-glass",
+    "accessibility",
+    "app-intents",
+    "widgetkit",
+    "storekit",
+    "code-review",
+    "linter"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kayaonur607/apple-native-engineer-mcp.git",
+    "directory": "integrations/mcp-server"
+  },
+  "homepage": "https://github.com/kayaonur607/apple-native-engineer-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/kayaonur607/apple-native-engineer-mcp/issues"
+  },
   "scripts": {
     "start": "node src/index.js",
+    "start:http": "node src/index.js --http",
+    "selftest": "node src/index.js --selftest",
+    "doctor": "node src/index.js --doctor",
+    "telemetry:preview": "node src/index.js --telemetry-preview",
+    "vendor": "node scripts/pack-vendor.mjs",
+    "prepack": "node scripts/pack-vendor.mjs",
     "test": "node --test test/*.test.js"
   },
   "dependencies": {

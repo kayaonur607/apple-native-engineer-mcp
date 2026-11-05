@@ -176,7 +176,7 @@ def main(argv=None) -> int:
         epilog="Exit codes: 0 pass, 1 warnings with --strict, 2 failure.",
     )
     args = parser.parse_args(argv)
-    guard = guard_directory("liquid-glass-auditor", args.path)
+    guard = guard_directory("liquid-glass-auditor", args.path, allow_file=True)
     if guard is not None:
         return emit(guard, args)
     return emit(audit(Path(args.path).expanduser().resolve()), args,

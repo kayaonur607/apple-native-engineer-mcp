@@ -35,6 +35,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Generated npm payload for integrations/mcp-server (see scripts/pack-vendor.mjs)
+integrations/mcp-server/vendor/
+
 # Repository verification scratch space
 .swiftwork/
 RELEASE_REPORT.md

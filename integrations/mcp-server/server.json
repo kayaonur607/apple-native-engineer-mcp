@@ -1,0 +1,40 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "io.github.kayaonur607/apple-native-engineer",
+  "description": "Verifiable Apple-platform engineering audits for AI agents: SwiftUI lint, Liquid Glass, accessibility, privacy manifests, localisation, widgets, App Store readiness \u2014 plus the reference library as resources.",
+  "version": "2.1.0",
+  "websiteUrl": "https://github.com/kayaonur607/apple-native-engineer-mcp",
+  "repository": {
+    "url": "https://github.com/kayaonur607/apple-native-engineer-mcp",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "apple-native-engineer-mcp",
+      "version": "2.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "APPLE_NATIVE_PYTHON",
+          "description": "Python 3.10+ interpreter used to run the auditors (standard library only).",
+          "isRequired": false,
+          "default": "python3"
+        },
+        {
+          "name": "APPLE_NATIVE_TELEMETRY",
+          "description": "Aggregate usage counting: off (default), local or anonymous. Never records paths, file names or source text.",
+          "isRequired": false,
+          "default": "off",
+          "choices": [
+            "off",
+            "local",
+            "anonymous"
+          ]
+        }
+      ]
+    }
+  ]
+}

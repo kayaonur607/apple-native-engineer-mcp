@@ -25,9 +25,17 @@ SKIP_DIRS = {
 
 
 def iter_files(root: Path, suffixes: Iterable[str] = (".swift",)) -> Iterator[Path]:
-    """Yield files under *root* with one of *suffixes*, skipping build output."""
+    """Yield files under *root* with one of *suffixes*, skipping build output.
+
+    *root* may also be a single file, which is how the file-scoped reviewers
+    audit one changed file instead of a whole checkout.
+    """
 
     wanted = {s.lower() for s in suffixes}
+    if root.is_file():
+        if root.suffix.lower() in wanted:
+            yield root
+        return
     for path in sorted(root.rglob("*")):
         if not path.is_file() or path.suffix.lower() not in wanted:
             continue
@@ -187,7 +195,10 @@ def load_swift_files(root: Path) -> List[SwiftFile]:
         files.append(
             SwiftFile(
                 path=path,
-                relative=str(path.relative_to(root)) if path.is_relative_to(root) else str(path),
+                # A single-file target has no directory to be relative to.
+                relative=path.name if root.is_file() else (
+                    str(path.relative_to(root)) if path.is_relative_to(root) else str(path)
+                ),
                 raw=raw,
                 clean=strip_comments_and_strings(raw),
                 code=strip_comments(raw),

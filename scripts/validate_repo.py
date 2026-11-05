@@ -169,7 +169,7 @@ def markdown_files() -> List[Path]:
         if base.exists():
             files.extend(
                 path for path in base.rglob("*.md")
-                if "node_modules" not in path.parts and ".swiftwork" not in path.parts
+                if not {"node_modules", ".swiftwork", "vendor"} & set(path.parts)
             )
     return [f for f in files if f.exists()]
 

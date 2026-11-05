@@ -5,6 +5,12 @@
  * command specifications as prompts means a Claude Desktop or Cursor user gets
  * the same workflows as someone using the Claude Code slash commands, without
  * copying markdown into the chat by hand.
+ *
+ * Naming rule: the umbrella command `commands/apple-native.md` becomes the
+ * prompt `apple-native`; every other command `commands/<slug>.md` becomes
+ * `apple-native-<slug>`. The previous implementation prefixed unconditionally,
+ * which produced the duplicated id `apple-native-apple-native` — fixed here and
+ * covered by a test so it cannot regress.
  */
 
 import fs from "node:fs";
@@ -14,9 +20,12 @@ import { REPO_ROOT } from "./runner.js";
 
 const COMMANDS_DIR = path.join(REPO_ROOT, "commands");
 
+/** The umbrella command; its prompt id has no extra suffix. */
+const UMBRELLA = "apple-native";
+
 /** Fallback descriptions when the command file has no frontmatter description. */
 const FALLBACK = {
-  "apple-native": "Full end-to-end Apple engineering audit of the current project.",
+  [UMBRELLA]: "Full end-to-end Apple engineering audit of the current project.",
   design: "Review and improve HIG design quality: typography, spacing, materials, colour semantics.",
   code: "Review Swift architecture: state management, concurrency, modularisation.",
   review: "Audit against App Store Review Guidelines sections 1-5 before submission.",
@@ -29,6 +38,16 @@ const FALLBACK = {
   localization: "Audit localisation, String Catalogs and RTL mirroring.",
   release: "Run the full release readiness gate.",
 };
+
+/** `apple-native` → `apple-native`; `design` → `apple-native-design`. */
+export function promptIdForSlug(slug) {
+  return slug === UMBRELLA ? UMBRELLA : `${UMBRELLA}-${slug}`;
+}
+
+/** `apple-native` → `/apple-native`; `design` → `/apple-native-design`. */
+export function promptTitleForSlug(slug) {
+  return `/${promptIdForSlug(slug)}`;
+}
 
 function readFrontmatterDescription(markdown) {
   const match = markdown.match(/^---\n([\s\S]*?)\n---/);
@@ -53,19 +72,24 @@ export function registerPrompts(server) {
     const description = readFrontmatterDescription(markdown) ?? FALLBACK[slug] ?? `Run the ${slug} workflow.`;
 
     server.registerPrompt(
-      `apple-native-${slug}`,
+      promptIdForSlug(slug),
       {
-        title: `/${slug === "apple-native" ? "apple-native" : "apple-native-" + slug}`,
+        title: promptTitleForSlug(slug),
         description,
         argsSchema: {
           project: z
             .string()
             .optional()
             .describe("Absolute path to the Apple project. Defaults to the client's working directory."),
+          focus: z
+            .string()
+            .optional()
+            .describe("Optional emphasis for this run, e.g. 'only the settings screen' or 'Swift 6 concurrency'."),
         },
       },
-      ({ project }) => {
+      ({ project, focus }) => {
         const target = project?.trim() || "the current working directory";
+        const emphasis = focus?.trim();
         return {
           description,
           messages: [
@@ -75,13 +99,16 @@ export function registerPrompts(server) {
                 type: "text",
                 text: [
                   `Apply the following Apple Native Engineer workflow to ${target}.`,
+                  emphasis ? `\nEmphasis for this run: ${emphasis}.` : "",
                   "Use the apple-native-engineer MCP tools to gather evidence before advising;",
                   "quote the finding codes you relied on and end with concrete next steps.",
                   "",
                   "---",
                   "",
                   body,
-                ].join("\n"),
+                ]
+                  .filter(Boolean)
+                  .join("\n"),
               },
             },
           ],
@@ -97,5 +124,5 @@ export function promptInventory() {
     .readdirSync(COMMANDS_DIR)
     .filter((name) => name.endsWith(".md"))
     .sort()
-    .map((name) => `apple-native-${path.basename(name, ".md")}`);
+    .map((name) => promptIdForSlug(path.basename(name, ".md")));
 }

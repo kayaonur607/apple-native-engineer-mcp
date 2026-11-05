@@ -56,8 +56,14 @@ def emit(report: Report, args: argparse.Namespace, title: Optional[str] = None) 
     )
 
 
-def guard_directory(tool: str, raw: str) -> Optional[Report]:
-    """Return an error report when *raw* is not an existing directory."""
+def guard_directory(tool: str, raw: str, *, allow_file: bool = False) -> Optional[Report]:
+    """Return an error report when *raw* is not a usable target.
+
+    Auditors that read Swift sources one file at a time pass ``allow_file=True``
+    so a caller can scope a run to a single changed file. Everything else still
+    requires a directory: an icon validator pointed at one PNG is a different
+    question, not a smaller one.
+    """
 
     path = resolve_target(raw)
     if not path.exists():
@@ -70,12 +76,18 @@ def guard_directory(tool: str, raw: str) -> Optional[Report]:
         )
         return report
     if not path.is_dir():
+        if allow_file and path.suffix == ".swift":
+            return None
         report = fail_fast(
             tool,
             str(path),
             f"Expected a directory, got a file: {path}",
             code="GEN002",
-            hint="Point the tool at the folder that contains the project.",
+            hint=(
+                "Pass a single .swift file or the folder that contains the project."
+                if allow_file
+                else "Point the tool at the folder that contains the project."
+            ),
         )
         return report
     return None

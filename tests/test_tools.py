@@ -141,6 +141,26 @@ class SwiftUILinterTests(unittest.TestCase):
         for rule in module.RULES:
             self.assertTrue(rule.hint, f"{rule.code} must explain how to fix the finding")
 
+    def test_a_single_file_can_be_linted(self):
+        """A diff review passes one changed file, not a project directory."""
+
+        source = LEGACY / "App" / "LegacyContentView.swift"
+        envelope = run_tool("swiftui-linter/lint_swiftui.py", str(source), expect=2)
+        self.assertEqual(envelope["target"], str(source.resolve()))
+        self.assertIn("SWU003", codes(envelope))
+        self.assertEqual({finding["file"] for finding in envelope["findings"]}, {"LegacyContentView.swift"})
+
+    def test_a_non_swift_file_is_rejected_with_a_reason(self):
+        with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as handle:
+            handle.write("not swift\n")
+            stray = Path(handle.name)
+        try:
+            envelope = run_tool("swiftui-linter/lint_swiftui.py", str(stray), expect=2)
+        finally:
+            stray.unlink()
+        self.assertEqual(codes(envelope), ["GEN002"])
+        self.assertIn("single .swift file", envelope["findings"][0]["hint"])
+
 
 class AccessibilityTests(unittest.TestCase):
     def test_clean_project_passes(self):

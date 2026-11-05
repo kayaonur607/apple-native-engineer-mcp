@@ -6,12 +6,12 @@
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { SERVER_NAME, SERVER_VERSION } from "./constants.js";
 import { registerPrompts } from "./prompts.js";
 import { registerResources } from "./resources.js";
 import { registerTools } from "./tools.js";
 
-export const SERVER_NAME = "apple-native-engineer";
-export const SERVER_VERSION = "2.0.0";
+export { SERVER_NAME, SERVER_VERSION };
 
 /**
  * Build a fully configured McpServer (tools + resources + prompts).
@@ -27,8 +27,9 @@ export function createServer({ name = SERVER_NAME, version = SERVER_VERSION } = 
         "Core loop for any Apple task:",
         "1. inspect_apple_project first — understand targets, OS floor, Swift version and architecture.",
         "2. Before writing UI, read the apple-native://skill resource and the relevant references/ resource.",
-        "3. After changing code, run lint_swiftui, audit_accessibility and audit_liquid_glass.",
+        "3. After changing code, run review_diff — it audits only the files you touched.",
         "4. Before claiming a feature is shippable, run generate_release_report and quote its verdict.",
+        "5. If a tool fails unexpectedly, run check_environment before reporting a bug.",
         "",
         "Rules that override model preference:",
         "- Never introduce hardcoded colours, fixed font sizes or .frame(width:) on text.",

@@ -7,7 +7,9 @@
  */
 
 import { z } from "zod";
-import { errorResult, resolveTarget, runTool, toResult } from "./runner.js";
+import { errorResult, gitChangedFiles, resolveTarget, runFileMatrix, runTool, runToolsParallel, toResult } from "./runner.js";
+import { recordToolRun, sanitiseEvent } from "./telemetry.js";
+import { checkEnvironment } from "./environment.js";
 
 const READ_ONLY = {
   readOnlyHint: true,
@@ -58,16 +60,156 @@ const ENVELOPE = z
   .passthrough();
 
 /**
+ * Turn a client's `progressToken` into a callback, or into a no-op.
+ *
+ * Long composites (a whole-project sweep, a large diff) otherwise look frozen
+ * for seconds. Clients that do not ask for progress never see a notification.
+ */
+function progressReporter(extra) {
+  const token = extra?._meta?.progressToken;
+  if (token === undefined || typeof extra?.sendNotification !== "function") return undefined;
+  return ({ completed, total, label, status }) => {
+    extra
+      .sendNotification({
+        method: "notifications/progress",
+        params: { progressToken: token, progress: completed, total, message: `${label} → ${status}` },
+      })
+      .catch(() => {});
+  };
+}
+
+/**
  * @typedef {Object} ToolSpec
  * @property {string} name
  * @property {string} title
  * @property {string} description
  * @property {import('zod').ZodRawShape} inputSchema
- * @property {(args: any) => Promise<any>} run
+ * @property {(args: any, extra?: any) => Promise<any>} run
  */
+
+/**
+ * The read-only suite behind `audit_project`. Every entry takes only a target
+ * path, so they can run concurrently without ordering constraints.
+ */
+export const AUDIT_SUITE = [
+  { name: "project-inspector", script: "tools/project-inspector/inspect_project.py" },
+  { name: "swiftui-linter", script: "tools/swiftui-linter/lint_swiftui.py" },
+  { name: "accessibility-auditor", script: "tools/accessibility-auditor/audit_accessibility.py" },
+  { name: "liquid-glass-auditor", script: "tools/liquid-glass-auditor/audit_liquid_glass.py" },
+  { name: "privacy-auditor", script: "tools/privacy-auditor/audit_privacy.py" },
+  { name: "localization-checker", script: "tools/localization-checker/check_localization.py" },
+  { name: "widget-validator", script: "tools/widget-validator/validate_widget.py" },
+  { name: "sf-symbols-catalog", script: "tools/sf-symbols-catalog/check_symbols.py" },
+];
+
+/**
+ * The file-scoped auditors behind `review_diff`.
+ *
+ * These three accept a single `.swift` path, which is what makes a diff review
+ * possible — each changed file is audited on its own instead of re-auditing the
+ * whole project on every edit.
+ */
+export const FILE_AUDITORS = [
+  { name: "swiftui-linter", script: "tools/swiftui-linter/lint_swiftui.py" },
+  { name: "accessibility-auditor", script: "tools/accessibility-auditor/audit_accessibility.py" },
+  { name: "liquid-glass-auditor", script: "tools/liquid-glass-auditor/audit_liquid_glass.py" },
+];
 
 /** @type {ToolSpec[]} */
 export const TOOL_SPECS = [
+  {
+    name: "review_diff",
+    title: "Review only the files this change touched",
+    description:
+      "Reads `git diff` for the project, keeps the changed Swift files, and runs the SwiftUI, accessibility and " +
+      "Liquid Glass auditors on each one. Use this in an edit loop instead of audit_project: it costs seconds, " +
+      "reports only what you just wrote, and groups findings by file. Set `staged` to review the index, or `base` " +
+      "to review against a branch.",
+    inputSchema: {
+      path: OPTIONAL_PATH,
+      base: z
+        .string()
+        .optional()
+        .describe("Git revision to diff against, e.g. 'origin/main' or a commit SHA. Defaults to HEAD."),
+      staged: z.boolean().optional().describe("Review staged changes only (git diff --cached). Defaults to false."),
+      max_files: z
+        .number()
+        .int()
+        .min(1)
+        .max(500)
+        .optional()
+        .describe("Cap on files audited, because a 400-file diff is not a review. Defaults to 60."),
+    },
+    run: async (args, extra) => {
+      const target = resolveTarget(args.path);
+      const { selected, truncated, files } = await gitChangedFiles(target, {
+        base: args.base || "HEAD",
+        staged: Boolean(args.staged),
+        maxFiles: args.max_files ?? 60,
+      });
+      const swiftFiles = selected.filter((file) => file.endsWith(".swift"));
+
+      if (swiftFiles.length === 0) {
+        return {
+          envelope: {
+            schema_version: "2.0",
+            tool: "diff-review",
+            tool_version: "2.0.0",
+            target,
+            status: "pass",
+            summary: { critical: 0, error: 0, warning: 0, info: 0, total: 0 },
+            findings: [],
+            data: {
+              changed_files: files,
+              audited: [],
+              note:
+                files.length === 0
+                  ? "No changes to review."
+                  : `${files.length} changed file(s), none of them Swift — nothing for the Swift auditors to read.`,
+            },
+          },
+          summary: `diff-review · PASS · no Swift changes (${files.length} changed file(s))`,
+          exitCode: 0,
+        };
+      }
+
+      const result = await runFileMatrix({
+        target,
+        files: swiftFiles,
+        auditors: FILE_AUDITORS,
+        signal: extra?.signal,
+        onProgress: progressReporter(extra),
+      });
+      result.envelope.data.truncated = truncated;
+      result.envelope.data.changed_files = files;
+      return result;
+    },
+  },
+  {
+    name: "check_environment",
+    title: "Diagnose the MCP server itself",
+    description:
+      "Checks the runtime this server depends on: Node and Python versions, whether the auditors and reference " +
+      "guides are present, git and Xcode availability, App Store Connect credentials (presence only, never the " +
+      "value), and the telemetry mode. Run this first when a tool behaves unexpectedly.",
+    inputSchema: {},
+    run: async () => checkEnvironment(),
+  },
+  {
+    name: "audit_project",
+    title: "Audit the whole project in one call",
+    description:
+      "Runs eight read-only audits concurrently — project structure, SwiftUI lint, accessibility, Liquid Glass, " +
+      "privacy manifest, localisation, widgets and SF Symbols — and returns one merged envelope with every " +
+      "finding tagged by the audit that produced it. Use this first on an unfamiliar project; follow up with a " +
+      "single audit when you need its full detail.",
+    inputSchema: { path: OPTIONAL_PATH },
+    run: async (args, extra) => {
+      const target = resolveTarget(args.path);
+      const specs = AUDIT_SUITE.map((entry) => ({ ...entry, args: [target], targetLabel: target }));
+      return runToolsParallel(specs, { signal: extra?.signal, onProgress: progressReporter(extra) });
+    },
+  },
   {
     name: "inspect_apple_project",
     title: "Inspect Apple project",
@@ -251,6 +393,8 @@ export const TOOL_SPECS = [
  * @param {import('@modelcontextprotocol/sdk/server/mcp.js').McpServer} server
  */
 export function registerTools(server) {
+  const knownTools = TOOL_SPECS.map((spec) => spec.name);
+
   for (const spec of TOOL_SPECS) {
     server.registerTool(
       spec.name,
@@ -261,12 +405,18 @@ export function registerTools(server) {
         outputSchema: ENVELOPE,
         annotations: spec.annotations ?? READ_ONLY,
       },
-      async (args) => {
+      async (args, extra) => {
+        const started = Date.now();
+        let outcome = "error";
         try {
-          const run = await spec.run(args ?? {});
+          const run = await spec.run(args ?? {}, extra);
+          outcome = sanitiseEvent({ outcome: run?.envelope?.status }).outcome;
           return toResult(run);
         } catch (error) {
           return errorResult(error);
+        } finally {
+          // Fire-and-forget, aggregate-only, and a no-op unless explicitly enabled.
+          recordToolRun({ tool: spec.name, outcome, durationMs: Date.now() - started, knownTools });
         }
       },
     );

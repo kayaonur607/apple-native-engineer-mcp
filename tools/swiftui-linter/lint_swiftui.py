@@ -241,7 +241,7 @@ def main(argv=None) -> int:
     if args.rules:
         return print_rules()
 
-    guard = guard_directory("swiftui-linter", args.path)
+    guard = guard_directory("swiftui-linter", args.path, allow_file=True)
     if guard is not None:
         return emit(guard, args)
     return emit(lint(Path(args.path).expanduser().resolve()), args,
