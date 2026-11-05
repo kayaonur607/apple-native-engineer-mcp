@@ -86,6 +86,18 @@ else
     record skip
 fi
 
+section "Documentation API claims"
+if [ "$(uname -s)" = "Darwin" ] && command -v xcrun > /dev/null 2>&1; then
+    if python3 scripts/check_api_claims.py; then
+        record pass
+    else
+        record fail
+    fi
+else
+    printf '  ! requires an Apple SDK; skipped\n'
+    record skip
+fi
+
 ELAPSED=$(( $(date +%s) - START ))
 
 printf '\n\033[1m────────────────────────────────────────────\033[0m\n'

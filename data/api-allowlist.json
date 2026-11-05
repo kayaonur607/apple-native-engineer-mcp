@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "description": "Modifiers that legitimately do not exist in the iOS SDK's Swift interfaces. Every entry needs a reason: this file is the only way to silence the check.",
+  "allowed": [
+    {
+      "symbol": "glassBackgroundEffect",
+      "reason": "visionOS-only SwiftUI modifier; declared in the visionOS interface, which this check does not index."
+    },
+    {
+      "symbol": "immersionStyle",
+      "reason": "visionOS-only SwiftUI scene modifier; same reason."
+    }
+  ]
+}

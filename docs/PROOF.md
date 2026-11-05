@@ -34,7 +34,7 @@ cd integrations/mcp-server && npm install && cd ../..
 ▸ Python tests (shared library + tools)
 .......................................................
 ----------------------------------------------------------------------
-Ran 69 tests in 1.219s
+Ran 77 tests in 1.209s
 
 OK
 
@@ -206,7 +206,29 @@ Inventory at runtime:
 
 ---
 
-## 6. Real data, not remembered data
+## 6. The documentation cannot invent API
+
+A snippet that parses can still call something that does not exist. `scripts/check_api_claims.py` indexes every
+public declaration in the installed SDK's Swift interfaces, extracts every modifier written at the start of a line
+inside a ```swift block, and looks each one up:
+
+```
+$ python3 scripts/check_api_claims.py
+SDK index:        21,998 symbols from iPhoneSimulator27.2.sdk
+Documents:        40
+Modifiers taught: 96
+Verified:         94
+Allowlisted:      2
+Unverified:       0
+```
+
+The two allowlisted entries are `glassBackgroundEffect` and `immersionStyle`, both visionOS-only modifiers whose
+declarations live in the visionOS interface that this check does not index. They are listed in
+`data/api-allowlist.json` with a written reason — the only way to silence the check, and it is visible in review.
+
+---
+
+## 7. Real data, not remembered data
 
 The SF Symbols catalogue is extracted from the running system, not typed from a blog post:
 
@@ -249,7 +271,7 @@ grep -A2 "func glassEffect(" \
 
 ---
 
-## 7. What is *not* verified
+## 8. What is *not* verified
 
 Being explicit about this is the difference between evidence and marketing.
 
@@ -267,11 +289,11 @@ severity reflects the confidence: `info` for suggestions, `error` for rules Appl
 
 ---
 
-## 8. Reproducing any single claim
+## 9. Reproducing any single claim
 
 | Claim | Command |
 | :--- | :--- |
-| "77 tests pass" | `./scripts/verify.sh` |
+| "85 tests pass" | `./scripts/verify.sh` |
 | "14 CLI tools" | `ls -d tools/*/ \| wc -l` |
 | "13 MCP tools" | `node integrations/mcp-server/src/index.js --selftest` |
 | "every internal link resolves" | `python3 scripts/validate_repo.py --links` |
