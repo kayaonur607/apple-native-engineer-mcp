@@ -5,32 +5,34 @@
   "primary_locale": "en-US",
   "localizations": {
     "en-US": {
-      "name": "App Name (Max 30 chars)",
-      "subtitle": "Clear, informative subtitle (Max 30 chars)",
+      "name": "Example App",
+      "subtitle": "Native, fast, private",
       "privacyPolicyUrl": "https://example.com/privacy",
       "supportUrl": "https://example.com/support",
       "marketingUrl": "https://example.com",
-      "description": "Comprehensive, user-focused description explaining app features, workflow benefits, and native device capabilities. Avoid keyword stuffing and unsupported claims. (Max 4000 characters).",
-      "keywords": "native,swiftui,productivity,scanner,tools,offline",
-      "promotionalText": "Optional promotional copy displayed above the description that can be updated at any time without submitting a new build. (Max 170 characters).",
-      "whatsNew": "Initial release introducing native SwiftUI interface, Dynamic Type scaling, and offline sync."
+      "description": "Replace this with a user-focused description of what the app does, who it is for and why it is native. Mention Dynamic Type, Dark Mode, VoiceOver and offline behaviour if they matter. Avoid keyword stuffing and claims you cannot demonstrate on screen. (Max 4000 characters.)",
+      "keywords": "native,swiftui,productivity,offline,privacy",
+      "promotionalText": "Optional copy shown above the description. Editable without submitting a new build. (Max 170 characters.)",
+      "whatsNew": "First release: native SwiftUI interface, Dynamic Type, Dark Mode and offline sync.",
+      "screenshots": ["screenshots/home.png", "screenshots/detail.png", "screenshots/settings.png"]
     },
     "tr-TR": {
-      "name": "Uygulama Adı (Maks 30 karakter)",
-      "subtitle": "Kısa ve net alt başlık (Maks 30 karakter)",
+      "name": "Örnek Uygulama",
+      "subtitle": "Yerel, hızlı, gizli",
       "privacyPolicyUrl": "https://example.com/tr/gizlilik",
       "supportUrl": "https://example.com/tr/destek",
       "marketingUrl": "https://example.com/tr",
-      "description": "Uygulamanın özelliklerini, sunduğu çözümleri ve yerel Apple yeteneklerini anlatan açıklama metni. (Maks 4000 karakter).",
-      "keywords": "yerel,swiftui,verimlilik,tarayıcı,araçlar,çevrimdışı",
-      "promotionalText": "Açıklamanın üzerinde görünen ve yeni sürüm gerektirmeden güncellenebilen tanıtım metni. (Maks 170 karakter).",
-      "whatsNew": "SwiftUI ve iOS 18 desteğiyle ilk resmi sürüm."
+      "description": "Uygulamanın ne yaptığını, kime hitap ettiğini ve neden yerel olduğunu anlatan kullanıcı odaklı açıklama. Dynamic Type, Karanlık Mod, VoiceOver ve çevrimdışı davranıştan söz edin. (Maks 4000 karakter.)",
+      "keywords": "yerel,swiftui,verimlilik,çevrimdışı,gizlilik",
+      "promotionalText": "Açıklamanın üzerinde görünen, yeni sürüm gerektirmeden güncellenebilen tanıtım metni. (Maks 170 karakter.)",
+      "whatsNew": "İlk sürüm: yerel SwiftUI arayüzü, Dynamic Type, Karanlık Mod ve çevrimdışı eşitleme.",
+      "screenshots": ["screenshots/home.png", "screenshots/detail.png", "screenshots/settings.png"]
     }
   },
   "review_information": {
     "demo_account_required": true,
     "demo_username": "appstore_reviewer@example.com",
     "demo_password": "ReviewDemoPassword123!",
-    "notes": "Test login credentials provided above. To test the core workflow, tap the + button to create a sample document."
+    "notes": "The demo account above can reach every screen. Tap + to create a sample document."
   }
 }

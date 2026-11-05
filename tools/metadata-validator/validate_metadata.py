@@ -41,6 +41,17 @@ URL_RE = re.compile(r"^https://[A-Za-z0-9.-]+\.[A-Za-z]{2,}(?:/[^\s]*)?$")
 
 LOCALES_REQUIRED = {"en-US"}
 
+#: App Store Connect's API and Fastlane use camelCase; hand-written files use
+#: snake_case. Accept both rather than making the user translate their tooling.
+FIELD_ALIASES = {
+    "privacyPolicyUrl": "privacy_url",
+    "supportUrl": "support_url",
+    "marketingUrl": "marketing_url",
+    "promotionalText": "promotional_text",
+    "whatsNew": "whats_new",
+    "appStoreVersion": "version",
+}
+
 
 def _as_text(value: Any) -> str:
     if value is None:
@@ -50,18 +61,26 @@ def _as_text(value: Any) -> str:
     return str(value)
 
 
+def _apply_aliases(fields: Dict[str, Any]) -> Dict[str, Any]:
+    normalised = dict(fields)
+    for alias, canonical in FIELD_ALIASES.items():
+        if alias in normalised and canonical not in normalised:
+            normalised[canonical] = normalised.pop(alias)
+    return normalised
+
+
 def _normalise(payload: Dict[str, Any]) -> Dict[str, Any]:
     """Accept both flat and localisation-nested metadata shapes."""
 
     if "localizations" in payload and isinstance(payload["localizations"], dict):
         result: Dict[str, Any] = {}
+        outer = _apply_aliases({k: v for k, v in payload.items() if k != "localizations"})
         for locale, fields in payload["localizations"].items():
-            merged = dict(payload)
-            merged.pop("localizations", None)
-            merged.update(fields)
+            merged = dict(outer)
+            merged.update(_apply_aliases(fields))
             result[locale] = merged
         return {"__locales__": result}
-    return {"__locales__": {"default": payload}}
+    return {"__locales__": {"default": _apply_aliases(payload)}}
 
 
 def validate_metadata(payload: Dict[str, Any], source: str = "metadata.json") -> Report:

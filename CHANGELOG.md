@@ -35,6 +35,11 @@ Version 2 replaces all three.
   invalid `dampingRatio:` label across six guides.
 - **Documentation API verification** — `scripts/check_api_claims.py` indexes 21,998 SDK symbols and proves that
   every SwiftUI modifier taught in the guides exists, with a two-entry, reasoned allowlist for visionOS-only API.
+- **Developer experience** — `make doctor` (toolchain check with the exact fix for each missing piece),
+  `make demo` (a 30-second tour of the audits on the broken fixture) and a `Makefile` that delegates to the same
+  scripts CI runs.
+- **Template self-tests** — the metadata, icon and report templates must pass the tools they template, and the
+  screenshot spec's dimensions must be recognised by the validator.
 - **Verification harness** — `scripts/verify.sh` runs repository validation, 55 Python tests, 8 MCP protocol tests
   and real `swiftc` compilation; `docs/PROOF.md` records the transcripts.
 - **Two fixture projects** — `clean-app` (must produce zero findings) and `legacy-app` (must trip every rule), so

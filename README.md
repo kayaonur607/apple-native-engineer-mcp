@@ -12,7 +12,7 @@
 
 <p align="center">
   <a href="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml"><img src="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/tests-85_passing-30D158" alt="85 tests">
+  <img src="https://img.shields.io/badge/tests-93_passing-30D158" alt="93 tests">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT"></a>
   <img src="https://img.shields.io/badge/MCP-1.32-8A2BE2" alt="MCP">
   <img src="https://img.shields.io/badge/Swift-6.x-F05138" alt="Swift 6">
@@ -41,12 +41,32 @@ This repository is that feedback loop. It ships:
    as resources and the workflows as prompts.
 
 > [!IMPORTANT]
-> **Nothing here is vibes.** Every number in this README is produced by `./scripts/verify.sh`, which runs 85
+> **Nothing here is vibes.** Every number in this README is produced by `./scripts/verify.sh`, which runs 93
 > tests, a link/count validator and a real Swift type-check. See [Proof](#proof).
 
 ---
 
 ## Quickstart
+
+```bash
+git clone https://github.com/kayaonur607/apple-native-engineer-mcp.git
+cd apple-native-engineer-mcp
+
+make doctor   # is this machine ready?
+make demo     # 30 seconds: the audits running on a deliberately broken app
+make verify   # everything CI runs, including 85 tests and a real Swift compile
+```
+
+`make demo` output, trimmed:
+
+```
+1/4 · What is this project?          → 7 findings: iOS 16 floor, no @Observable, NavigationView…
+2/4 · What is wrong with the SwiftUI? → 14 findings: 3 errors (NavigationView, UIScreen.main, try!)
+3/4 · Would the App Store accept it?  → icon is 512×512 with an alpha channel — rejected
+4/4 · The verdict                     → BLOCKED, 19/100
+```
+
+The same gate on a project that follows the rules returns **READY FOR SUBMISSION, 100/100**.
 
 ### 1. Use it as an MCP server (recommended)
 
@@ -222,7 +242,7 @@ This is the part most repositories skip. Here is what `./scripts/verify.sh` actu
 | Stage | Result | How it is measured |
 | :--- | :--- | :--- |
 | Repository validation | **pass** | Frontmatter, 20 required paths, every internal link, and every count in this README cross-checked against the filesystem |
-| Python tests | **77 pass** | `python3 -m unittest` across 3.10 / 3.12 / 3.13 in CI |
+| Python tests | **85 pass** | `python3 -m unittest` across 3.10 / 3.12 / 3.13 in CI |
 | MCP protocol tests | **8 pass** | A real `Client` ↔ `McpServer` pair over the SDK's in-memory transport |
 | Swift compilation | **pass** | `swiftc -typecheck` on both fixtures, `swiftc -parse` on all 118 documentation snippets |
 | SF Symbols catalogue | **9,649 symbols** | Extracted from `CoreGlyphs.bundle`, internally consistent |
@@ -277,6 +297,8 @@ apple-native-engineer-mcp/
 ├── data/sf-symbols.json      # 9,649 SF Symbols with per-OS availability
 ├── tests/                    # 55 Python tests + two fixture projects
 ├── scripts/verify.sh         # the one command that proves the repo works
+├── scripts/doctor.sh         # environment check (python, node, Xcode, SDK)
+├── scripts/demo.sh           # 30-second tour on the bundled fixtures
 └── .github/workflows/ci.yml  # repository · python ×3 · mcp · swift
 ```
 
