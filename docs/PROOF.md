@@ -21,10 +21,10 @@ cd integrations/mcp-server && npm install && cd ../..
   [PASS] skill name 'apple-native-engineer-mcp' is valid
   [PASS] skill description is 660 characters
   [PASS] all 20 required paths present
-  [PASS] 14 CLI tools structure validated
+  [PASS] 15 CLI tools structure validated
   [PASS] 84 internal links resolve
   [PASS] README badge states 131 tests
-  [PASS] README documents 14 CLI tools
+  [PASS] README documents 15 CLI tools
   [PASS] README documents 31 reference guides
   [PASS] README documents 12 checklists
   [PASS] README documents 9 worked examples
@@ -474,7 +474,7 @@ severity reflects the confidence: `info` for suggestions, `error` for rules Appl
 | Claim | Command |
 | :--- | :--- |
 | "138 tests pass" | `./scripts/verify.sh` |
-| "14 CLI tools" | `ls -d tools/*/ \| wc -l` |
+| "15 CLI tools" | `ls -d tools/*/ \| wc -l` |
 | "16 MCP tools" | `node integrations/mcp-server/src/index.js --selftest` |
 | "the HTTP transport rejects a foreign origin" | `node integrations/mcp-server/src/index.js --http 3931 &` then the `curl` above |
 | "a review only reports the diff" | `cd integrations/mcp-server && npm test` (`review_diff` suite) |

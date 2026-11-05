@@ -364,6 +364,60 @@ export const TOOL_SPECS = [
     },
   },
   {
+    name: "search_apple_documentation",
+    title: "Search Apple documentation",
+    description:
+      "Searches Apple's own symbol index for a framework (swiftui, uikit, appkit, foundation, …) and returns the " +
+      "documentation paths that match. Use it before writing API you are not certain exists.",
+    inputSchema: {
+      query: z.string().describe("Symbol or phrase to look for, e.g. 'navigation stack'"),
+      framework: z.string().optional().describe("Framework index to search (default: swiftui)"),
+      limit: z.number().int().min(1).max(25).optional().describe("Maximum matches (default: 10)"),
+    },
+    run: async (args) => {
+      const cliArgs = ["search", args.query];
+      if (args.framework) cliArgs.push("--framework", args.framework);
+      if (args.limit) cliArgs.push("--limit", String(args.limit));
+      return runTool("tools/apple-docs-research/apple_docs.py", cliArgs);
+    },
+  },
+  {
+    name: "read_apple_documentation",
+    title: "Read Apple documentation",
+    description:
+      "Fetches one developer.apple.com page through the JSON API the site itself uses and returns it as Markdown " +
+      "with the source URL and fetch time. Refuses any host other than developer.apple.com.",
+    inputSchema: {
+      path: z.string().describe("Symbol path (swiftui/view/glassEffect(_:in:)) or a developer.apple.com URL"),
+    },
+    run: async (args) =>
+      runTool("tools/apple-docs-research/apple_docs.py", ["read", args.path]),
+  },
+  {
+    name: "inspect_apple_api_availability",
+    title: "Inspect API availability",
+    description:
+      "Returns the per-platform availability table Apple publishes for a symbol: introduced version, deprecation, " +
+      "beta status. Use it instead of guessing whether an API exists on the project's deployment target.",
+    inputSchema: {
+      path: z.string().describe("Symbol path, e.g. swiftui/view/glassEffect(_:in:)"),
+    },
+    run: async (args) =>
+      runTool("tools/apple-docs-research/apple_docs.py", ["availability", args.path]),
+  },
+  {
+    name: "find_apple_guidelines",
+    title: "Read Human Interface Guidelines",
+    description:
+      "Fetches a Human Interface Guidelines page (buttons, navigation-and-search, materials, …) as Markdown with " +
+      "its source URL, so design advice can cite Apple instead of an opinion.",
+    inputSchema: {
+      page: z.string().describe("HIG page slug, e.g. 'buttons' or 'materials'"),
+    },
+    run: async (args) =>
+      runTool("tools/apple-docs-research/apple_docs.py", ["guidelines", args.page]),
+  },
+  {
     name: "app_store_connect",
     title: "App Store Connect (read-only)",
     description:

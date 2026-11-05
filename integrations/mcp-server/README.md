@@ -147,7 +147,7 @@ against your filesystem.
 
 ## Tools
 
-Sixteen tools: fourteen 1:1 wrappers over a script you can run yourself. If the MCP tool and the CLI ever
+Twenty tools: fifteen 1:1 wrappers over a script you can run yourself, plus the audit/review entry points. If the MCP tool and the CLI ever
 disagree, the CLI wins — that rule is why the server cannot drift.
 
 | Tool | What it answers | Backing script |
@@ -222,7 +222,7 @@ A tool that crashes still returns a valid envelope with `status: "fail"` and an 
 
 ## Capability modules
 
-Nine modules, gated by `APPLE_NATIVE_MODULES` (comma-separated, always includes `core`):
+Ten modules, gated by `APPLE_NATIVE_MODULES` (comma-separated, always includes `core`):
 
 ```json
 { "env": { "APPLE_NATIVE_MODULES": "core,swift-engineering,privacy-security-audit" } }

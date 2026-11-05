@@ -54,6 +54,18 @@ export const MODULES = [
     defaultEnabled: true,
   },
   {
+    id: "apple-docs-research",
+    label: "Apple documentation",
+    description: "Live research against developer.apple.com: search, read, availability and HIG pages.",
+    tools: [
+      "search_apple_documentation",
+      "read_apple_documentation",
+      "inspect_apple_api_availability",
+      "find_apple_guidelines",
+    ],
+    defaultEnabled: true,
+  },
+  {
     id: "app-store-review",
     label: "App Store review",
     description: "Listing metadata limits and URL validation.",

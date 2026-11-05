@@ -228,6 +228,28 @@ TOOLS: Dict[str, dict] = {
         "codes": {"ASC001": "missing credentials", "ASC010": "explicit mock mode",
                   "ASC013": "expired builds"},
     },
+    "apple-docs-research": {
+        "script": "apple_docs.py",
+        "title": "Apple Documentation Research",
+        "summary": "Read Apple's official documentation with citations, from the JSON API the site itself uses.",
+        "usage": [
+            "python3 tools/apple-docs-research/apple_docs.py search \"navigation stack\" --framework swiftui",
+            "python3 tools/apple-docs-research/apple_docs.py read swiftui/view/glassEffect(_:in:)",
+            "python3 tools/apple-docs-research/apple_docs.py availability swiftui/navigationstack",
+            "python3 tools/apple-docs-research/apple_docs.py guidelines buttons",
+        ],
+        "checks": [
+            "refuses any host other than developer.apple.com, before a socket opens",
+            "`search`: ranked symbol lookup across a framework index (8,000+ symbols for SwiftUI)",
+            "`read`: page rendered as Markdown — declaration, overview, code listings, parameters",
+            "`availability`: the per-platform table Apple publishes (introduced, deprecated, beta)",
+            "`guidelines`: Human Interface Guidelines pages as Markdown",
+            "every result carries `source_url` and `fetched_at`; cached seven days, `--refresh` to bypass, `--offline` to forbid the network",
+        ],
+        "codes": {"DOC000": "document could not be retrieved (error, never a guess)",
+                  "DOC010": "served from cache", "DOC011": "API is deprecated on a platform",
+                  "DOC030": "no symbol matched", "DOC040": "HIG page rendered empty"},
+    },
     "release-readiness": {
         "script": "generate_report.py",
         "title": "Release Readiness Gate",

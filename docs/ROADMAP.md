@@ -26,7 +26,7 @@ Last reviewed: 2026-11-06 · SDK 27.2 · Xcode 27.2
 | Release gate | **Implemented** | Seven weighted gates, `NOT INSPECTED` blocks, score, Markdown report | — |
 | App Store Connect | **Partial (read-only)** | ES256 JWT, `apps`, `appStoreVersions`, `builds`, rate limiting, hard failure without credentials | No writes, no submission, no screenshot upload |
 | App Store Review analysis | **Partial** | Rule-based subset: privacy, metadata, assets, completeness signals | Not a guideline-by-guideline engine |
-| Apple documentation research | **Partial** | 31 verified guides, SDK-generated `whats-new-ios-27.md`, 129 API claims checked against the SDK | No live retrieval from developer.apple.com |
+| Apple documentation research | **Implemented (v1)** | Live retrieval from developer.apple.com's JSON API: symbol search across framework indexes, page rendering as Markdown, per-platform availability, HIG pages — each with source URL and fetch timestamp, cached, and refusing non-Apple hosts | No PDF parsing, no WWDC transcript search, no offline mirror of the whole site |
 | ASO | **Not implemented** | — | Keyword research, competitor analysis, copy generation |
 | Icon studio | **Not implemented** | Validation only | Original artwork generation, asset export |
 | Screenshot studio (composition) | **Not implemented** | Capture + validation only | Marketing frames, headlines, multi-locale layouts |
@@ -44,16 +44,20 @@ Last reviewed: 2026-11-06 · SDK 27.2 · Xcode 27.2
 Repository audit, verified knowledge base, 14 CLI auditors, 16 MCP tools, shared report contract, CI that runs
 everything, capability modules.
 
-### Phase 2 — Apple documentation research (next)
+### Phase 2 — Apple documentation research (v1 shipped)
 
-The single biggest gap. Today the research is static: verified guides plus an SDK-generated index. A real engine
-needs:
+`tools/apple-docs-research/` reads the JSON API that developer.apple.com itself uses:
 
-- a fetcher with an allowlist of official Apple domains,
-- HTML → structured extraction for developer.apple.com pages,
-- a cache with a verified date per document,
-- citation output: every answer names the source URL and the date it was read,
-- explicit refusal when a page cannot be retrieved (no invented quotes).
+- **allowlist** — only `developer.apple.com`, everything else is refused before a socket opens,
+- **search** — 8,000+ symbols per framework index, ranked exact → prefix → substring,
+- **read** — page rendered as Markdown: declaration, overview, code listings, parameters,
+- **availability** — the per-platform table Apple publishes (the answer to "does this exist on iOS 17? 26?"),
+- **HIG** — Human Interface Guidelines pages as Markdown,
+- **provenance** — every result carries `source_url` and `fetched_at`; cached for 7 days, `--refresh` to bypass,
+  `--offline` to refuse the network,
+- **failure** — a missing page is an error, never a plausible guess.
+
+Next in this phase: PDF and WWDC transcript retrieval, an offline mirror for air-gapped machines.
 
 ### Phase 3 — App Store lifecycle
 
