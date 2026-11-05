@@ -220,6 +220,21 @@ Exit semantics, identical in the CLI and over MCP:
 A tool that crashes still returns a valid envelope with `status: "fail"` and an error code (`TOOL_MISSING`,
 `TOOL_TIMEOUT`, `TOOL_CANCELLED`). The agent gets something to reason about instead of a stack trace.
 
+## Capability modules
+
+Nine modules, gated by `APPLE_NATIVE_MODULES` (comma-separated, always includes `core`):
+
+```json
+{ "env": { "APPLE_NATIVE_MODULES": "core,swift-engineering,privacy-security-audit" } }
+```
+
+```bash
+node src/index.js --modules    # registry and current state
+```
+
+A disabled module's tools are absent from `tools/list` and return an error if called. Resources and prompts stay
+available: they are knowledge, not capability. Full rules in [`docs/MODULES.md`](../../docs/MODULES.md).
+
 ## Resources
 
 The knowledge base is exposed rather than pasted into prompts, so a client loads only what it needs.

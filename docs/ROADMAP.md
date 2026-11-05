@@ -1,0 +1,81 @@
+# Roadmap and capability matrix
+
+This repository's argument is that claims should be checkable. That applies to the roadmap too: a capability is
+listed as **implemented** only when a tool implements it, a test exercises it and `./scripts/verify.sh` runs that
+test. Everything else says so.
+
+Last reviewed: 2026-11-06 · SDK 27.2 · Xcode 27.2
+
+---
+
+## Capability matrix
+
+| Capability | Status | What exists today | What is missing |
+| :--- | :--- | :--- | :--- |
+| Project inspection | **Implemented** | `project-inspector`: project kind, targets, OS floors, Swift version, frameworks, architecture signals, debt findings | — |
+| SwiftUI lint | **Implemented** | 20 rules with finding codes, fix hints and Apple documentation links | No autofix, no SwiftLint/SwiftFormat bridge |
+| Accessibility audit | **Implemented** | WCAG contrast maths in both appearances, Dynamic Type, 44pt targets, VoiceOver labels | VoiceOver order/rotor traversal needs a device |
+| Liquid Glass audit | **Implemented** | Verified iOS 26 API table, availability-guard detection, imitation detection | visionOS glass APIs are allowlisted, not compiled |
+| SF Symbols | **Implemented** | 9,649 symbols from `CoreGlyphs.bundle`, per-OS availability, typo suggestions | — |
+| Privacy manifest audit | **Implemented** | Required-Reason categories, valid reason codes, tracking domains, collected data | Third-party SDK manifests are not scanned |
+| Localisation audit | **Implemented** | `Text(verbatim:)`, UIKit strings, RTL layout, String Catalog completeness | Format-specifier validation is shallow |
+| Widgets and Live Activities | **Implemented** | Dynamic Island regions, Info.plist flag, families, providers, App Groups | — |
+| Metadata validation | **Implemented** | Character limits, URL rules, keyword duplicates, screenshot counts | Does not suggest copy (see ASO) |
+| Icon validation | **Implemented** | 1024×1024, PNG, alpha, asset catalogue consistency | No icon generation (see Icon studio) |
+| Screenshot capture | **Partial** | `xcrun simctl` capture + App Store slot validation | No marketing composition, no multi-locale batch |
+| Release gate | **Implemented** | Seven weighted gates, `NOT INSPECTED` blocks, score, Markdown report | — |
+| App Store Connect | **Partial (read-only)** | ES256 JWT, `apps`, `appStoreVersions`, `builds`, rate limiting, hard failure without credentials | No writes, no submission, no screenshot upload |
+| App Store Review analysis | **Partial** | Rule-based subset: privacy, metadata, assets, completeness signals | Not a guideline-by-guideline engine |
+| Apple documentation research | **Partial** | 31 verified guides, SDK-generated `whats-new-ios-27.md`, 129 API claims checked against the SDK | No live retrieval from developer.apple.com |
+| ASO | **Not implemented** | — | Keyword research, competitor analysis, copy generation |
+| Icon studio | **Not implemented** | Validation only | Original artwork generation, asset export |
+| Screenshot studio (composition) | **Not implemented** | Capture + validation only | Marketing frames, headlines, multi-locale layouts |
+| Capability modules | **Implemented** | Nine modules, `APPLE_NATIVE_MODULES`, isolation tests | No lazy dependency installation (there are no optional deps to install) |
+| MCP transports | **Implemented** | stdio and Streamable HTTP (`--http`), loopback-only default, Origin check | No auth for remote use (deliberately refused) |
+| Privacy controls | **Implemented** | Telemetry off by default, closed five-key schema, sanitiser tests, no source uploads | Session-level consent prompts are a client concern |
+| Native macOS app | **Parked** | Working build on branch `wip/app-studio` (findings UI, gate, assistant) | Not in `main`; tool calling and streaming not built |
+
+---
+
+## Phases
+
+### Phase 1 — Foundations (done)
+
+Repository audit, verified knowledge base, 14 CLI auditors, 16 MCP tools, shared report contract, CI that runs
+everything, capability modules.
+
+### Phase 2 — Apple documentation research (next)
+
+The single biggest gap. Today the research is static: verified guides plus an SDK-generated index. A real engine
+needs:
+
+- a fetcher with an allowlist of official Apple domains,
+- HTML → structured extraction for developer.apple.com pages,
+- a cache with a verified date per document,
+- citation output: every answer names the source URL and the date it was read,
+- explicit refusal when a page cannot be retrieved (no invented quotes).
+
+### Phase 3 — App Store lifecycle
+
+- Guidelines engine: map each Review Guideline section to checks, evidence and severity.
+- Metadata write path (preview → approve → apply → read back), gated behind an explicit module.
+- ASO assistant: keyword extraction, character budgets, localisation variants — recommendations only, never
+  invented claims.
+
+### Phase 4 — Visual production
+
+- Icon studio: original artwork directions, then the existing validator as the gate.
+- Screenshot studio: capture, then composition onto device frames with localisation-aware text.
+- Both must distinguish *actual screenshots* from *marketing compositions* in the output, always.
+
+### Phase 5 — The app
+
+The parked macOS app becomes the surface for phases 2–4: findings, gate, documentation research and the assistant in
+one window, with tool calling wired to the same registry the server uses.
+
+---
+
+## How to read this document
+
+If a capability is listed as implemented and you cannot find the tool or the test, that is a bug in this document —
+open an issue. The project's whole premise is that "it works" is a claim requiring evidence.

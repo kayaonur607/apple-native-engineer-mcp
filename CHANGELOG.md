@@ -11,6 +11,14 @@ shared machines, and privacy claims that a test enforces.
 
 ### Added
 
+- **Capability modules** — the sixteen tools are grouped into nine modules (`core`, `swift-engineering`,
+  `sf-symbols`, `design-tokens`, `privacy-security-audit`, `app-store-review`, `app-store-assets`,
+  `release-readiness`, `app-store-connect`) and gated by `APPLE_NATIVE_MODULES`. `core` cannot be disabled, an
+  unknown id stops startup with the valid list, and a disabled tool is absent from `tools/list` and errors when
+  called. Ten tests enforce the rules in `test/modules.test.js`; the contract is written down in
+  `docs/MODULES.md`.
+- **Roadmap** — `docs/ROADMAP.md` lists every capability as implemented, partial or not started, with what is
+  missing. A claim that cannot be demonstrated is a bug in that document.
 - **Logo** — `assets/logo.svg`, a native squircle mark (brackets plus a check) used at the top of the README.
 - **`review_diff`** — reads `git diff --name-only` (against `HEAD`, the index with `staged`, or any `base`
   revision), keeps the changed `.swift` files and runs the SwiftUI, accessibility and Liquid Glass auditors on
