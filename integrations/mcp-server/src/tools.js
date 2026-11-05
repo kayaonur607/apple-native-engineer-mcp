@@ -443,6 +443,30 @@ export const TOOL_SPECS = [
       runTool("tools/icon-studio/icon_studio.py", ["verify", resolveTarget(args.path)]),
   },
   {
+    name: "compose_marketing_screenshots",
+    title: "Compose marketing screenshots",
+    description:
+      "Lays real simulator screenshots into App Store marketing frames (background, headline, subheadline) as " +
+      "exact-size SVG, optionally rasterised when a renderer is installed. Refuses to invent screens: it only " +
+      "composes images you actually captured.",
+    inputSchema: {
+      screenshots: z.string().describe("Directory of real screenshots"),
+      out: z.string().describe("Directory to write compositions into"),
+      headline: z.string().optional().describe("Headline copy"),
+      subhead: z.string().optional().describe("Supporting line"),
+      theme: z.enum(["dark", "light", "warm"]).optional().describe("Colour theme (default: dark)"),
+      render: z.boolean().optional().describe("Also rasterise to PNG when a renderer is available"),
+    },
+    run: async (args) => {
+      const cliArgs = ["--screenshots", resolveTarget(args.screenshots), "--out", resolveTarget(args.out)];
+      if (args.headline) cliArgs.push("--headline", args.headline);
+      if (args.subhead) cliArgs.push("--subhead", args.subhead);
+      if (args.theme) cliArgs.push("--theme", args.theme);
+      if (args.render) cliArgs.push("--render");
+      return runTool("tools/screenshot-studio/compose_marketing.py", cliArgs);
+    },
+  },
+  {
     name: "analyze_app_store_optimization",
     title: "Analyse App Store optimization",
     description:

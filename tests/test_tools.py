@@ -272,6 +272,40 @@ class DesignTokenForgeTests(unittest.TestCase):
             self.assertEqual(len(payload["colors"]), 2, "light and dark entries")
 
 
+class MarketingCompositionTests(unittest.TestCase):
+    def test_composes_exact_size_svg(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "frames"
+            envelope = run_tool("screenshot-studio/compose_marketing.py",
+                                "--screenshots", str(CLEAN / "screenshots"),
+                                "--out", str(out), "--headline", "Plan your week",
+                                "--subhead", "Native on iPhone", expect=0)
+            self.assertEqual(envelope["data"]["composed"], 3)
+            svg = (out / "home.svg").read_text()
+            self.assertIn('viewBox="0 0 1320 2868"', svg)
+            self.assertIn("Plan your week", svg)
+            self.assertIn("data:image/png;base64,", svg, "the screenshot must be embedded, not referenced")
+
+    def test_missing_directory_fails(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            envelope = run_tool("screenshot-studio/compose_marketing.py",
+                                "--screenshots", str(Path(tmp) / "nope"),
+                                "--out", str(Path(tmp) / "out"), expect=2)
+            self.assertIn("SHOT100", codes(envelope))
+
+    def test_warns_when_fewer_than_three(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            shots = Path(tmp) / "one"
+            shots.mkdir()
+            (shots / "a.png").write_bytes((CLEAN / "screenshots/home.png").read_bytes())
+            envelope = run_tool("screenshot-studio/compose_marketing.py",
+                                "--screenshots", str(shots), "--out", str(Path(tmp) / "out"), expect=0)
+            self.assertIn("SHOT113", codes(envelope))
+
+
 class IconStudioTests(unittest.TestCase):
     def test_generates_a_complete_set_and_verifies_it(self):
         import tempfile

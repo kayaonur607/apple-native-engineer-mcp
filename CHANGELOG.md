@@ -11,6 +11,17 @@ shared machines, and privacy claims that a test enforces.
 
 ### Added
 
+- **Apple documentation research (live)** — `tools/apple-docs-research/`: search a framework index (8,000+ symbols),
+  read a page as Markdown, inspect per-platform availability, read HIG pages. Reads the JSON API
+  developer.apple.com itself uses, refuses any other host, caches for seven days, and returns `source_url` plus
+  `fetched_at` with every answer.
+- **Icon generation** — `icon-studio prepare` turns one 1024×1024 master into 18 slots plus `Contents.json`, with a
+  pure-Python PNG codec and box-filter downscale. `verify` re-reads every slot; `preview` renders it small.
+- **ASO analysis** — deterministic budgets, duplicate/wasted keyword detection, coverage against visible copy,
+  risky-claim detection, and keyword candidates extracted from the developer's own description. It states in its
+  own output that no search-volume or competitor data is used.
+- **Marketing screenshot composition** — exact-size SVG frames around real captures (background, headline,
+  subheadline, embedded screenshot, three themes), optionally rasterised when a renderer is installed.
 - **Capability modules** — the sixteen tools are grouped into nine modules (`core`, `swift-engineering`,
   `sf-symbols`, `design-tokens`, `privacy-security-audit`, `app-store-review`, `app-store-assets`,
   `release-readiness`, `app-store-connect`) and gated by `APPLE_NATIVE_MODULES`. `core` cannot be disabled, an

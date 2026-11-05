@@ -14,6 +14,7 @@ design-tokens             forge_design_tokens
 privacy-security-audit    audit_privacy_manifest
 app-store-review          validate_app_metadata
 app-store-assets          validate_app_icon · prepare_icon_assets · verify_icon_set
+                          compose_marketing_screenshots
 release-readiness         generate_release_report
 app-store-connect         app_store_connect
 ```

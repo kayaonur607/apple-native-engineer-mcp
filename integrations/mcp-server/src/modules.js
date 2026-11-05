@@ -83,7 +83,7 @@ export const MODULES = [
     id: "app-store-assets",
     label: "App Store assets",
     description: "Icon and screenshot validation.",
-    tools: ["validate_app_icon", "prepare_icon_assets", "verify_icon_set"],
+    tools: ["validate_app_icon", "prepare_icon_assets", "verify_icon_set", "compose_marketing_screenshots"],
     defaultEnabled: true,
   },
   {

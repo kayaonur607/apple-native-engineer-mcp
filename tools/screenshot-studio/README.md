@@ -9,6 +9,7 @@ Part of [apple-native-engineer-mcp](../../README.md). Exposed over MCP as a matc
 ```bash
 python3 tools/screenshot-studio/screenshot_studio.py --out shot.png
 python3 tools/screenshot-studio/screenshot_studio.py --screenshots ./shots
+python3 tools/screenshot-studio/compose_marketing.py --screenshots ./shots --out ./frames --headline "Plan your week"
 ```
 
 Every tool accepts `--json` (stable envelope, see below), `--strict` (warnings become failures) and
@@ -19,6 +20,7 @@ Every tool accepts `--json` (stable envelope, see below), `--strict` (warnings b
 - booted simulator discovery via `xcrun simctl`
 - capture and immediate dimension validation
 - slot matching for iPhone 6.9"/6.7"/6.5", iPad 13", Watch, Vision Pro
+- marketing composition at exact App Store dimensions (SVG, screenshot embedded), optional rasterisation
 
 ## Findings
 

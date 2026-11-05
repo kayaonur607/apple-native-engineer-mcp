@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml"><img src="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/tests-170_passing-30D158" alt="170 tests">
+  <img src="https://img.shields.io/badge/tests-173_passing-30D158" alt="173 tests">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT"></a>
   <img src="https://img.shields.io/badge/protocol-MCP_1.32-8A2BE2" alt="MCP 1.32">
   <img src="https://img.shields.io/badge/Swift-6.x-F05138" alt="Swift 6">
@@ -23,7 +23,7 @@
 
 <p align="center">
   <sub>
-  <b>170 tests</b> · <b>5/5 CI stages</b> · <b>162 snippets compiled</b> · <b>129 API claims checked against the SDK</b> · <b>9,649 SF Symbols</b> · <b>23 MCP tools</b><br>
+  <b>173 tests</b> · <b>5/5 CI stages</b> · <b>162 snippets compiled</b> · <b>129 API claims checked against the SDK</b> · <b>9,649 SF Symbols</b> · <b>24 MCP tools</b><br>
   every number produced by <code>./scripts/verify.sh</code> — see <a href="#proof">Proof</a> and <a href="docs/PROOF.md">docs/PROOF.md</a>
   </sub>
 </p>
@@ -35,7 +35,7 @@
 **One MCP server that refuses to let an agent declare an Apple app finished without evidence.** Three layers, in
 the order you meet them:
 
-**1. An MCP server.** Twenty-three tools over stdio or Streamable HTTP: project inspection, one-call audits, diff
+**1. An MCP server.** Twenty-four tools over stdio or Streamable HTTP: project inspection, one-call audits, diff
 review, SwiftUI lint, accessibility, Liquid Glass, SF Symbols, privacy manifests, widgets, metadata, assets and a
 weighted release gate. Every result is a typed envelope with finding codes — not prose.
 
@@ -104,7 +104,7 @@ cd apple-native-engineer-mcp
 
 make doctor   # is this machine ready? (Python, Node, Xcode, SDK)
 make demo     # 30 seconds: the audits on a deliberately broken app
-make verify   # everything CI runs, including 170 tests and a real Swift compile
+make verify   # everything CI runs, including 173 tests and a real Swift compile
 ```
 
 What `make demo` shows, trimmed:
@@ -218,7 +218,7 @@ These are the rules that separate "looks like iOS" from "is iOS":
 | [`liquid-glass-auditor`](tools/liquid-glass-auditor/) | Liquid Glass adopted correctly — or imitated with fake stacks? | `LG*` |
 | [`sf-symbols-catalog`](tools/sf-symbols-catalog/) | Does this symbol exist, and does it exist on *your* deployment target? | `SFC*` |
 | [`design-token-forge`](tools/design-token-forge/) | Token JSON → SwiftUI tokens + `.xcassets`, with contrast checks. | `TOK*` |
-| [`screenshot-studio`](tools/screenshot-studio/) | Capture from a booted simulator and validate the slot. | `SHOT*` |
+| [`screenshot-studio`](tools/screenshot-studio/) | Capture from a simulator, compose marketing frames, validate the slot. | `SHOT*` |
 | [`app-store-connect`](tools/app-store-connect/) | Read-only ASC: apps, versions, builds. No silent mock. | `ASC*` |
 | [`release-readiness`](tools/release-readiness/) | Weighted verdict across every gate — the only one that blocks. | `REL*` |
 | [`apple-docs-research`](tools/apple-docs-research/) | What does Apple actually say, and on which OS does this API exist? | `DOC*` |
@@ -241,14 +241,14 @@ These are the rules that separate "looks like iOS" from "is iOS":
 
 ---
 
-## The 23 MCP tools
+## The 24 MCP tools
 
 `audit_project` · `review_diff` · `check_environment` · `inspect_apple_project` · `audit_privacy_manifest` ·
 `validate_app_icon` · `validate_app_metadata` · `check_localization` · `validate_widgets` · `lint_swiftui` ·
 `audit_accessibility` · `audit_liquid_glass` · `validate_sf_symbols` · `forge_design_tokens` ·
 `generate_release_report` · `app_store_connect` · `search_apple_documentation` · `read_apple_documentation` ·
 `inspect_apple_api_availability` · `find_apple_guidelines` · `prepare_icon_assets` · `verify_icon_set` ·
-`analyze_app_store_optimization`
+`analyze_app_store_optimization` · `compose_marketing_screenshots`
 
 Two of them change how an agent works rather than just what it can check:
 
@@ -307,7 +307,7 @@ disagrees with the documentation:
 | Stage | Result | How it is measured |
 | :--- | :--- | :--- |
 | Repository validation | **pass** | Frontmatter, 20 required paths, every internal link, and every count in this README cross-checked against the filesystem |
-| Python tests | **109 pass** | `python3 -m unittest` across 3.10 / 3.12 / 3.13 in CI |
+| Python tests | **112 pass** | `python3 -m unittest` across 3.10 / 3.12 / 3.13 in CI |
 | MCP protocol tests | **61 pass** | A real `Client` ↔ `McpServer` pair over the SDK's in-memory transport, a real HTTP socket, a throwaway git repo, the publish metadata, and hostile telemetry payloads |
 | Swift compilation | **pass** | `swiftc -typecheck` on both fixtures, `swiftc -parse` on all 162 documented snippets, and a full type-check of 73 of them against the SDK each one targets — iOS or visionOS |
 | Apple documentation | **live** | Search, read, availability and HIG pages fetched from developer.apple.com with a source URL and fetch time |

@@ -23,14 +23,15 @@ Last reviewed: 2026-11-06 · SDK 27.2 · Xcode 27.2
 | Metadata validation | **Implemented** | Character limits, URL rules, keyword duplicates, screenshot counts | Does not suggest copy (see ASO) |
 | Icon validation | **Implemented** | 1024×1024, PNG, alpha, asset catalogue consistency | — |
 | Icon generation | **Implemented** | `icon-studio prepare`: one 1024 master → 18 slots + Contents.json, pure-Python PNG codec and box-filter downscale | No generative artwork; the master is the designer's |
-| Screenshot capture | **Partial** | `xcrun simctl` capture + App Store slot validation | No marketing composition, no multi-locale batch |
+| Screenshot capture | **Partial** | `xcrun simctl` capture + App Store slot validation | No multi-locale batch orchestration |
+| Screenshot composition | **Implemented (SVG v1)** | Exact-size marketing frames around real captures: background, headline, subheadline, embedded screenshot, three themes, optional rasterisation when a renderer exists | No device-frame artwork, no automatic localisation of headlines |
 | Release gate | **Implemented** | Seven weighted gates, `NOT INSPECTED` blocks, score, Markdown report | — |
 | App Store Connect | **Partial (read-only)** | ES256 JWT, `apps`, `appStoreVersions`, `builds`, rate limiting, hard failure without credentials | No writes, no submission, no screenshot upload |
 | App Store Review analysis | **Partial** | Rule-based subset: privacy, metadata, assets, completeness signals | Not a guideline-by-guideline engine |
 | Apple documentation research | **Implemented (v1)** | Live retrieval from developer.apple.com's JSON API: symbol search across framework indexes, page rendering as Markdown, per-platform availability, HIG pages — each with source URL and fetch timestamp, cached, and refusing non-Apple hosts | No PDF parsing, no WWDC transcript search, no offline mirror of the whole site |
 | ASO | **Implemented (honest v1)** | Budget arithmetic, duplicate/wasted keywords, coverage against visible copy, risky-claim detection, candidates extracted from the developer's own description | No search-volume or competitor data — and it says so instead of inventing numbers |
 
-| Screenshot studio (composition) | **Not implemented** | Capture + validation only | Marketing frames, headlines, multi-locale layouts |
+
 | Capability modules | **Implemented** | Nine modules, `APPLE_NATIVE_MODULES`, isolation tests | No lazy dependency installation (there are no optional deps to install) |
 | MCP transports | **Implemented** | stdio and Streamable HTTP (`--http`), loopback-only default, Origin check | No auth for remote use (deliberately refused) |
 | Privacy controls | **Implemented** | Telemetry off by default, closed five-key schema, sanitiser tests, no source uploads | Session-level consent prompts are a client concern |
