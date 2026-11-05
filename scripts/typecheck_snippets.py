@@ -177,16 +177,29 @@ def main(argv: List[str]) -> int:
     used = sorted({snippet.platform for snippet in snippets if snippet.platform in PLATFORMS})
 
     sdks: Dict[str, Path] = {}
+    skipped: Dict[str, str] = {}
     for platform in used:
         try:
             sdks[platform] = sdk_path(platform)
         except (OSError, subprocess.CalledProcessError):
-            print(
-                f"error: xcrun could not find the {PLATFORMS[platform][0]} SDK, needed by "
-                f"{platform} snippets (macOS with Xcode required)",
-                file=sys.stderr,
-            )
-            return 2
+            # A runner without the visionOS platform installed is not a defect in
+            # this repository: verify what the toolchain can see and say what was
+            # skipped, loudly, instead of failing the whole job.
+            skipped[platform] = PLATFORMS[platform][0]
+
+    if not sdks:
+        print(
+            "error: no Apple SDK found (xmux/iphonesimulator); macOS with Xcode required",
+            file=sys.stderr,
+        )
+        return 2
+
+    for platform, sdk_name in skipped.items():
+        count = sum(1 for snippet in snippets if snippet.platform == platform)
+        print(
+            f"  ! {platform}: {sdk_name} SDK is not installed, skipping {count} snippet(s)",
+            file=sys.stderr,
+        )
 
     if WORK.exists():
         shutil.rmtree(WORK)
@@ -196,7 +209,10 @@ def main(argv: List[str]) -> int:
     target_dir.mkdir(parents=True, exist_ok=True)
 
     for snippet in snippets:
-        compile_snippet(snippet, sdks.get(snippet.platform, Path()), target_dir)
+        if snippet.platform in skipped:
+            snippet.status = "skipped"
+            continue
+        compile_snippet(snippet, sdks[snippet.platform], target_dir)
 
     counts = Counter(snippet.status for snippet in snippets)
     real = [snippet for snippet in snippets if snippet.status == "real"]
@@ -212,6 +228,7 @@ def main(argv: List[str]) -> int:
             {"document": s.document, "block": s.index, "platform": s.platform, "errors": s.errors}
             for s in real
         ],
+        "skipped": skipped,
         "unknown_errors": [
             {"document": s.document, "block": s.index, "stderr": s.errors}
             for s in snippets if s.status == "unknown-error"
@@ -224,6 +241,8 @@ def main(argv: List[str]) -> int:
         print("SDK:              " + ", ".join(f"{p} → {name}" for p, name in payload["sdks"].items()))
         print(f"Snippets:         {len(snippets)}")
         print("Per platform:     " + ", ".join(f"{p} {n}" for p, n in sorted(by_platform.items())))
+        if skipped:
+            print("Skipped:          " + ", ".join(f"{p} ({name} SDK missing)" for p, name in skipped.items()))
         print(f"Type-check clean: {payload['ok']}")
         print(f"Fragments:        {payload['fragments']}")
         print(f"Real errors:      {len(real)}")

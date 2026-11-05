@@ -66,7 +66,7 @@ if [ "${SDK_MAJOR:-0}" -lt 26 ]; then
     done
 fi
 
-compile "fixture: clean-app/App"        "${APP_FILES[@]}"
+compile "fixture: clean-app/App"        ${APP_FILES[@]+"${APP_FILES[@]}"}
 compile "fixture: clean-app/Widgets"    tests/fixtures/clean-app/Widgets/*.swift
 
 # 2. Documentation snippets (syntax only) -----------------------------------
@@ -108,7 +108,7 @@ fi
 
 echo "  type-checking every snippet against the iOS SDK..."
 if python3 scripts/typecheck_snippets.py --strict > "$WORK/snippets-typecheck.log" 2>&1; then
-    sed 's/^/  /' "$WORK/snippets-typecheck.log" | grep -E "Type-check clean|Fragments|Real errors"
+    sed 's/^/  /' "$WORK/snippets-typecheck.log" | grep -E "Type-check clean|Fragments|Real errors|Skipped"
 else
     checked=$((checked + 1))
     failures=$((failures + 1))
