@@ -7,6 +7,7 @@
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SERVER_NAME, SERVER_VERSION } from "./constants.js";
+import { resolveModules, toolsFor } from "./modules.js";
 import { registerPrompts } from "./prompts.js";
 import { registerResources } from "./resources.js";
 import { registerTools } from "./tools.js";
@@ -17,7 +18,10 @@ export { SERVER_NAME, SERVER_VERSION };
  * Build a fully configured McpServer (tools + resources + prompts).
  * @returns {McpServer}
  */
-export function createServer({ name = SERVER_NAME, version = SERVER_VERSION } = {}) {
+export function createServer({ name = SERVER_NAME, version = SERVER_VERSION, modules } = {}) {
+  const resolved = modules ?? resolveModules();
+  const enabledTools = toolsFor(resolved.enabled);
+
   const server = new McpServer(
     { name, version },
     {
@@ -36,13 +40,20 @@ export function createServer({ name = SERVER_NAME, version = SERVER_VERSION } = 
         "- Never hand-build glass effects; use Liquid Glass APIs on iOS 26+ with an availability guard.",
         "- Treat any tool result with status 'fail' as a blocker, and 'warn' as work you must resolve or justify.",
         "- Cite finding codes (for example SWU002, A11Y001, PRIV010) when you report problems.",
+        "",
+        `Enabled modules: ${resolved.enabled.join(", ")}.`,
+        resolved.disabled.length > 0
+          ? `Disabled: ${resolved.disabled.join(", ")}. Ask the user to enable a module with APPLE_NATIVE_MODULES rather than pretending the capability exists.`
+          : "",
       ].join("\n"),
     },
   );
 
-  registerTools(server);
+  const registered = registerTools(server, { enabledTools });
   registerResources(server);
   registerPrompts(server);
 
+  server.enabledTools = registered;
+  server.enabledModules = resolved;
   return server;
 }

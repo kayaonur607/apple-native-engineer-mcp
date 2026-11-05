@@ -24,6 +24,12 @@
           "default": "python3"
         },
         {
+          "name": "APPLE_NATIVE_MODULES",
+          "description": "Comma-separated capability modules to enable (core is always on). Unset enables all nine.",
+          "isRequired": false,
+          "default": "all"
+        },
+        {
           "name": "APPLE_NATIVE_TELEMETRY",
           "description": "Aggregate usage counting: off (default), local or anonymous. Never records paths, file names or source text.",
           "isRequired": false,

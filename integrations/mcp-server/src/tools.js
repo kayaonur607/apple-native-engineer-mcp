@@ -392,10 +392,14 @@ export const TOOL_SPECS = [
  * Register every tool on an McpServer instance.
  * @param {import('@modelcontextprotocol/sdk/server/mcp.js').McpServer} server
  */
-export function registerTools(server) {
+export function registerTools(server, { enabledTools } = {}) {
   const knownTools = TOOL_SPECS.map((spec) => spec.name);
+  const allowed = enabledTools ? new Set(enabledTools) : null;
+  const registered = [];
 
   for (const spec of TOOL_SPECS) {
+    if (allowed && !allowed.has(spec.name)) continue;
+    registered.push(spec.name);
     server.registerTool(
       spec.name,
       {
@@ -421,4 +425,5 @@ export function registerTools(server) {
       },
     );
   }
+  return registered;
 }

@@ -18,6 +18,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { createServer, SERVER_NAME, SERVER_VERSION } from "./server.js";
 import { promptInventory } from "./prompts.js";
 import { resourceInventory } from "./resources.js";
+import { MODULES, resolveModules } from "./modules.js";
 import { TOOL_SPECS } from "./tools.js";
 import { DEFAULT_PORT, startHttpServer } from "./http.js";
 import { checkEnvironment } from "./environment.js";
@@ -30,6 +31,7 @@ const HELP = [
   "  apple-native-engineer-mcp                 speak MCP on stdio",
   `  apple-native-engineer-mcp --http [port]   speak MCP on POST /mcp (default port ${DEFAULT_PORT})`,
   "  apple-native-engineer-mcp --selftest      print the tool/resource/prompt inventory",
+  "  apple-native-engineer-mcp --modules       print the capability module registry",
   "  apple-native-engineer-mcp --doctor        check that this machine can run the server",
   "  apple-native-engineer-mcp --telemetry-preview  print the exact telemetry payload",
   "  apple-native-engineer-mcp --version       print the version",
@@ -78,12 +80,22 @@ async function main() {
     return;
   }
 
+  if (args.includes("--modules")) {
+    const resolved = resolveModules();
+    process.stdout.write(JSON.stringify({ ...resolved, registry: MODULES }, null, 2) + "\n");
+    return;
+  }
+
   if (args.includes("--selftest")) {
+    const resolved = resolveModules();
+    const enabledTools = TOOL_SPECS.map((spec) => spec.name).filter((tool) =>
+      MODULES.some((module) => resolved.enabled.includes(module.id) && module.tools.includes(tool)));
     const payload = {
       name: SERVER_NAME,
       version: SERVER_VERSION,
       transport: args.includes("--http") ? "streamable-http" : "stdio",
-      tools: TOOL_SPECS.map((spec) => spec.name),
+      modules: resolved,
+      tools: enabledTools,
       resources: resourceInventory().length,
       prompts: promptInventory(),
       telemetry: telemetryMode(),
