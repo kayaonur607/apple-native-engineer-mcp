@@ -83,6 +83,13 @@ ARTIFACT_PATTERNS = (
     r"could not infer type for placeholder",
     r"no such module 'Testing'",
     r"is unavailable in iOS",
+    # Documentation about iOS 26 necessarily shows iOS 26 API. Compiling it
+    # against an older deployment target is expected to warn, not to fail a doc.
+    r"is only available in iOS",
+    r"only available in macOS",
+    r"only available in watchOS",
+    r"only available in visionOS",
+    r"'[^']*' is only available",
     r"extraneous argument label",
     r"an enum with no cases cannot declare a raw type",
     r"generic parameter '[^']*' could not be inferred",
