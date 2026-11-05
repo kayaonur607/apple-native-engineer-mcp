@@ -32,25 +32,27 @@
 
 ## What this actually is
 
-Three things that work together, in one repository:
+**One MCP server that refuses to let an agent declare an Apple app finished without evidence.** Three layers, in
+the order you meet them:
 
-**1. A standard.** [`SKILL.md`](SKILL.md) is a short, opinionated document an agent loads before touching Swift:
-what "native" means, which APIs are legacy, what to refuse. Behind it are 31 reference guides that go deep —
-Liquid Glass, SwiftUI engineering, StoreKit 2, SwiftData, privacy, performance.
+**1. An MCP server.** Sixteen tools over stdio or Streamable HTTP: project inspection, one-call audits, diff
+review, SwiftUI lint, accessibility, Liquid Glass, SF Symbols, privacy manifests, widgets, metadata, assets and a
+weighted release gate. Every result is a typed envelope with finding codes — not prose.
 
-**2. Fourteen auditors.** Each one answers a question you cannot answer by reading a diff:
-*does this symbol exist on iOS 17? does this text colour pass contrast in Dark Mode? is the privacy manifest
-missing a reason code? would the App Store reject this icon?* They print finding codes, not opinions.
+**2. Fourteen auditors.** The Python CLI behind those tools. They run without Xcode, without a build, in
+milliseconds, and a human can run the exact same command the agent runs. One implementation, so the agent and the
+terminal can never disagree.
 
-**3. An MCP server.** Every audit, the whole knowledge base and the twelve workflows exposed to Claude Desktop,
-Claude Code, Cursor, Codex or any MCP client — over the official SDK, with typed, versioned results.
+**3. A standard.** [`SKILL.md`](SKILL.md) plus 31 reference guides: what "native" means, which APIs are legacy,
+what to refuse. The server enforces the parts that can be checked; the skill explains the parts that need judgment.
 
-The point is not to generate more Swift. The point is to make the agent **unable to claim it is done** without
-evidence.
+Capabilities are grouped into **nine modules** you enable one by one (`APPLE_NATIVE_MODULES`), so a SwiftUI
+developer never installs the App Store Connect credential path. What is implemented, partial and not started is
+listed in [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 > [!IMPORTANT]
-> Every number on this page is produced by `./scripts/verify.sh`: 138 tests, a link and count validator, a real
-> Swift compile of the fixtures, and a type-check of every documented snippet. See [Proof](#proof).
+> Every number on this page is produced by `./scripts/verify.sh`: 151 tests, a link and count validator, a real
+> Swift compile of the fixtures, and a type-check of all documented snippets. See [Proof](#proof).
 
 ---
 
