@@ -38,6 +38,8 @@ Version 2 replaces all three.
 - **Developer experience** — `make doctor` (toolchain check with the exact fix for each missing piece),
   `make demo` (a 30-second tour of the audits on the broken fixture) and a `Makefile` that delegates to the same
   scripts CI runs.
+- **Benchmark** — `make benchmark` times all eight auditors on a synthetic 500-file project: 922 ms total,
+  ~123 ms per 1,000 lines of Swift.
 - **Template self-tests** — the metadata, icon and report templates must pass the tools they template, and the
   screenshot spec's dimensions must be recognised by the validator.
 - **Verification harness** — `scripts/verify.sh` runs repository validation, 55 Python tests, 8 MCP protocol tests

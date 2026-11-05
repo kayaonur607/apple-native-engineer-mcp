@@ -1,7 +1,7 @@
 # Convenience targets. Everything delegates to scripts/ so CI and humans run the
 # same code path.
 
-.PHONY: help verify test test-py test-js swift docs demo doctor clean
+.PHONY: help verify test test-py test-js swift docs demo doctor benchmark clean
 
 help:
 	@echo "apple-native-engineer-mcp"
@@ -14,6 +14,7 @@ help:
 	@echo "  make docs      regenerate tool READMEs and the SDK reference"
 	@echo "  make demo      see the toolkit work on the bundled fixtures"
 	@echo "  make doctor    check that this machine can run everything"
+	@echo "  make benchmark time the auditors on a synthetic 500-file project"
 	@echo "  make clean     remove caches and generated scratch space"
 
 verify:
@@ -40,6 +41,9 @@ demo:
 
 doctor:
 	./scripts/doctor.sh
+
+benchmark:
+	python3 scripts/benchmark.py
 
 clean:
 	rm -rf .swiftwork **/__pycache__ __pycache__ tests/__pycache__

@@ -333,6 +333,28 @@ its output. There is no silent fallback to synthetic data.
 
 ---
 
+## Performance
+
+The audits run before a build exists, so they have to be cheaper than the thing they check. Measured with
+`make benchmark` on a synthetic 500-file / 7,500-line project (Darwin arm64, Python 3.14):
+
+| Tool | Wall time |
+| :--- | ---: |
+| project-inspector | 82 ms |
+| privacy-auditor | 107 ms |
+| swiftui-linter | 88 ms |
+| accessibility-auditor | 76 ms |
+| localization-checker | 116 ms |
+| liquid-glass-auditor | 78 ms |
+| sf-symbols-catalog | 80 ms |
+| release-readiness (runs the suite internally) | 317 ms |
+| **all eight** | **922 ms** |
+
+≈123 ms per 1,000 lines of Swift for the whole suite. No network, no Xcode, no build products — which is why it can
+run on every agent turn rather than once a day in CI.
+
+---
+
 ## Non-goals
 
 - **Not a build system.** It never calls `xcodebuild` to produce your app; it checks the things that break *before*

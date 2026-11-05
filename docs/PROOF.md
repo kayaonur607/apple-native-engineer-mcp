@@ -241,7 +241,35 @@ declarations live in the visionOS interface that this check does not index. They
 
 ---
 
-## 7. Real data, not remembered data
+## 7. Cost of an audit
+
+```
+$ python3 scripts/benchmark.py --files 500
+Machine:  Darwin arm64 · Python 3.14.7
+Project:  500 Swift files, 7,500 lines
+
+tool                     status       ms  findings
+----------------------------------------------------
+project-inspector        warn       82.2         6
+privacy-auditor          fail      106.9         2
+swiftui-linter           fail       88.2      1000
+accessibility-auditor    fail       76.0       625
+localization-checker     pass      115.5         2
+liquid-glass-auditor     pass       78.1         1
+sf-symbols-catalog       pass       79.5         0
+release-readiness        fail      316.7         7
+----------------------------------------------------
+all 8 tools                        943.1
+
+125.7 ms per 1,000 lines of Swift across the whole suite
+```
+
+Numbers vary by machine; the shape does not. Every tool is a fresh process that reads the sources once, so the
+cost scales linearly with the codebase and never with the dependency graph.
+
+---
+
+## 8. Real data, not remembered data
 
 The SF Symbols catalogue is extracted from the running system, not typed from a blog post:
 
@@ -284,7 +312,7 @@ grep -A2 "func glassEffect(" \
 
 ---
 
-## 8. What is *not* verified
+## 9. What is *not* verified
 
 Being explicit about this is the difference between evidence and marketing.
 
@@ -302,7 +330,7 @@ severity reflects the confidence: `info` for suggestions, `error` for rules Appl
 
 ---
 
-## 9. Reproducing any single claim
+## 10. Reproducing any single claim
 
 | Claim | Command |
 | :--- | :--- |
