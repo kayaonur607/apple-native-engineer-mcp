@@ -180,6 +180,16 @@ def strip_code_fences(text: str) -> str:
     return re.sub(r"```.*?```", "", text, flags=re.DOTALL)
 
 
+def github_slug(heading: str) -> str:
+    slug = heading.strip().lower()
+    slug = re.sub(r"[^a-z0-9 \-_]", "", slug)
+    return slug.replace(" ", "-")
+
+
+def heading_slugs(text: str) -> set:
+    return {github_slug(match.group(1)) for match in re.finditer(r"^#{1,6}\s+(.+)$", text, re.MULTILINE)}
+
+
 def check_links() -> int:
     checked = 0
     broken: List[Tuple[Path, str]] = []
@@ -191,7 +201,12 @@ def check_links() -> int:
             if " " in target:  # prose inside backticks, e.g. `[noun](inflect: true)`
                 continue
             clean = target.split("#", 1)[0]
+            anchor = target.split("#", 1)[1] if "#" in target else ""
             if not clean:
+                # Same-page anchor: the heading must exist (GitHub slug rules).
+                if anchor and github_slug(anchor) not in heading_slugs(md.read_text(errors="ignore")):
+                    broken.append((md, target))
+                checked += 1
                 continue
             clean = clean.removeprefix("file:///").removeprefix("file://")
             candidate = (md.parent / clean).resolve()

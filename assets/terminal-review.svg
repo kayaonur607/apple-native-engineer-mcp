@@ -1,0 +1,27 @@
+<svg width="820" height="466" viewBox="0 0 820 466" fill="none"
+     xmlns="http://www.w3.org/2000/svg" role="img" aria-label="app-store-review · legacy-app">
+  <defs>
+    <linearGradient id="cardBg" x1="0" y1="0" x2="820" y2="466" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0D1117"/>
+      <stop offset="1" stop-color="#090B10"/>
+    </linearGradient>
+    <linearGradient id="cardEdge" x1="0" y1="0" x2="820" y2="466" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2C3648"/>
+      <stop offset="1" stop-color="#161B24"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0.75" y="0.75" width="818.5" height="464.5" rx="14" fill="url(#cardBg)"/>
+  <rect x="0.75" y="0.75" width="818.5" height="464.5" rx="14" stroke="url(#cardEdge)" stroke-width="1.5"/>
+
+  <circle cx="26" cy="22" r="5" fill="#FF5F57"/>
+  <circle cx="44" cy="22" r="5" fill="#FEBC2E"/>
+  <circle cx="62" cy="22" r="5" fill="#28C840"/>
+  <text x="84" y="26" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="11.5"
+        fill="#6B7688">app-store-review · legacy-app</text>
+  <line x1="0" y1="42" x2="820" y2="42" stroke="#FFFFFF" stroke-opacity="0.07"/>
+
+  <g font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="12.5">
+    <text x="22" y="64" fill="#3A4457" font-weight="400" xml:space="preserve">==========================================================================</text><text x="22" y="83" fill="#C9D1DE" font-weight="400" xml:space="preserve">  Apple Native Engineer — App Store Review Risk</text><text x="22" y="102" fill="#3A4457" font-weight="400" xml:space="preserve">==========================================================================</text><text x="22" y="121" fill="#9AA6BA" font-weight="400" xml:space="preserve">  Target:       &lt;repo&gt;/tests/fixtures/legacy-app</text><text x="22" y="140" fill="#FF6B60" font-weight="400" xml:space="preserve">  Status:       FAIL</text><text x="22" y="159" fill="#9AA6BA" font-weight="400" xml:space="preserve">  Findings:     8 (0 critical, 3 error, 5 warning, 0 info)</text><text x="22" y="178" fill="#3A4457" font-weight="400" xml:space="preserve">--------------------------------------------------------------------------</text><text x="22" y="197" fill="#FF6B60" font-weight="600" xml:space="preserve">  ✖ RVW101 The app uses the camera but Info.plist has no NSCameraUsageDescription.</text><text x="22" y="216" fill="#C9D1DE" font-weight="400" xml:space="preserve">      → Add a specific, user-facing NSCameraUsageDescription — Guideline 5.1.1 rejects apps that access…</text><text x="22" y="235" fill="#FF6B60" font-weight="600" xml:space="preserve">  ✖ RVW301 The app offers account creation but no account deletion path was found.</text><text x="22" y="254" fill="#C9D1DE" font-weight="400" xml:space="preserve">      → Guideline 5.1.1(v): apps that support account creation must let people delete the account in-ap…</text><text x="22" y="273" fill="#FF6B60" font-weight="600" xml:space="preserve">  ✖ RVW601 performSelector on private selectors is a rejection risk (2.5.1).</text><text x="22" y="292" fill="#C9D1DE" font-weight="400" xml:space="preserve">      at App/RiskyFeatures.swift:27</text><text x="22" y="311" fill="#C9D1DE" font-weight="400" xml:space="preserve">      → Replace with the public API; Guideline 2.5.1 rejects private or deprecated APIs.</text><text x="22" y="330" fill="#FFDD57" font-weight="600" xml:space="preserve">  ▲ RVW201 “coming soon” placeholder in shipped code — reviewers treat visible placeholders as an incom…</text><text x="22" y="349" fill="#C9D1DE" font-weight="400" xml:space="preserve">      at App/RiskyFeatures.swift:20</text><text x="22" y="368" fill="#C9D1DE" font-weight="400" xml:space="preserve">      → Remove it, or gate it behind a debug flag that cannot ship.</text><text x="22" y="387" fill="#FFDD57" font-weight="600" xml:space="preserve">  ▲ RVW401 An external payment provider is referenced in code.</text><text x="22" y="406" fill="#C9D1DE" font-weight="400" xml:space="preserve">      → Guideline 3.1.1: digital goods and subscriptions sold in the app must use In-App Purchase. Phys…</text><text x="22" y="425" fill="#FFDD57" font-weight="600" xml:space="preserve">  ▲ RVW501 The project looks like a web wrapper: WKWebView with no native navigation or list views.</text>
+  </g>
+</svg>

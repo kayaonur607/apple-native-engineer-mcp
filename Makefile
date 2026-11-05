@@ -1,7 +1,7 @@
 # Convenience targets. Everything delegates to scripts/ so CI and humans run the
 # same code path.
 
-.PHONY: help verify test test-py test-js swift docs demo doctor benchmark clean
+.PHONY: help verify test test-py test-js swift docs demo doctor benchmark evidence clean
 
 help:
 	@echo "apple-native-engineer-mcp"
@@ -15,6 +15,7 @@ help:
 	@echo "  make demo      see the toolkit work on the bundled fixtures"
 	@echo "  make doctor    check that this machine can run everything"
 	@echo "  make benchmark time the auditors on a synthetic 500-file project"
+	@echo "  make evidence  regenerate the README's terminal evidence card"
 	@echo "  make clean     remove caches and generated scratch space"
 
 verify:
@@ -41,6 +42,14 @@ demo:
 
 doctor:
 	./scripts/doctor.sh
+
+evidence:
+	@mkdir -p .swiftwork
+	python3 tools/app-store-review/review.py tests/fixtures/legacy-app \
+	  --metadata tests/fixtures/legacy-app/metadata.json --color never > .swiftwork/review.txt 2>&1 || true
+	python3 scripts/render_terminal_card.py --input .swiftwork/review.txt \
+	  --title "app-store-review · legacy-app" --out assets/terminal-review.svg \
+	  --max-lines 20 --strip-prefix "$$PWD"
 
 benchmark:
 	python3 scripts/benchmark.py

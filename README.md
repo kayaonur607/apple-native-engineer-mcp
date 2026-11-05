@@ -214,7 +214,13 @@ Eighteen auditors, 100+ finding codes. The ones that matter most:
 | **App Store assets** | Icon is 512×512, or has an alpha channel, or screenshots match no accepted slot | [`asset-validator`](tools/asset-validator/) |
 | **Release decision** | Seven weighted gates; a gate with no input is `NOT INSPECTED` → `BLOCKED` | [`release-readiness`](tools/release-readiness/) |
 
-The complete list, with finding codes and exit codes, is in the [tool table](#the-14-cli-tools).
+The complete list, with finding codes and exit codes, is in the [tool table](#the-18-cli-tools).
+
+<p align="center">
+  <img src="assets/terminal-review.svg" alt="app-store-review output on the fixture project" width="100%">
+</p>
+
+<p align="center"><sub>Not a mock-up: the card is rendered from the command's own output — <code>python3 tools/app-store-review/review.py tests/fixtures/legacy-app</code> — by <code>scripts/render_terminal_card.py</code>. Regenerate with <code>make evidence</code>.</sub></p>
 
 ---
 
