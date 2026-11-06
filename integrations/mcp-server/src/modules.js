@@ -96,7 +96,7 @@ export const MODULES = [
   {
     id: "app-store-connect",
     label: "App Store Connect",
-    description: "Read-only account inspection. Requires ASC credentials; off unless enabled.",
+    description: "Read-only account inspection. Requires ASC credentials when called; enabled by default.",
     tools: ["app_store_connect"],
     defaultEnabled: true,
   },

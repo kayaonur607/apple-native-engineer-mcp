@@ -32,7 +32,7 @@ export function createServer({ name = SERVER_NAME, version = SERVER_VERSION, mod
         "1. inspect_apple_project first — understand targets, OS floor, Swift version and architecture.",
         "2. Before writing UI, read the apple-native://skill resource and the relevant references/ resource.",
         "3. After changing code, run review_diff — it audits only the files you touched.",
-        "4. Before claiming a feature is shippable, run generate_release_report and quote its verdict.",
+        "4. Before claiming a feature is shippable, run generate_release_report and quote its static scope; obtain build and runtime evidence separately.",
         "5. If a tool fails unexpectedly, run check_environment before reporting a bug.",
         "",
         "Rules that override model preference:",

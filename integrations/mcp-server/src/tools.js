@@ -7,7 +7,7 @@
  */
 
 import { z } from "zod";
-import { errorResult, gitChangedFiles, resolveTarget, runFileMatrix, runTool, runToolsParallel, toResult } from "./runner.js";
+import { errorResult, gitChangedFiles, resolveOutput, resolveTarget, runFileMatrix, runTool, runToolsParallel, toResult } from "./runner.js";
 import { recordToolRun, sanitiseEvent } from "./telemetry.js";
 import { checkEnvironment } from "./environment.js";
 
@@ -17,6 +17,10 @@ const READ_ONLY = {
   idempotentHint: true,
   openWorldHint: false,
 };
+
+// Writers can overwrite existing destinations. Conservative, static annotations
+// apply even when an optional output argument is omitted.
+const LOCAL_WRITE = { ...READ_ONLY, readOnlyHint: false, destructiveHint: true };
 
 const OPTIONAL_PATH = z
   .string()
@@ -55,7 +59,7 @@ const ENVELOPE = z
           .passthrough(),
       )
       .optional(),
-    data: z.record(z.unknown()).optional(),
+    data: z.record(z.string(), z.unknown()).optional(),
   })
   .passthrough();
 
@@ -325,6 +329,7 @@ export const TOOL_SPECS = [
   },
   {
     name: "forge_design_tokens",
+    annotations: LOCAL_WRITE,
     title: "Forge design tokens",
     description:
       "Compiles a design token JSON (colours with light/dark pairs, spacing, radius, typography) into idiomatic " +
@@ -336,13 +341,14 @@ export const TOOL_SPECS = [
     },
     run: async (args) => {
       const cliArgs = [resolveTarget(args.path)];
-      if (args.out) cliArgs.push("--out", resolveTarget(args.out));
-      if (args.xcassets) cliArgs.push("--xcassets", resolveTarget(args.xcassets));
+      if (args.out) cliArgs.push("--out", resolveOutput(args.out));
+      if (args.xcassets) cliArgs.push("--xcassets", resolveOutput(args.xcassets));
       return runTool("tools/design-token-forge/forge_tokens.py", cliArgs);
     },
   },
   {
     name: "generate_release_report",
+    annotations: LOCAL_WRITE,
     title: "Generate release readiness report",
     description:
       "Runs every audit and produces a weighted App Store readiness verdict. Gates that cannot be inspected " +
@@ -359,12 +365,13 @@ export const TOOL_SPECS = [
       if (args.metadata_path) cliArgs.push("--metadata", resolveTarget(args.metadata_path));
       if (args.icon_path) cliArgs.push("--icon", resolveTarget(args.icon_path));
       if (args.screenshots_path) cliArgs.push("--screenshots", resolveTarget(args.screenshots_path));
-      if (args.output) cliArgs.push("--output", resolveTarget(args.output));
+      if (args.output) cliArgs.push("--output", resolveOutput(args.output));
       return runTool("tools/release-readiness/generate_report.py", cliArgs);
     },
   },
   {
     name: "search_apple_documentation",
+    annotations: { ...READ_ONLY, openWorldHint: true },
     title: "Search Apple documentation",
     description:
       "Searches Apple's own symbol index for a framework (swiftui, uikit, appkit, foundation, …) and returns the " +
@@ -383,6 +390,7 @@ export const TOOL_SPECS = [
   },
   {
     name: "read_apple_documentation",
+    annotations: { ...READ_ONLY, openWorldHint: true },
     title: "Read Apple documentation",
     description:
       "Fetches one developer.apple.com page through the JSON API the site itself uses and returns it as Markdown " +
@@ -395,6 +403,7 @@ export const TOOL_SPECS = [
   },
   {
     name: "inspect_apple_api_availability",
+    annotations: { ...READ_ONLY, openWorldHint: true },
     title: "Inspect API availability",
     description:
       "Returns the per-platform availability table Apple publishes for a symbol: introduced version, deprecation, " +
@@ -407,6 +416,7 @@ export const TOOL_SPECS = [
   },
   {
     name: "find_apple_guidelines",
+    annotations: { ...READ_ONLY, openWorldHint: true },
     title: "Read Human Interface Guidelines",
     description:
       "Fetches a Human Interface Guidelines page (buttons, navigation-and-search, materials, …) as Markdown with " +
@@ -419,6 +429,7 @@ export const TOOL_SPECS = [
   },
   {
     name: "prepare_icon_assets",
+    annotations: LOCAL_WRITE,
     title: "Prepare app icon assets",
     description:
       "Turns one 1024×1024 opaque PNG into a complete AppIcon.appiconset: 18 slots downscaled with a box filter, " +
@@ -428,7 +439,7 @@ export const TOOL_SPECS = [
       out: z.string().describe("Destination .appiconset directory to write"),
     },
     run: async (args) =>
-      runTool("tools/icon-studio/icon_studio.py", ["prepare", resolveTarget(args.source), "--out", resolveTarget(args.out)]),
+      runTool("tools/icon-studio/icon_studio.py", ["prepare", resolveTarget(args.source), "--out", resolveOutput(args.out)]),
   },
   {
     name: "verify_icon_set",
@@ -461,6 +472,7 @@ export const TOOL_SPECS = [
   },
   {
     name: "compose_marketing_screenshots",
+    annotations: LOCAL_WRITE,
     title: "Compose marketing screenshots",
     description:
       "Lays real simulator screenshots into App Store marketing frames (background, headline, subheadline) as " +
@@ -475,7 +487,7 @@ export const TOOL_SPECS = [
       render: z.boolean().optional().describe("Also rasterise to PNG when a renderer is available"),
     },
     run: async (args) => {
-      const cliArgs = ["--screenshots", resolveTarget(args.screenshots), "--out", resolveTarget(args.out)];
+      const cliArgs = ["--screenshots", resolveTarget(args.screenshots), "--out", resolveOutput(args.out)];
       if (args.headline) cliArgs.push("--headline", args.headline);
       if (args.subhead) cliArgs.push("--subhead", args.subhead);
       if (args.theme) cliArgs.push("--theme", args.theme);

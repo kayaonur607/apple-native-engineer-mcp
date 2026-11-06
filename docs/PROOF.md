@@ -26,20 +26,20 @@ Recorded by `./scripts/update_proof.py` on 2026-11-06. Re-run it after any chang
   ✓ validation passed: 0 warning(s)
 
 ▸ Python tests (shared library + tools)
-........................................................................................................................
+................................................................................................................................
 ----------------------------------------------------------------------
-Ran 120 tests in 3.981s
+Ran 128 tests in 3.903s
 
 
 ▸ MCP protocol tests
-ℹ tests 61
+ℹ tests 66
 ℹ suites 13
-ℹ pass 61
+ℹ pass 66
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 655.48475
+ℹ duration_ms 1783.208625
 
 ▸ Swift compilation (fixtures + documentation snippets)
   SDK: iPhoneSimulator27.2.sdk
@@ -103,7 +103,7 @@ Island, a valid privacy manifest, an opaque 1024×1024 icon and three screenshot
 $ python3 tools/release-readiness/generate_report.py <repo>/tests/fixtures/clean-app \
     --metadata metadata.json --icon AppIcon-1024.png --screenshots screenshots
 
-  Verdict:      READY FOR SUBMISSION
+  Verdict:      READY FOR SUBMISSION (historical output; current verdict wording is CONFIGURED STATIC CHECKS PASSED)
   Score:        100/100
 ```
 

@@ -62,6 +62,8 @@ class Gate:
 
     @property
     def status(self) -> str:
+        if not self.applicable:
+            return "not_applicable"
         if not self.inspected or self.report is None:
             return "not_inspected"
         return self.report.status
@@ -73,7 +75,7 @@ class Gate:
         advisories still contributes most of its weight.
         """
 
-        if not self.inspected or self.report is None:
+        if not self.applicable or not self.inspected or self.report is None:
             return 0.0
         counts = self.report.counts()
         if counts["critical"] or counts["error"]:
@@ -88,6 +90,8 @@ class Gate:
             "label": self.label,
             "weight": self.weight,
             "status": self.status,
+            "applicable": self.applicable,
+            "inspected": self.inspected,
             "earned": round(self.earned(), 2),
             "findings": {k: counts[k] for k in ("critical", "error", "warning", "info")},
             "next_command": self.command,
@@ -175,7 +179,7 @@ def evaluate(root: Path, metadata_file: Optional[Path], icon_file: Optional[Path
     if blockers or failing:
         status = "BLOCKED"
     elif score >= 90 and not warning_gates:
-        status = "READY FOR SUBMISSION"
+        status = "CONFIGURED STATIC CHECKS PASSED"
     elif score >= 60:
         status = "ACTION REQUIRED"
     else:
@@ -187,12 +191,15 @@ def evaluate(root: Path, metadata_file: Optional[Path], icon_file: Optional[Path
         "score": score,
         "applicable_weight": total_weight,
         "gates": [g.as_row() for g in gates],
+        "scope": "Configured static checks only; build, runtime accessibility, signing and App Review approval are not verified.",
         "blockers": [g.key for g in blockers],
         "failing_gates": [g.key for g in failing],
         "warning_gates": [g.key for g in warning_gates],
     }
 
     for gate in gates:
+        if not gate.applicable:
+            continue
         if not gate.inspected:
             report.error(
                 "REL001",
@@ -214,7 +221,7 @@ def evaluate(root: Path, metadata_file: Optional[Path], icon_file: Optional[Path
                 hint=f"Details: {gate.command}",
             )
 
-    if status == "READY FOR SUBMISSION":
+    if status == "CONFIGURED STATIC CHECKS PASSED":
         report.info("REL010", f"All {len(applicable)} applicable gates passed with a score of {score}/100.")
     elif blockers:
         report.info("REL011",
@@ -234,6 +241,8 @@ def render_markdown(report: Report, gates: List[Gate]) -> str:
         f"**Verdict**: **{data['verdict']}**  ",
         f"**Score**: **{data['score']}/100** (weighted over {data['applicable_weight']} applicable points)",
         "",
+        f"**Scope**: {data['scope']}",
+        "",
         "## Quality gates",
         "",
         "| Gate | Weight | Status | Earned | Critical | Errors | Warnings |",
@@ -242,7 +251,7 @@ def render_markdown(report: Report, gates: List[Gate]) -> str:
     for gate in gates:
         row = gate.as_row()
         findings = row["findings"]  # type: ignore[index]
-        status = "NOT INSPECTED" if not gate.inspected else str(row["status"]).upper()
+        status = str(row["status"]).upper().replace("_", " ")
         lines.append(
             f"| {row['label']} | {row['weight']} | {status} | {row['earned']} | "
             f"{findings['critical']} | {findings['error']} | {findings['warning']} |"
@@ -251,7 +260,7 @@ def render_markdown(report: Report, gates: List[Gate]) -> str:
     if data["blockers"]:
         lines += ["", "## Blocking inputs", ""]
         for gate in gates:
-            if not gate.inspected:
+            if gate.applicable and not gate.inspected:
                 lines.append(f"- **{gate.label}** — run `{gate.command}`")
 
     lines += ["", "## Finding register", ""]

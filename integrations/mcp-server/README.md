@@ -15,7 +15,7 @@ Claude Desktop · Cursor · Codex · Cline · Zed · any MCP client
   apple-native-engineer  ──►  python3 tools/<auditor>/<script>.py --json
         │                          │
         │                          └── stable envelope (schema_version 2.0)
-        ├── 16 tools        (a whole-project sweep, a diff-scoped review, and 14 auditors)
+        ├── 25 tools        (audits, documentation research and asset generation)
         ├── 53 resources    (references, checklists, examples, SKILL.md)
         └── 12 prompts      (the review workflows, parameterised)
 ```
@@ -318,7 +318,7 @@ credentials, and fails if any of it survives.
 ## Verify the install
 
 ```bash
-node src/index.js --selftest        # inventory: 16 tools, 53 resources, 12 prompts
+node src/index.js --selftest        # inventory: 25 tools, 53 resources, 12 prompts
 node src/index.js --doctor          # Node, Python, auditors, git, Xcode, credentials
 node src/index.js --telemetry-preview
 npm test                            # 51 protocol, CLI, diff, HTTP, metadata and telemetry tests

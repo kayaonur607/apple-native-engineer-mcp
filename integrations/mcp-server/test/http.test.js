@@ -6,6 +6,7 @@
  * cannot reproduce: header handling, body limits, origin checks, clean shutdown.
  */
 
+import http from "node:http";
 import assert from "node:assert/strict";
 import { after, before, describe, it } from "node:test";
 
@@ -76,6 +77,42 @@ describe("streamable HTTP transport", () => {
     assert.equal(response.status, 403);
     const body = await response.json();
     assert.equal(body.error, "origin_not_allowed");
+  });
+
+  it("rejects a foreign Host even without Origin", async () => {
+    const result = await new Promise((resolve, reject) => {
+      const request = http.request(`${handle.url}/mcp`, {
+        method: "POST",
+        headers: { host: "attacker.example", "content-type": "application/json", accept: ACCEPT },
+      }, response => {
+        let body = "";
+        response.on("data", chunk => { body += chunk; });
+        response.on("end", () => resolve({ status: response.statusCode, body: JSON.parse(body) }));
+      });
+      request.on("error", reject);
+      request.end(JSON.stringify(INITIALIZE));
+    });
+    assert.equal(result.status, 403);
+    assert.equal(result.body.error, "host_not_allowed");
+  });
+
+  it("accepts the actual ephemeral loopback Origin", async () => {
+    const response = await fetch(`${handle.url}/mcp`, {
+      method: "POST",
+      headers: { origin: handle.url, "content-type": "application/json", accept: ACCEPT },
+      body: JSON.stringify(INITIALIZE),
+    });
+    assert.equal(response.status, 200);
+    await response.text();
+  });
+
+  it("rejects cross-site requests that omit Origin", async () => {
+    const response = await fetch(`${handle.url}/mcp`, {
+      method: "POST",
+      headers: { "sec-fetch-site": "cross-site", "content-type": "application/json", accept: ACCEPT },
+      body: JSON.stringify(INITIALIZE),
+    });
+    assert.equal(response.status, 403);
   });
 
   it("rejects a non-JSON content type", async () => {

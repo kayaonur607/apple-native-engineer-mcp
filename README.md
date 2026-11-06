@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml"><img src="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/tests-181_passing-30D158" alt="181 tests">
+  <img src="https://img.shields.io/badge/tests-194_passing-30D158" alt="194 tests">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT"></a>
   <img src="https://img.shields.io/badge/protocol-MCP_1.32-8A2BE2" alt="MCP 1.32">
   <img src="https://img.shields.io/badge/Swift-6.x-F05138" alt="Swift 6">
@@ -23,8 +23,8 @@
 
 <p align="center">
   <sub>
-  <b>181 tests</b> · <b>5/5 CI stages</b> · <b>162 snippets compiled</b> · <b>129 API claims checked against the SDK</b> · <b>9,649 SF Symbols</b> · <b>25 MCP tools</b><br>
-  every number produced by <code>./scripts/verify.sh</code> — see <a href="#proof">Proof</a> and <a href="docs/PROOF.md">docs/PROOF.md</a>
+  <b>194 tests</b> · <b>5/5 local verification stages</b> · <b>162 snippets parsed</b> · <b>129 API claims checked against the SDK</b> · <b>9,649 SF Symbols</b> · <b>25 MCP tools</b><br>
+  local run on 2026-11-06; see exact commands and scope — see <a href="#proof">Proof</a> and <a href="docs/PROOF.md">docs/PROOF.md</a>
   </sub>
 </p>
 
@@ -37,8 +37,7 @@ npx -y apple-native-engineer-mcp --selftest   # 25 tools, 53 resources, 12 promp
 npx -y apple-native-engineer-mcp --doctor     # Node, Python, Xcode, SDK, auditors
 ```
 
-That is the whole setup for an MCP client: point it at `npx apple-native-engineer-mcp` and nothing else. No clone,
-no Python install, no credentials. Prefer a checkout? `git clone`, `cd integrations/mcp-server && npm install`.
+With Node 20+ and Python 3.10+ installed, configure an MCP client: point it at `npx apple-native-engineer-mcp` and nothing else. No clone or credentials for local audits. The package bundles auditors, not a Python runtime. Prefer a checkout? `git clone`, `cd integrations/mcp-server && npm install`.
 
 <details>
 <summary><b>Client configuration and the other entry points</b></summary>
@@ -71,20 +70,18 @@ the order you meet them:
 review, SwiftUI lint, accessibility, Liquid Glass, SF Symbols, privacy manifests, widgets, metadata, assets and a
 weighted release gate. Every result is a typed envelope with finding codes — not prose.
 
-**2. Eighteen auditors.** The Python CLI behind those tools. They run without Xcode, without a build, in
-milliseconds, and a human can run the exact same command the agent runs. One implementation, so the agent and the
-terminal can never disagree.
+**2. Eighteen CLI tools.** The Python CLI behind those tools. Static audits run without Xcode or a build, and a human can run the exact same command the agent runs. Shared implementations keep CLI and MCP behavior aligned.
 
 **3. A standard.** [`SKILL.md`](SKILL.md) plus 31 reference guides: what "native" means, which APIs are legacy,
 what to refuse. The server enforces the parts that can be checked; the skill explains the parts that need judgment.
 
-Capabilities are grouped into **eleven modules** you enable one by one (`APPLE_NATIVE_MODULES`), so a SwiftUI
-developer never installs the App Store Connect credential path. What is implemented, partial and not started is
+Capabilities are grouped into **eleven modules**, selected with `APPLE_NATIVE_MODULES`. All are exposed by default;
+select `core,swift-engineering` for a smaller local tool inventory. ASC credentials are read only when called. What is implemented, partial and not started is
 listed in [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 > [!IMPORTANT]
-> Every number on this page is produced by `./scripts/verify.sh`: 151 tests, a link and count validator, a real
-> Swift compile of the fixtures, and a type-check of all documented snippets. See [Proof](#proof).
+> The validation counts are checked by `./scripts/verify.sh`: 194 tests, a link and count validator, a real
+> Swift compile of the fixtures, a parse of documented snippets and SDK type-checks of supported complete examples. See [Proof](#proof).
 
 ---
 
@@ -100,7 +97,7 @@ Button { save() } label: { Image(systemName: "checkmark") }
     .frame(width: 30, height: 30)             // half the 44pt minimum tap target
 ```
 
-Nothing in that snippet fails the build. The bugs live where a compiler does not look: contrast ratios, Dynamic
+The invented `Color(hex:)` initializer fails unless your project defines it; the layout and accessibility problems can still compile. The bugs live where a compiler does not look: contrast ratios, Dynamic
 Type, hit targets, localisation, platform availability.
 
 Three specific failure modes this repository removes:
@@ -121,10 +118,9 @@ Three specific failure modes this repository removes:
 
 The agent asks in natural language. The server maps that to a script, the script produces a **finding list**, and
 every finding carries a stable code, a severity, a file and line, a fix hint and a documentation link. The release
-gate reads all of them and returns one of two answers.
+gate combines seven configured gates into a verdict and score.
 
-There is deliberately **one implementation**: the MCP tools shell out to the same CLI this README documents. No
-second code path, no drift between "what the agent runs" and "what a human runs".
+There is deliberately **one implementation**: the MCP tools shell out to the same CLI this README documents. The same audit code runs from MCP and the terminal.
 
 ---
 
@@ -136,7 +132,7 @@ cd apple-native-engineer-mcp
 
 make doctor   # is this machine ready? (Python, Node, Xcode, SDK)
 make demo     # 30 seconds: the audits on a deliberately broken app
-make verify   # everything CI runs, including 181 tests and a real Swift compile
+make verify   # everything CI runs, including 194 tests and a real Swift compile
 ```
 
 What `make demo` shows, trimmed:
@@ -148,13 +144,13 @@ What `make demo` shows, trimmed:
 4/4 · The verdict                      → BLOCKED, 19/100
 ```
 
-Then the same gate on a project that follows the rules: **READY FOR SUBMISSION, 100/100**.
+Then the same gate on a project that follows the rules: **CONFIGURED STATIC CHECKS PASSED, 100/100**.
 
 ### Use it as an MCP server (recommended)
 
 ```bash
 cd integrations/mcp-server && npm install
-node src/index.js --selftest   # 16 tools · 53 resources · 12 prompts
+node src/index.js --selftest   # 25 tools · 53 resources · 12 prompts
 ```
 
 Or without cloning anything:
@@ -194,7 +190,7 @@ python3 tools/swiftui-linter/lint_swiftui.py .
 python3 tools/release-readiness/generate_report.py . --metadata metadata.json --icon AppIcon-1024.png
 ```
 
-Python 3.10+, standard library, nothing to install. Every tool supports `--json`, `--strict` and `--color`.
+Python 3.10+, standard library, nothing to install. Audit entry points support `--json`, `--strict` and `--color`.
 
 ---
 
@@ -273,7 +269,7 @@ These are the rules that separate "looks like iOS" from "is iOS":
   `GlassEffectContainer`, `.glassEffectID`, `.scrollEdgeEffectStyle` and `.buttonStyle(.glass)` are iOS 26+, that
   `Glass` has exactly `.regular`, `.clear`, `.identity` with `.tint()` and `.interactive()`, and that the API is
   unavailable on visionOS.
-- **A release gate that cannot be fooled.** A gate with no input is `NOT INSPECTED`, scores zero and forces
+- **A conservative static release gate.** A gate with no input is `NOT INSPECTED`, scores zero and forces
   `BLOCKED`. A missing metadata file is not a passing metadata file.
 - **Contrast maths, not contrast guesses.** Every ratio is computed from the WCAG relative luminance formula, in
   both appearances, and printed as a number.
@@ -307,13 +303,13 @@ Built on the official `@modelcontextprotocol/sdk` (v1.32) rather than a hand-rol
   URIs. The agent loads the design standard on demand instead of you pasting it into the prompt.
 - **12 prompts.** Every slash command (`/apple-native`, `/apple-native-design`, `/apple-native-release`, …) is a
   first-class MCP prompt with a `project` argument and an optional `focus`.
-- **Read-only annotations.** Audit tools are `readOnlyHint: true, destructiveHint: false`. The server cannot mutate
-  your project or your App Store account.
-- **Capability modules.** Nine modules, enabled with `APPLE_NATIVE_MODULES`. A SwiftUI developer never installs the
-  App Store Connect credential path; a privacy reviewer can run `core,privacy-security-audit` and nothing else. A
+- **Capability annotations.** Audit tools are `readOnlyHint: true, destructiveHint: false`. Four output-capable tools are marked writable and potentially destructive
+  because destinations may be overwritten. App Store Connect remains read-only.
+- **Capability modules.** Eleven modules, enabled with `APPLE_NATIVE_MODULES`. A SwiftUI developer can disable the
+  App Store Connect capability; a privacy reviewer can run `core,privacy-security-audit` and nothing else. A
   disabled tool is absent from `tools/list` and returns an error if called — never a silent empty result. See
   [`docs/MODULES.md`](docs/MODULES.md).
-- **No data collection.** No audit makes a network call. Telemetry is off by default; when you turn it on it records
+- **Local audits.** Source audits make no network calls. Telemetry is off by default; when you turn it on it records
   five fields — tool, outcome, duration bucket, day, schema — and an allowlist drops everything else.
   `--telemetry-preview` prints the exact bytes, and a test feeds it paths and prompts to prove they do not survive.
 
@@ -340,22 +336,22 @@ compiler sees annotated `@available(iOS 27.0, …)`.
 
 ## Proof
 
-Most repositories describe. This one measures. `./scripts/verify.sh` runs five stages and fails if any of them
+The recorded local run is linked in [the audit report](docs/AUDIT-2026-11-06.md). `./scripts/verify.sh` runs five stages and fails if any of them
 disagrees with the documentation:
 
 | Stage | Result | How it is measured |
 | :--- | :--- | :--- |
-| Repository validation | **pass** | Frontmatter, 20 required paths, every internal link, and every count in this README cross-checked against the filesystem |
-| Python tests | **120 pass** | `python3 -m unittest` across 3.10 / 3.12 / 3.13 in CI |
-| MCP protocol tests | **61 pass** | A real `Client` ↔ `McpServer` pair over the SDK's in-memory transport, a real HTTP socket, a throwaway git repo, the publish metadata, and hostile telemetry payloads |
+| Repository validation | **pass** | Frontmatter, 20 required paths, every internal link, and selected inventory counts checked against the filesystem |
+| Python tests | **128 pass** | `python3 -m unittest` locally; CI is configured for 3.10 / 3.12 / 3.13 |
+| MCP protocol tests | **66 pass** | A real `Client` ↔ `McpServer` pair over the SDK's in-memory transport, a real HTTP socket, a throwaway git repo, the publish metadata, and hostile telemetry payloads |
 | Swift compilation | **pass** | `swiftc -typecheck` on both fixtures, `swiftc -parse` on all 162 documented snippets, and a full type-check of 73 of them against the SDK each one targets — iOS or visionOS |
-| Apple documentation | **live** | Search, read, availability and HIG pages fetched from developer.apple.com with a source URL and fetch time |
+| Apple documentation | **optional network capability** | Search, read, availability and HIG pages fetched from developer.apple.com with a source URL and fetch time |
 | Documentation claims | **pass** | 129 taught modifiers looked up in 21,998 SDK symbols; 64 iOS 27 declarations generated from the SDK |
 
 Both directions are tested, which is the point:
 
-- the **clean** fixture must produce **zero** findings across all auditors (no false positives)
-- the **legacy** fixture must trip **every** rule it was built for (no false negatives)
+- the **clean** fixture must produce **zero** findings across all auditors (fixture regression check)
+- the **legacy** fixture must trip **every** rule it was built for (fixture regression check)
 
 `docs/PROOF.md` holds the raw terminal transcripts, including the check that found 14 occurrences of an invalid
 `dampingRatio:` argument label across six guides.
@@ -422,6 +418,22 @@ output. There is no silent fallback to synthetic data.
 
 ---
 
+## Evidence boundaries and platform coverage
+
+The release verdict is **configured static checks only**. It does not prove a successful build, working purchase flow,
+VoiceOver behavior, signing, entitlement correctness, App Store acceptance or ASO performance. Regex findings are review
+signals; contrast checks use assumed backgrounds, not rendered pixels. Review false positives in context.
+
+For a recorded Xcode test run, use `python3 scripts/collect_xcode_evidence.py TestResults.xcresult`.
+This optional local CLI reads `xcresulttool` output, rejects empty/failed runs and reports skipped tests. It does not
+run builds or feed the static gate automatically. Its parser has contract tests; no real app test bundle was exercised
+in this revision. See [platform and developer workflow](docs/PLATFORM-WORKFLOW.md),
+[optional ecosystem integrations](docs/ECOSYSTEM.md), and [current audit evidence](docs/AUDIT-2026-11-06.md).
+
+iOS and iPadOS have the deepest fixture coverage. macOS, watchOS and visionOS have reference guidance and shared
+source checks; they do not have equivalent end-to-end app coverage. tvOS requires manual focus, remote and layout
+review. See the platform matrix before applying iPhone-specific rules to another platform.
+
 ## Non-goals
 
 - **Not a build system.** It never runs `xcodebuild` to produce your app; it checks what breaks *before* and
@@ -444,7 +456,7 @@ apple-native-engineer-mcp/
 ├── integrations/mcp-server/     # official-SDK MCP server (tools + resources + prompts)
 ├── references/  checklists/  examples/  commands/
 ├── data/sf-symbols.json         # 9,649 SF Symbols with per-OS availability
-├── tests/                       # 87 Python tests + two fixture projects
+├── tests/                       # 128 Python tests + two fixture projects
 ├── scripts/                     # verify, doctor, demo, benchmark, generators
 ├── docs/PROOF.md                # raw verification transcripts
 ├── docs/PUBLISHING.md           # release runbook: version, tag, npm, registries
@@ -458,8 +470,8 @@ apple-native-engineer-mcp/
 | Question | Answer |
 | :--- | :--- |
 | Does it upload my source? | No. Audit tools read files locally and print JSON to stdout. |
-| What talks to the network? | Only two things, and only when called: `developer.apple.com` (documentation research) and `api.appstoreconnect.apple.com` (read-only App Store Connect). |
-| How are credentials stored? | `ASC_*` environment variables or a `.p8` path for App Store Connect; the macOS app keeps assistant keys in the Keychain. Never in tool results, never in logs. |
+| What talks to the network? | Documentation and App Store Connect when called (anonymous telemetry can also send events to an explicitly configured endpoint): `developer.apple.com` (documentation research) and `api.appstoreconnect.apple.com` (read-only App Store Connect). |
+| How are credentials stored? | `ASC_*` environment variables or a `.p8` path for App Store Connect; the parked macOS app is not included in this branch. Never in tool results, never in logs. |
 | Telemetry? | Off by default. `APPLE_NATIVE_TELEMETRY=local` or `anonymous` writes a closed five-key event; a test feeds the sanitiser hostile payloads and fails if anything else escapes. `--telemetry-preview` prints the exact bytes first. |
 | Can a tool modify my account? | Not today: the App Store Connect client only issues GET requests. Any write capability would arrive as its own module with a preview → approve → apply → read-back flow. |
 | What about secrets in the repo? | `.env`, `*.p8`, `*.pem` are git-ignored; documentation is validated for leaked personal paths in CI. |

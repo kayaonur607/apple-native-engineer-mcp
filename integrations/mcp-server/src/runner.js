@@ -45,8 +45,8 @@ export class ToolError extends Error {
 }
 
 /**
- * Resolve a user supplied path against `cwd`, rejecting paths that escape a
- * sensible root. Agents pass relative paths most of the time; absolute paths
+ * Resolve an existing input path against `cwd`. This does not impose a sandbox.
+ * Agents pass relative paths most of the time; absolute paths
  * are allowed because a monorepo often lives elsewhere.
  */
 export function resolveTarget(input, cwd = process.cwd()) {
@@ -56,6 +56,16 @@ export function resolveTarget(input, cwd = process.cwd()) {
     throw new ToolError(`Path does not exist: ${resolved}`, { code: "PATH_NOT_FOUND" });
   }
   return resolved;
+}
+
+/** Resolve a write destination; the tool creates directories as needed.
+ * Like input paths, this is not a filesystem sandbox. MCP clients must approve writes.
+ */
+export function resolveOutput(input, cwd = process.cwd()) {
+  if (typeof input !== "string" || !input.trim() || input.includes("\0")) {
+    throw new ToolError("Output path must be a non-empty path", { code: "INVALID_OUTPUT_PATH" });
+  }
+  return path.resolve(cwd, input);
 }
 
 function summarise(envelope) {

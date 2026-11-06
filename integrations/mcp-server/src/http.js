@@ -96,10 +96,18 @@ export function createHttpServer({
     );
   }
 
-  const origins = allowedOrigins(port);
+
 
   const server = http.createServer(async (req, res) => {
-    const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
+    // Validate Host even when a client omits Origin (DNS rebinding).
+    const authority = req.headers.host ?? "";
+    const boundPort = server.address()?.port ?? port;
+    const localHosts = new Set([`127.0.0.1:${boundPort}`, `localhost:${boundPort}`, `[::1]:${boundPort}`]);
+    if (isLoopback && !localHosts.has(authority)) {
+      sendJson(res, 403, { error: "host_not_allowed" });
+      return;
+    }
+    const url = new URL(req.url ?? "/", "http://localhost");
 
     // Health is intentionally unauthenticated and body-free: it is what a
     // container orchestrator and a human with curl both need.
@@ -126,7 +134,8 @@ export function createHttpServer({
     // allowed, and reject requests with no usable Origin only when they claim
     // to be cross-origin (Sec-Fetch-Site).
     const origin = req.headers.origin;
-    if (origin && !origins.has(origin)) {
+    if ((origin && !allowedOrigins(boundPort).has(origin)) ||
+        (!origin && req.headers["sec-fetch-site"] === "cross-site")) {
       sendJson(res, 403, {
         error: "origin_not_allowed",
         detail: `Origin ${origin} is not allowed. Add it explicitly only if you trust it.`,

@@ -68,7 +68,7 @@ npm init -y > /dev/null
 npm install /tmp/apple-native-engineer-mcp-<version>.tgz
 ./node_modules/.bin/apple-native-engineer-mcp --version      # must print the new version
 ./node_modules/.bin/apple-native-engineer-mcp --doctor       # must not report a missing auditor
-./node_modules/.bin/apple-native-engineer-mcp --selftest     # 16 tools, 53 resources, 12 prompts
+./node_modules/.bin/apple-native-engineer-mcp --selftest     # 25 tools, 53 resources, 12 prompts
 ```
 
 A run that only succeeds in the repository has proven nothing about what users install.

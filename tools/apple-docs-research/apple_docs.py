@@ -42,6 +42,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 from apple_native import __version__
 from apple_native.cli import build_parser, emit
 from apple_native.report import Report
+from apple_native.http import open_trusted
 
 DATA_BASE = "https://developer.apple.com/tutorials/data"
 ALLOWED_HOSTS = {"developer.apple.com"}
@@ -116,7 +117,7 @@ class HttpFetcher:
                 "Accept": "application/json",
             })
             try:
-                with urllib.request.urlopen(request, timeout=self.timeout) as response:
+                with open_trusted(request, ALLOWED_HOSTS, timeout=self.timeout) as response:
                     return json.loads(response.read().decode("utf-8"))
             except urllib.error.HTTPError as exc:
                 if exc.code == 404:

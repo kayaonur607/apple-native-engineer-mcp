@@ -32,6 +32,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+from apple_native.http import open_trusted
+
 API_BASE = "https://api.appstoreconnect.apple.com/v1"
 TOKEN_LIFETIME = 19 * 60  # Apple rejects tokens older than 20 minutes
 MAX_RETRIES = 3
@@ -173,7 +176,7 @@ class AppStoreConnectClient:
                 method="GET",
             )
             try:
-                with urllib.request.urlopen(request, timeout=self.timeout) as response:
+                with open_trusted(request, {"api.appstoreconnect.apple.com"}, timeout=self.timeout) as response:
                     return json.loads(response.read().decode())
             except urllib.error.HTTPError as exc:
                 body = exc.read().decode(errors="replace")

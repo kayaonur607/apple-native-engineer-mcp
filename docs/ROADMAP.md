@@ -32,7 +32,7 @@ Last reviewed: 2026-11-06 · SDK 27.2 · Xcode 27.2
 | ASO | **Implemented (honest v1)** | Budget arithmetic, duplicate/wasted keywords, coverage against visible copy, risky-claim detection, candidates extracted from the developer's own description | No search-volume or competitor data — and it says so instead of inventing numbers |
 
 
-| Capability modules | **Implemented** | Nine modules, `APPLE_NATIVE_MODULES`, isolation tests | No lazy dependency installation (there are no optional deps to install) |
+| Capability modules | **Implemented** | Eleven modules, `APPLE_NATIVE_MODULES`, isolation tests | No lazy dependency installation (there are no optional deps to install) |
 | MCP transports | **Implemented** | stdio and Streamable HTTP (`--http`), loopback-only default, Origin check | No auth for remote use (deliberately refused) |
 | Privacy controls | **Implemented** | Telemetry off by default, closed five-key schema, sanitiser tests, no source uploads | Session-level consent prompts are a client concern |
 | Native macOS app | **Parked** | Working build on branch `wip/app-studio` (findings UI, gate, assistant) | Not in `main`; tool calling and streaming not built |

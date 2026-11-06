@@ -40,8 +40,10 @@ Anything that lets input escape its intended effect is in scope.
 **In scope**
 
 - Path traversal or symlink tricks that make an auditor read or write outside the target directory.
-- A tool that mutates a project or an App Store Connect account. Every tool is declared read-only and must stay
-  that way.
+- An audit tool that unexpectedly mutates a project, or any App Store Connect mutation.
+- An output-capable tool writing beyond its requested destination. Token, icon, screenshot and report generators
+  intentionally write files and can overwrite existing destinations; MCP annotations mark these writable.
+  User-supplied absolute paths are supported: this server is not a filesystem sandbox.
 - Command injection through a path, a symbol name, a metadata field or a git revision.
 - A way to make the server emit data it promised not to: file contents, credentials, environment variables.
 - Telemetry fields outside the documented five-key shape, or a network request the user did not enable.
