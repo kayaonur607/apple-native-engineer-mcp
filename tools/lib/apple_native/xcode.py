@@ -39,27 +39,37 @@ class ProjectInfo:
     privacy_manifests: List[Path] = field(default_factory=list)
 
 
-_PBXPROJ_SKIP = {"DerivedData", ".build", "Pods", "Carthage", ".git"}
+_PBXPROJ_SKIP = {"DerivedData", ".build", "Pods", "Carthage", ".git", "node_modules", ".symlinks", "ephemeral",
+                 ".dart_tool", "build", ".expo", "android", ".swiftwork"}
+
+
+def _skipped(path: Path, root: Path) -> bool:
+    try:
+        parts = path.relative_to(root).parts
+    except ValueError:
+        parts = path.parts
+    return any(part in _PBXPROJ_SKIP for part in parts)
 
 
 def discover(root: Path) -> ProjectInfo:
-    info = ProjectInfo(root=root)
+    """Inspect *root*. Xcode projects are found at the root and in cross-platform
+    host folders (``ios/``, ``macos/``, ``ios/App``, ``iosApp`` …) up to three levels deep."""
 
-    for pattern, bucket in (
-        ("*.xcodeproj", info.project_files),
-        ("*.xcworkspace", info.workspace_files),
-    ):
-        for found in sorted(root.glob(pattern)):
-            if any(part in _PBXPROJ_SKIP for part in found.parts):
-                continue
-            bucket.append(found.name)
+    from .frameworks import xcode_containers  # local import: frameworks imports nothing from here
+
+    info = ProjectInfo(root=root)
+    containers = [path for path in xcode_containers(root) if not _skipped(path, root)]
+    for container in containers:
+        relative = str(container.relative_to(root))
+        (info.workspace_files if container.suffix == ".xcworkspace" else info.project_files).append(relative)
 
     for found in sorted(root.rglob("Package.swift")):
-        if any(part in _PBXPROJ_SKIP for part in found.parts):
+        if _skipped(found, root):
             continue
         info.package_files.append(str(found.relative_to(root)))
 
-    info.has_cocoapods = (root / "Podfile").exists()
+    info.has_cocoapods = (root / "Podfile").exists() or any((root / host / "Podfile").exists()
+                                                           for host in ("ios", "macos", "ios/App", "iosApp"))
     info.has_carthage = (root / "Cartfile").exists()
 
     if info.workspace_files:
@@ -69,30 +79,30 @@ def discover(root: Path) -> ProjectInfo:
     elif info.package_files:
         info.kind = "swift-package"
 
-    for pbx in root.glob("*.xcodeproj/project.pbxproj"):
-        parse_pbxproj(pbx, info)
+    for project in info.project_files:
+        parse_pbxproj(root / project / "project.pbxproj", info)
 
     for pkg in info.package_files:
         parse_package_swift(root / pkg, info)
 
     for found in root.rglob("Info.plist"):
-        if any(part in _PBXPROJ_SKIP for part in found.parts):
+        if _skipped(found, root):
             continue
         info.info_plists.append(found)
 
     for found in root.rglob("*.entitlements"):
-        if any(part in _PBXPROJ_SKIP for part in found.parts):
+        if _skipped(found, root):
             continue
         info.entitlements.append(found)
 
     for found in root.rglob("PrivacyInfo.xcprivacy"):
-        if any(part in _PBXPROJ_SKIP for part in found.parts):
+        if _skipped(found, root):
             continue
         info.privacy_manifests.append(found)
 
     if (root / "Package.resolved").exists() or any(
-        "XCRemoteSwiftPackageReference" in p.read_text(errors="ignore")
-        for p in root.glob("*.xcodeproj/project.pbxproj")
+        "XCRemoteSwiftPackageReference" in (root / project / "project.pbxproj").read_text(errors="ignore")
+        for project in info.project_files if (root / project / "project.pbxproj").exists()
     ):
         info.has_spm_dependencies = True
 
@@ -205,3 +215,30 @@ def parse_version(value: str) -> Tuple[int, ...]:
     while len(parts) < 3:
         parts.append(0)
     return tuple(parts[:3])
+
+
+SDK_NAMES = {"iOS": "iphoneos", "macOS": "macosx", "tvOS": "appletvos", "watchOS": "watchos", "visionOS": "xros"}
+
+
+def sdk_minimum_deployment(platform: str = "iOS") -> Optional[Tuple[str, str]]:
+    """``(minimum, sdk_version)`` the installed Xcode accepts for *platform*, read from
+    ``SDKSettings.json``. ``None`` when Xcode or the platform SDK is not installed."""
+
+    import json
+    import shutil
+    import subprocess
+
+    sdk = SDK_NAMES.get(platform)
+    if not sdk or shutil.which("xcrun") is None:
+        return None
+    try:
+        path = subprocess.run(["xcrun", "--sdk", sdk, "--show-sdk-path"], capture_output=True, text=True,
+                              timeout=20).stdout.strip()
+        settings = json.loads((Path(path) / "SDKSettings.json").read_text())
+    except (OSError, ValueError, subprocess.TimeoutExpired):
+        return None
+    for target in (settings.get("SupportedTargets") or {}).values():
+        minimum = target.get("MinimumDeploymentTarget")
+        if minimum:
+            return minimum, str(settings.get("Version", ""))
+    return None

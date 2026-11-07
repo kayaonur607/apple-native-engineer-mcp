@@ -22,7 +22,8 @@ from apple_native import __version__
 from apple_native.cli import build_parser, emit, guard_directory
 from apple_native.report import Report
 from apple_native.swiftscan import iter_files, load_swift_files
-from apple_native.xcode import discover, parse_version
+from apple_native.frameworks import detect as detect_framework
+from apple_native.xcode import discover, parse_version, sdk_minimum_deployment
 
 FRAMEWORK_SIGNATURES = {
     "SwiftUI": ["import SwiftUI"],
@@ -92,6 +93,7 @@ def inspect_project(raw_root: str) -> Report:
     report = Report(tool="project-inspector", target=str(root), version=__version__)
 
     project = discover(root)
+    app_framework = detect_framework(root)
     swift_files = load_swift_files(root)
     joined = "\n".join(f.clean for f in swift_files)
 
@@ -119,16 +121,38 @@ def inspect_project(raw_root: str) -> Report:
         "spm_dependencies": project.has_spm_dependencies,
         "cocoapods": project.has_cocoapods,
         "bundle_ids": project.bundle_ids[:5],
+        "app_framework": app_framework.as_dict(),
+        "xcode_containers": project.workspace_files + project.project_files,
     }
 
+    if app_framework.framework != "native":
+        report.info(
+            "PROJ020",
+            f"{app_framework.label} app"
+            + (f"; iOS host at {app_framework.hosts['iOS']}" if "iOS" in app_framework.hosts else "; no checked-in iOS host")
+            + ". Swift metrics below cover the native host only.",
+            hint="Run audit_cross_platform for framework-level checks (Dynamic Type, VoiceOver, Dark Mode, "
+                 "permissions, localizations).",
+        )
+
     # -- findings ---------------------------------------------------
-    if project.kind == "unknown":
+    for platform, floor in project.deployment_targets.items():
+        supported = sdk_minimum_deployment(platform) if project.kind != "swift-package" else None
+        if supported and parse_version(floor) < parse_version(supported[0]):
+            report.error("PROJ022", f"{platform} deployment target {floor} is below {supported[0]}, the minimum the "
+                         f"installed SDK ({supported[1]}) builds.",
+                         hint="Raise the deployment target; Xcode refuses to build below the SDK's supported range.")
+    if project.kind == "unknown" and app_framework.managed:
+        report.info("PROJ021", "Expo app without a checked-in native host; EAS or `npx expo prebuild` generates it.")
+    elif project.kind == "unknown":
         report.warn(
             "PROJ001",
             "No .xcodeproj, .xcworkspace or Package.swift found at the project root.",
             hint="Run the tool from the directory that contains the project, or pass its path.",
         )
-    if not swift_files:
+    if not swift_files and app_framework.framework != "native":
+        pass
+    elif not swift_files:
         report.warn(
             "PROJ002",
             "No Swift sources found; nothing to analyse.",

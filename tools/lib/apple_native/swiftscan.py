@@ -12,6 +12,7 @@ original file position.
 
 from __future__ import annotations
 
+import os
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -21,6 +22,8 @@ SWIFT_EXTS = {".swift"}
 SKIP_DIRS = {
     ".git", ".build", "DerivedData", "build", "Pods", "Carthage",
     ".swiftpm", "node_modules", "venv", ".venv", "__pycache__",
+    # cross-platform dependency and generated trees (Flutter, React Native, Expo, Gradle)
+    ".symlinks", "ephemeral", ".dart_tool", ".expo", ".gradle", "android",
 }
 
 
@@ -36,12 +39,14 @@ def iter_files(root: Path, suffixes: Iterable[str] = (".swift",)) -> Iterator[Pa
         if root.suffix.lower() in wanted:
             yield root
         return
-    for path in sorted(root.rglob("*")):
-        if not path.is_file() or path.suffix.lower() not in wanted:
-            continue
-        if any(part in SKIP_DIRS for part in path.parts):
-            continue
-        yield path
+    found = []
+    for directory, subdirectories, files in os.walk(root):
+        # Prune in place: never descend into dependency or build trees.
+        subdirectories[:] = [name for name in subdirectories if name not in SKIP_DIRS]
+        for name in files:
+            if os.path.splitext(name)[1].lower() in wanted:
+                found.append(Path(directory) / name)
+    yield from sorted(found)
 
 
 def _blank(chunk: str) -> str:
