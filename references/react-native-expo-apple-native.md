@@ -52,10 +52,19 @@ anything SwiftUI-only (widgets, Live Activities, App Intents live in Swift targe
 ## 3. Screenshots
 
 Build for the Simulator (`npx expo run:ios --configuration Release`, or `xcodebuild` on `ios/<App>.xcworkspace`
-with `-sdk iphonesimulator`), then `capture_screenshots`. Route screens with launch arguments: iOS places
-`-screen insights` in the NSUserDefaults argument domain, and React Native's iOS-only `Settings.get('screen')`
-reads NSUserDefaults. (The Swift and Flutter routes are exercised in this repository's recorded runs; the React
-Native route is not yet — confirm it once in your app, or read the value in a small native module.)
+with `-sdk iphonesimulator`), then `capture_screenshots`.
+
+Screen routing, **verified on a published Expo SDK 55 app (React Native 0.83, New Architecture)**:
+
+1. Launch arguments `-screenshotMode YES -screen history` land in the NSUserDefaults argument domain; React
+   Native's iOS `Settings.get('screen')` reads them (it works in bridgeless mode, unlike
+   `NativeModules.SettingsManager`).
+2. If the app skips its JS splash/onboarding in screenshot mode, call `SplashScreen.hideAsync()` yourself —
+   otherwise the native splash stays on screen.
+3. Expo Router opens the URL route (`/` → first tab) and ignores `initialRouteName` on first launch: navigate with
+   `router.replace('/history')` once the app is ready.
+4. Seed realistic demo data **in memory only** (no AsyncStorage, no iCloud) so lists are not empty; avoid third-party
+   trademarks and real personal data in it.
 
 ## 4. Release
 

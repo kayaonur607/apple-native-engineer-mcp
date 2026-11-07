@@ -33,7 +33,7 @@
 <rect x="950" y="396" width="590" height="98" rx="16"/><rect x="950" y="514" width="590" height="98" rx="16"/>
 </g>
 <g fill="#edf3fb" font-size="22" font-weight="600"><text x="976" y="200">audit_cross_platform</text><text x="976" y="318">inspect · privacy · audit_project</text><text x="976" y="436">capture_screenshots</text><text x="976" y="554">plan_distribution</text></g>
-<g fill="#a2b1c6" font-size="18"><text x="976" y="232">Dynamic Type · VoiceOver · Dark Mode · iOS idioms · permissions</text><text x="976" y="350">Run on the host: targets, manifests, SDK minimum (XPL020)</text><text x="976" y="468">One -screen launch argument; recorded in Swift and Flutter</text><text x="976" y="586">flutter build ipa · EAS build/submit · cap sync · dotnet publish</text></g>
+<g fill="#a2b1c6" font-size="18"><text x="976" y="232">Dynamic Type · VoiceOver · Dark Mode · iOS idioms · permissions</text><text x="976" y="350">Run on the host: targets, manifests, SDK minimum (XPL020)</text><text x="976" y="468">One -screen launch argument; recorded in Swift, Flutter and Expo</text><text x="976" y="586">flutter build ipa · EAS build/submit · cap sync · dotnet publish</text></g>
 
 <path d="M60 652H1540" stroke="#29374b"/>
 <text x="60" y="694" fill="#edf3fb" font-size="22">Recorded Flutter 3.44.8 run: fresh template failed to build on Xcode 27.2 (XPL020) and lacked Turkish (FLT009)</text>

@@ -59,9 +59,9 @@ auditors (`lint_swiftui`, `validate_widgets`).
 
 Screen routing: pass `-screen <name>` as a launch argument and read it from the NSUserDefaults argument domain —
 `UserDefaults` (Swift), `Settings.get` (React Native), `SharedPreferencesAsync` (Flutter),
-`NSUserDefaults.StandardUserDefaults` (MAUI), `NSUserDefaults.standardUserDefaults` (Kotlin/Native). Swift and
-Flutter are verified in the recorded runs; the others use the same NSUserDefaults lookup but have not been
-recorded here. Avoid custom-scheme deep links for captures: iOS asks for confirmation first, and
+`NSUserDefaults.StandardUserDefaults` (MAUI), `NSUserDefaults.standardUserDefaults` (Kotlin/Native). Swift,
+Flutter and React Native (Expo SDK 55, New Architecture) are verified in recorded runs; MAUI and Kotlin/Native use
+the same NSUserDefaults lookup but have not been recorded here. Avoid custom-scheme deep links for captures: iOS asks for confirmation first, and
 `Platform.environment` is empty for Flutter on iOS.
 
 ## 5. Ecosystem (reviewed on GitHub, 2026-11-07)
