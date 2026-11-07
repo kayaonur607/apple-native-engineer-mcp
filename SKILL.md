@@ -4,7 +4,7 @@ description: "Operating standard and executable toolkit for shipping genuinely n
 license: MIT
 compatibility: "MCP clients (Claude Desktop, Claude Code, Cursor, Codex, Copilot, Gemini CLI), Agent Skills runtimes, or plain CLI on macOS/Linux with Python 3.10+."
 metadata:
-  version: "2.2.0"
+  version: "2.2.1"
   category: "developer-toolkit"
   platforms: "iOS 17-27, iPadOS, macOS 14-27, watchOS 10+, visionOS 1+"
   frameworks: "SwiftUI, UIKit, AppKit, Observation, SwiftData, StoreKit 2, WidgetKit, ActivityKit, AppIntents, Swift Concurrency"

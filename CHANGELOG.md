@@ -4,6 +4,19 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.1] — 2026-11-07
+
+Includes the v2.2.0 developer/designer onboarding, automatic GitHub release updates, version-aware AI guidance and animated evidence walkthrough, with the release portability fixes below.
+
+### Fixed
+
+- GitHub release launcher distribution: the release verification gate now invokes the same npm test script that passes on Node 20/22, instead of passing a test directory unsupported by Node 22.
+- Preserve full Python and MCP failure logs when a release gate fails.
+- Exact SDK reference regeneration is checked only against the SDK recorded in that reference. Other SDKs still run the structural validation and report the exact reproduction check as skipped.
+- Add macOS Python regression coverage alongside the existing Linux matrix.
+
+The v2.2.0 source tag was pushed, but its release gate failed and no GitHub Release was published. The recorded v2.2.0 animation remains valid demonstration evidence. v2.2.1 is the first stable published candidate for this GitHub-only workflow.
+
 ## [2.2.0] — 2026-11-07
 
 ### Added

@@ -1,6 +1,6 @@
 {
   "name": "apple-native-engineer-mcp",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "mcpName": "io.github.kayaonur607/apple-native-engineer",
   "description": "MCP server for Apple-platform engineering: 14 verifiable audits (SwiftUI, Liquid Glass, accessibility, privacy manifest, localisation, widgets, App Store) plus the reference knowledge base as resources, for any MCP client.",
   "license": "MIT",

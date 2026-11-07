@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/kayaonur607/apple-native-engineer-mcp/releases"><img src="https://img.shields.io/badge/version-v2.2.0-75E0BD" alt="Source version v2.2.0"></a>
+  <a href="https://github.com/kayaonur607/apple-native-engineer-mcp/releases"><img src="https://img.shields.io/badge/version-v2.2.1-75E0BD" alt="Source version v2.2.1"></a>
   <a href="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml"><img src="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/tests-205_passing-75E0BD" alt="205 tests">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-9BAAC0" alt="MIT license"></a>
@@ -169,14 +169,14 @@ Thirteen prompts cover onboarding, design, code, review, privacy, icons, screens
 
 ## Versions and automatic updates
 
-**Current source version: v2.2.0.** See [CHANGELOG.md](CHANGELOG.md) for the version history and [GitHub Releases](https://github.com/kayaonur607/apple-native-engineer-mcp/releases) for published versions. A local tag or changelog entry is not a published release.
+**Current source version: v2.2.1.** See [CHANGELOG.md](CHANGELOG.md) for the version history and [GitHub Releases](https://github.com/kayaonur607/apple-native-engineer-mcp/releases) for published versions. A local tag or changelog entry is not a published release.
 
 The GitHub launcher checks published stable releases **when the MCP process starts**. It stages the candidate in a separate version/commit directory, installs locked dependencies, validates its version and runs an inventory smoke test before atomically activating it.
 
 - Existing sessions continue on their current version. Updates apply on reconnect/restart.
 - Failed downloads or installations preserve the active cached version.
 - Startup instructions ask the AI to announce its version and relevant changes; the client controls presentation.
-- `APPLE_NATIVE_VERSION=mcp-v2.2.0` pins a published version or permits rollback.
+- `APPLE_NATIVE_VERSION=mcp-v2.2.1` pins a published version or permits rollback.
 - `APPLE_NATIVE_AUTO_UPDATE=off` disables the update check.
 - Automatic updates include new stable major versions unless a version is pinned.
 

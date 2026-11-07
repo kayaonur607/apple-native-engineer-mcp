@@ -1,6 +1,6 @@
 # GitHub installation, versions and automatic updates
 
-Apple Native Engineer v2.2.0 is distributed from [GitHub](https://github.com/kayaonur607/apple-native-engineer-mcp). GitHub Releases is the only product release channel. There is no hosted service or npm product publication. The MCP runs locally; it reads your local project and uses Apple documentation tools when requested. npm is still required to download the SDK dependencies pinned in `package-lock.json`.
+Apple Native Engineer v2.2.1 is distributed from [GitHub](https://github.com/kayaonur607/apple-native-engineer-mcp). GitHub Releases is the only product release channel. There is no hosted service or npm product publication. The MCP runs locally; it reads your local project and uses Apple documentation tools when requested. npm is still required to download the SDK dependencies pinned in `package-lock.json`.
 
 ## Install once
 
@@ -58,7 +58,7 @@ Set these in the MCP client's `env` block:
 | Variable | Default | Effect |
 | --- | --- | --- |
 | `APPLE_NATIVE_AUTO_UPDATE` | on | `off` skips the GitHub check and uses the active installation, or bootstrap if none |
-| `APPLE_NATIVE_VERSION` | unset | Exact stable tag, e.g. `mcp-v2.2.0`; explicitly permits rollback to that published version |
+| `APPLE_NATIVE_VERSION` | unset | Exact stable tag, e.g. `mcp-v2.2.1`; explicitly permits rollback to that published version |
 | `APPLE_NATIVE_UPDATE_DIR` | `~/.cache/apple-native-engineer` | Isolated release cache and atomic active pointer |
 
 To roll back, set `APPLE_NATIVE_VERSION` to a known published tag and reconnect. Leave auto-update on for the rollback installation. Once cached, it can run with updates off. Remove the pin to return to automatic stable updates.

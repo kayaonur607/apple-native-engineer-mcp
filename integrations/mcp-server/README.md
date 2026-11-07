@@ -47,7 +47,7 @@ Clone the [GitHub repository](https://github.com/kayaonur607/apple-native-engine
 
 Configure `node` with the absolute path to `integrations/mcp-server/scripts/github-launcher.mjs`. The launcher selects a published stable GitHub Release at startup, stages and smoke-tests it, then activates it atomically. Failed updates retain the working cached version. Sessions update on reconnect/restart.
 
-Read `apple-native://release` for the installed version and changelog. Use `APPLE_NATIVE_VERSION=mcp-v2.2.0` to pin or roll back; `APPLE_NATIVE_AUTO_UPDATE=off` disables checks.
+Read `apple-native://release` for the installed version and changelog. Use `APPLE_NATIVE_VERSION=mcp-v2.2.1` to pin or roll back; `APPLE_NATIVE_AUTO_UPDATE=off` disables checks.
 
 ### From this repository
 
