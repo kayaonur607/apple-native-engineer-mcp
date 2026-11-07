@@ -1,5 +1,5 @@
 {
-  "recorded_at": "2026-11-07T14:09:52.099Z",
+  "recorded_at": "2026-11-07T14:27:27.304Z",
   "fixture_only": true,
   "format": "Real MCP stdio session; rendered transcript playback, not a desktop screen recording.",
   "comparison": "Legacy and clean are separate fixtures. This session does not automatically rewrite Swift code.",
@@ -11,7 +11,7 @@
         "transport": "stdio",
         "command": "node integrations/mcp-server/src/index.js"
       },
-      "duration_ms": 128,
+      "duration_ms": 119,
       "response": {
         "server": {
           "name": "apple-native-engineer",
@@ -54,7 +54,7 @@
           "path": "<repository>/tests/fixtures/legacy-app"
         }
       },
-      "duration_ms": 50,
+      "duration_ms": 42,
       "response": {
         "content": [
           {
@@ -166,7 +166,7 @@
           "path": "<repository>/tests/fixtures/legacy-app"
         }
       },
-      "duration_ms": 34,
+      "duration_ms": 35,
       "response": {
         "content": [
           {
@@ -330,7 +330,7 @@
           "path": "<repository>/tests/fixtures/clean-app"
         }
       },
-      "duration_ms": 34,
+      "duration_ms": 35,
       "response": {
         "content": [
           {
@@ -376,7 +376,7 @@
           "out": "<repository>/.swiftwork/video-demo/AppIcon.appiconset"
         }
       },
-      "duration_ms": 1486,
+      "duration_ms": 1516,
       "response": {
         "content": [
           {
@@ -446,7 +446,7 @@
           "path": "<repository>/.swiftwork/video-demo/AppIcon.appiconset"
         }
       },
-      "duration_ms": 34,
+      "duration_ms": 35,
       "response": {
         "content": [
           {
@@ -494,7 +494,7 @@
           {
             "uri": "apple-native://release",
             "mimeType": "application/json",
-            "text": "{\n  \"version\": \"2.2.0\",\n  \"release_url\": \"https://github.com/kayaonur607/apple-native-engineer-mcp/releases/tag/mcp-v2.2.0\",\n  \"notes\": \"## [2.2.0] — 2026-11-07\\n\\n### Added\\n\\n- Developer/designer onboarding with `/apple-native-start`, task routing, Apple HIG/API provenance, and explicit build/runtime evidence boundaries.\\n- GitHub release launcher: checks published stable releases at MCP startup, installs into isolated version/commit directories, and activates only after a smoke test.\\n- Offline fallback to the last working installation, atomic activation, concurrent update locking, version pinning and an automatic update opt-out.\\n- `apple-native://release` exposes the installed version, release notes and update policy to the AI client. Connection instructions announce the version and relevant changes.\\n- Reproducible MCP demonstration evidence and a commercial/video production plan.\\n- Rewritten product README with measured audit/asset visuals, a 64-second captioned usage video, GIF preview, raw stdio session and media checksums.\\n\\n### Changed\\n\\n- GitHub is the sole product distribution and release channel. npm publication is disabled; npm is used only to install locked runtime dependencies.\\n- Version tags use `mcp-vMAJOR.MINOR.PATCH`. GitHub Release notes and this changelog describe each version.\\n- Updates take effect on the next MCP connection/restart. Existing sessions and customer source trees are never replaced by the launcher.\\n- Static audits no longer imply runtime validation or Apple approval.\",\n  \"update_policy\": \"GitHub launcher checks published stable releases on MCP restart. Running sessions keep their current version. Direct src/index.js runs do not auto-update.\"\n}"
+            "text": "{\n  \"version\": \"2.2.0\",\n  \"release_url\": \"https://github.com/kayaonur607/apple-native-engineer-mcp/releases/tag/mcp-v2.2.0\",\n  \"notes\": \"## [2.2.0] — 2026-11-07\\n\\n### Added\\n\\n- Developer/designer onboarding with `/apple-native-start`, task routing, Apple HIG/API provenance, and explicit build/runtime evidence boundaries.\\n- GitHub release launcher: checks published stable releases at MCP startup, installs into isolated version/commit directories, and activates only after a smoke test.\\n- Offline fallback to the last working installation, atomic activation, concurrent update locking, version pinning and an automatic update opt-out.\\n- `apple-native://release` exposes the installed version, release notes and update policy to the AI client. Connection instructions announce the version and relevant changes.\\n- Reproducible MCP demonstration evidence and a commercial/video production plan.\\n- Rewritten product README with measured audit/asset visuals, a 64-second animated, captioned usage video, GIF preview, raw stdio session and media checksums.\\n\\n### Changed\\n\\n- GitHub is the sole product distribution and release channel. npm publication is disabled; npm is used only to install locked runtime dependencies.\\n- Version tags use `mcp-vMAJOR.MINOR.PATCH`. GitHub Release notes and this changelog describe each version.\\n- Updates take effect on the next MCP connection/restart. Existing sessions and customer source trees are never replaced by the launcher.\\n- Static audits no longer imply runtime validation or Apple approval.\",\n  \"update_policy\": \"GitHub launcher checks published stable releases on MCP restart. Running sessions keep their current version. Direct src/index.js runs do not auto-update.\"\n}"
           }
         ]
       }

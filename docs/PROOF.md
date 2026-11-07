@@ -26,21 +26,21 @@ Recorded by `./scripts/update_proof.py` on 2026-11-07. Re-run it after any chang
   ✓ validation passed: 0 warning(s)
 
 ▸ Python tests (shared library + tools)
-........................................................................................................................
+................................................................................................................................
 ----------------------------------------------------------------------
-Ran 120 tests in 3.871s
+Ran 128 tests in 3.997s
 
 OK
 
 ▸ MCP protocol tests
-ℹ tests 72
+ℹ tests 77
 ℹ suites 14
-ℹ pass 72
+ℹ pass 77
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 706.986125
+ℹ duration_ms 1888.328917
 
 ▸ Swift compilation (fixtures + documentation snippets)
   SDK: iPhoneSimulator27.2.sdk
@@ -63,7 +63,7 @@ Allowlisted:      2
 Unverified:       0
 
 ────────────────────────────────────────────
-  passed: 5   failed: 0   skipped: 0   55s
+  passed: 5   failed: 0   skipped: 0   58s
 ────────────────────────────────────────────
 ```
 <!-- proof:end -->

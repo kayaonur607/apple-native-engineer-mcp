@@ -56,7 +56,7 @@ the icon studio has its own PNG codec precisely so that the toolkit never grows 
 
 `./scripts/verify.sh` runs five stages: repository validation (links, counts, frontmatter), Python tests, MCP
 protocol tests, Swift compilation and snippet type-checking, and documentation claims against the SDK. The GitHub checkout job
-packs the package, installs it in a clean directory and runs it. If a claim in this repository is not exercised by
+installs locked dependencies from a clean checkout, exercises the launcher fallback and records protocol evidence. If a claim in this repository is not exercised by
 one of those, it is not a claim — it is a hope.
 
 ## Versioned delivery
