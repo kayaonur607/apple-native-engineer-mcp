@@ -33,6 +33,29 @@ class ProjectInspectorTests(unittest.TestCase):
         self.assertIn("PROJ008", found, "NavigationView must be flagged")
 
 
+class TextWidthRegressionTests(unittest.TestCase):
+    def check_source(self, source):
+        with tempfile.TemporaryDirectory() as tmp:
+            file = Path(tmp) / 'Screen.swift'
+            file.write_text(source)
+            return codes(run_tool("swiftui-linter/lint_swiftui.py", str(file)))
+
+    def test_sibling_width_is_not_text_width(self):
+        for source in ['Text("Title")\nRectangle().frame(width: 120)',
+                       'Text("Title").padding()\nImage(systemName: "star").frame(width: 120)']:
+            with self.subTest(source=source): self.assertNotIn('SWU005', self.check_source(source))
+
+    def test_animation_value_and_schedule_are_not_deprecated_modifiers(self):
+        self.assertNotIn('SWU010', self.check_source('Text("Title").animation(.default, value: selected)'))
+        self.assertNotIn('SWU010', self.check_source('TimelineView(.animation(paused: false)) { context in Text("Hi") }'))
+        self.assertIn('SWU010', self.check_source('Text("Title").animation(.default)'))
+
+    def test_text_modifier_chain_still_detected(self):
+        for source in ['Text("Title").frame(width: 120)',
+                       'Text(String(localized: "Title")).padding(.horizontal, 8).frame(width: 120)']:
+            with self.subTest(source=source): self.assertIn('SWU005', self.check_source(source))
+
+
 class PrivacyAuditorTests(unittest.TestCase):
     def test_clean_manifest_passes(self):
         envelope = run_tool("privacy-auditor/audit_privacy.py", str(CLEAN), expect=0)

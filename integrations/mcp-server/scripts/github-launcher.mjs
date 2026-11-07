@@ -69,7 +69,17 @@ export async function prepareRelease(cache, release, { execute = run, remote = R
     }
     const directory = path.join(releases, `${release.tag_name}-${commit}`);
     // A release directory is immutable once activated. Never reinstall into a running version.
-    if (!(await exists(directory))) await fs.rename(stage, directory);
+    if (await exists(directory)) {
+      // Never activate an unvalidated existing directory or replace files a session may use.
+      try {
+        const existing = JSON.parse(await fs.readFile(path.join(directory, 'integrations/mcp-server/package.json'), 'utf8'));
+        if (existing.version !== manifest.version || !(await exists(path.join(directory, 'integrations/mcp-server/node_modules')))) throw new Error('incomplete cache');
+        const { stdout: cached } = await execute(process.execPath, ['src/index.js', '--selftest'], path.join(directory, 'integrations/mcp-server'));
+        const verified = JSON.parse(cached);
+        if (verified.version !== manifest.version || !verified.tools?.includes('audit_project')) throw new Error('cache smoke test failed');
+      } catch { throw new Error('Release cache directory already exists but failed validation; use a fresh APPLE_NATIVE_UPDATE_DIR to recover'); }
+    }
+    else await fs.rename(stage, directory);
     const record = { tag: release.tag_name, commit, activated_at: new Date().toISOString(),
       release_url: `https://github.com/${REPOSITORY}/releases/tag/${release.tag_name}` };
     const temporary = path.join(cache, `active-${process.pid}.json`);

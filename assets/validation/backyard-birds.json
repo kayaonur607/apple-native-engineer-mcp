@@ -1,0 +1,253 @@
+{
+  "schema_version": "2.0",
+  "tool": "swiftui-linter",
+  "tool_version": "2.0.0",
+  "target": "apple/sample-backyard-birds",
+  "status": "fail",
+  "summary": {
+    "critical": 0,
+    "error": 24,
+    "warning": 1,
+    "info": 3,
+    "total": 28
+  },
+  "findings": [
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "BackyardBirdsData/Account/Account+DataGeneration.swift",
+      "line": 17,
+      "hint": "Use do/catch, or surface the failure as view state."
+    },
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "BackyardBirdsData/Backyards/Backyard+DataGeneration.swift",
+      "line": 18,
+      "hint": "Use do/catch, or surface the failure as view state."
+    },
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "BackyardBirdsData/Backyards/Backyard+DataGeneration.swift",
+      "line": 19,
+      "hint": "Use do/catch, or surface the failure as view state."
+    },
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "BackyardBirdsData/Backyards/BackyardVisitorEvent+DataGeneration.swift",
+      "line": 19,
+      "hint": "Use do/catch, or surface the failure as view state."
+    },
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "BackyardBirdsData/Backyards/BackyardVisitorEvent+DataGeneration.swift",
+      "line": 22,
+      "hint": "Use do/catch, or surface the failure as view state."
+    },
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "BackyardBirdsData/Backyards/BackyardVisitorEvent+DataGeneration.swift",
+      "line": 47,
+      "hint": "Use do/catch, or surface the failure as view state."
+    },
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "BackyardBirdsData/Backyards/BackyardVisitorEvent+DataGeneration.swift",
+      "line": 51,
+      "hint": "Use do/catch, or surface the failure as view state."
+    },
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "BackyardBirdsData/Backyards/BackyardVisitorEvent+DataGeneration.swift",
+      "line": 89,
+      "hint": "Use do/catch, or surface the failure as view state."
+    },
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "BackyardBirdsData/Backyards/BackyardVisitorEvent+DataGeneration.swift",
+      "line": 92,
+      "hint": "Use do/catch, or surface the failure as view state."
+    },
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "BackyardBirdsData/Birds/Bird+DataGeneration.swift",
+      "line": 15,
+      "hint": "Use do/catch, or surface the failure as view state."
+    },
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "BackyardBirdsData/Birds/Bird+DataGeneration.swift",
+      "line": 16,
+      "hint": "Use do/catch, or surface the failure as view state."
+    },
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "BackyardBirdsData/Food & Drink/BirdFood+DataGeneration.swift",
+      "line": 107,
+      "hint": "Use do/catch, or surface the failure as view state."
+    },
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "BackyardBirdsData/General/BackyardBirdsDataContainer.swift",
+      "line": 15,
+      "hint": "Use do/catch, or surface the failure as view state."
+    },
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "BackyardBirdsData/General/DataGeneration.swift",
+      "line": 89,
+      "hint": "Use do/catch, or surface the failure as view state."
+    },
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "BackyardBirdsData/General/DataGeneration.swift",
+      "line": 118,
+      "hint": "Use do/catch, or surface the failure as view state."
+    },
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "BackyardBirdsData/Plants/Plant+DataGeneration.swift",
+      "line": 18,
+      "hint": "Use do/catch, or surface the failure as view state."
+    },
+    {
+      "code": "SWU008",
+      "severity": "warning",
+      "message": "DispatchQueue.main.asyncAfter is unstructured concurrency.",
+      "file": "Multiplatform/Backyards/BackyardDetailView.swift",
+      "line": 50,
+      "hint": "Use Task { try await Task.sleep(for: .seconds(1)); ... } with cancellation support.",
+      "docs": "https://developer.apple.com/documentation/swift/task/sleep(for:)"
+    },
+    {
+      "code": "SWU007",
+      "severity": "info",
+      "message": "lineLimit(1) can clip localised copy.",
+      "file": "Multiplatform/Backyards/BackyardSupplyIndicator.swift",
+      "line": 46,
+      "hint": "Pair with .minimumScaleFactor(0.8) or allow two lines for longer translations."
+    },
+    {
+      "code": "SWU012",
+      "severity": "info",
+      "message": "Fixed point size bypasses Dynamic Type.",
+      "file": "Multiplatform/Backyards/BirdFoodPickerSheet.swift",
+      "line": 261,
+      "hint": "Prefer text styles (.body, .headline) or .font(.system(.body, design: .rounded)) with relative sizing.",
+      "docs": "https://developer.apple.com/documentation/swiftui/font/textstyle"
+    },
+    {
+      "code": "SWU012",
+      "severity": "info",
+      "message": "Fixed point size bypasses Dynamic Type.",
+      "file": "Multiplatform/Birds/NewBirdIndicator.swift",
+      "line": 32,
+      "hint": "Prefer text styles (.body, .headline) or .font(.system(.body, design: .rounded)) with relative sizing.",
+      "docs": "https://developer.apple.com/documentation/swiftui/font/textstyle"
+    },
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "Widgets/Backyard/BackyardSnapshotTimelineProvider.swift",
+      "line": 33,
+      "hint": "Use do/catch, or surface the failure as view state."
+    },
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "Widgets/Backyard/BackyardSnapshotTimelineProvider.swift",
+      "line": 37,
+      "hint": "Use do/catch, or surface the failure as view state."
+    },
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "Widgets/Backyard/BackyardSnapshotTimelineProvider.swift",
+      "line": 41,
+      "hint": "Use do/catch, or surface the failure as view state."
+    },
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "Widgets/Backyard/BackyardSnapshotTimelineProvider.swift",
+      "line": 46,
+      "hint": "Use do/catch, or surface the failure as view state."
+    },
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "Widgets/Backyard/BackyardWidgetIntent.swift",
+      "line": 74,
+      "hint": "Use do/catch, or surface the failure as view state."
+    },
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "Widgets/Backyard/BackyardWidgetIntent.swift",
+      "line": 82,
+      "hint": "Use do/catch, or surface the failure as view state."
+    },
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "Widgets/Backyard/ResupplyBackyardIntent.swift",
+      "line": 28,
+      "hint": "Use do/catch, or surface the failure as view state."
+    },
+    {
+      "code": "SWU014",
+      "severity": "error",
+      "message": "try! crashes the process on any thrown error.",
+      "file": "Widgets/Backyard/ResupplyBackyardIntent.swift",
+      "line": 34,
+      "hint": "Use do/catch, or surface the failure as view state."
+    }
+  ],
+  "data": {
+    "scanned_files": 114,
+    "rules": 20,
+    "violations": 28
+  },
+  "evaluation": {
+    "source": "https://github.com/apple/sample-backyard-birds",
+    "commit": "1843d5655bf884b501e2889ad9862ec58978fdbe",
+    "scope": "External source scan, not a manual accuracy benchmark or successful app build."
+  }
+}

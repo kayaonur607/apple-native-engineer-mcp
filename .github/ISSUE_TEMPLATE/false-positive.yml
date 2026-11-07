@@ -1,0 +1,24 @@
+name: Incorrect audit finding
+description: Help improve a free open-source tool with a public minimal reproduction.
+title: "[False positive] "
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: MCP version and operating system
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Finding code, exact command and minimal public source
+      description: Remove secrets and proprietary source before posting.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected versus actual behaviour
+    validations:
+      required: true

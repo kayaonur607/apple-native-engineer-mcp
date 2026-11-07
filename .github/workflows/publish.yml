@@ -49,4 +49,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ github.ref_name }}
-        run: gh release create "$RELEASE_TAG" --verify-tag --title "Apple Native Engineer ${RELEASE_TAG#mcp-}" --notes-file release-notes.md assets/demo/*
+        run: gh release create "$RELEASE_TAG" --verify-tag --draft --title "Apple Native Engineer ${RELEASE_TAG#mcp-}" --notes-file release-notes.md assets/demo/*
+
+      - name: Finalize immutable release after uploading assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: gh release edit "$RELEASE_TAG" --draft=false

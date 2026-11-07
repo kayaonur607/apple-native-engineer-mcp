@@ -41,8 +41,19 @@ describe('GitHub release updates', () => {
     // npm ci can omit node_modules with zero dependencies; production always has SDK dependencies.
     await fs.mkdir(path.join(installed.directory, 'integrations/mcp-server/node_modules'), { recursive: true });
     assert.equal((await readActive(cache)).tag, 'mcp-v2.2.0');
+    const reused = await prepareRelease(cache, release('mcp-v2.2.0'), { remote });
+    assert.equal(reused.directory, installed.directory, 'validated rollback cache remains usable');
     assert.equal((await exec('git', ['-C', installed.directory, 'rev-parse', 'HEAD'])).stdout.trim(), installed.commit);
     assert.ok(!(await fs.readdir(cache)).some(name => name.startsWith('stage-')));
+  });
+
+  it('never activates an existing damaged release directory', async () => {
+    const cache = await cacheFor('damaged');
+    const commit = (await exec('git', ['-C', remote, 'rev-parse', 'HEAD'])).stdout.trim();
+    await fs.mkdir(path.join(cache, 'releases', `mcp-v2.2.0-${commit}`), { recursive: true });
+    await assert.rejects(prepareRelease(cache, release('mcp-v2.2.0'), { remote }), /cache directory already exists/);
+    assert.equal(await readActive(cache), null);
+    await assert.rejects(fs.access(path.join(cache, 'active.json')));
   });
 
   it('keeps the active version if a release tag disagrees with its package', async () => {

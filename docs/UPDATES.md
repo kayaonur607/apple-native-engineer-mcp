@@ -68,3 +68,9 @@ Do not set `APPLE_NATIVE_ROOT` with the launcher: the launcher binds it to the s
 ## Version history
 
 Read [CHANGELOG.md](../CHANGELOG.md) or the [GitHub Releases page](https://github.com/kayaonur607/apple-native-engineer-mcp/releases). Tags use `mcp-vMAJOR.MINOR.PATCH`: patch for compatible fixes, minor for additions, major for breaking changes. A release is available to automatic updates only after it is published, not when its tag or changelog exists locally.
+
+## v2.3.0 bootstrap safety fix
+
+Existing users must refresh their original bootstrap checkout with `git pull --ff-only` to receive launcher fixes, then restart the MCP client. Updating only the cached server does not replace the bootstrap launcher. A damaged existing cache now fails validation and preserves the active pointer; a valid cached release can still be reactivated for rollback. Use a fresh `APPLE_NATIVE_UPDATE_DIR` if a damaged directory blocks recovery.
+
+GitHub immutable release protection was enabled on 2026-11-07. This applies to newly published releases; it does not retroactively make old releases immutable. Publisher-signature verification is still not implemented.

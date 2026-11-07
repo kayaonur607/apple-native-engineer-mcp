@@ -4,6 +4,17 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] — 2026-11-07
+
+- GitHub release launcher validates existing cache directories before activation, including rollback installations.
+- Fix SWU010 false positives on explicit value animations and TimelineView schedules.
+- Fix SWU005 false positives across sibling views; retain nested Text/modifier detection with regression tests.
+- Add free community pilot and open-source portfolio guidance; no paid tier or license key.
+- Add a one-command dependency installer that prints an absolute-path MCP configuration.
+- Record an external Apple Food Truck audit without claiming measured accuracy.
+- Compile, launch and capture a controlled SwiftUI app in an actual simulator in light and dark.
+- Enable GitHub immutable releases for future published versions.
+
 ## [2.2.1] — 2026-11-07
 
 Includes the v2.2.0 developer/designer onboarding, automatic GitHub release updates, version-aware AI guidance and animated evidence walkthrough, with the release portability fixes below.

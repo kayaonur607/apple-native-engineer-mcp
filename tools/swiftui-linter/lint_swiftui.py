@@ -75,7 +75,7 @@ RULES: List[Rule] = [
     ),
     Rule(
         "SWU005", Severity.WARNING,
-        r"\bText\s*\([\s\S]{0,240}?\.frame\s*\(\s*width\s*:",
+        r"\bText\s*\(",
         "Fixed width on Text truncates at large Dynamic Type sizes.",
         "Constrain with .frame(maxWidth:), .fixedSize(horizontal: false, vertical: true) or a layout priority.",
         "https://developer.apple.com/documentation/swiftui/view/fixedsize(horizontal:vertical:)",
@@ -109,7 +109,7 @@ RULES: List[Rule] = [
     ),
     Rule(
         "SWU010", Severity.WARNING,
-        r"\.animation\s*\(\s*(?!\.none)[^)]*\)\s*(?!.*value\s*:)",
+        r"\.animation\s*\(",
         "Deprecated .animation(_:) without a value animates every change in the subtree.",
         "Use .animation(.spring, value: someState) so only the intended change animates.",
         "https://developer.apple.com/documentation/swiftui/view/animation(_:value:)",
@@ -182,11 +182,43 @@ RULES: List[Rule] = [
 ]
 
 
+def text_has_fixed_width(source: str, opening: int) -> bool:
+    """Follow balanced call arguments and the receiver's modifier chain only."""
+    def close_paren(start):
+        depth = 0
+        for pos in range(start, len(source)):
+            if source[pos] == "(": depth += 1
+            elif source[pos] == ")":
+                depth -= 1
+                if depth == 0: return pos + 1
+        return len(source)
+    pos = close_paren(opening)
+    while True:
+        modifier = re.match(r"\s*\.([A-Za-z_][A-Za-z_0-9]*)\s*\(", source[pos:])
+        if not modifier: return False
+        opening = pos + modifier.end() - 1
+        if modifier.group(1) == "frame" and re.match(r"\s*width\s*:", source[opening + 1:]):
+            return True
+        pos = close_paren(opening)
+
+
 def lint_file(swift: SwiftFile, report: Report) -> int:
     hits = 0
     for rule in RULES:
         for match in re.finditer(rule.pattern, swift.clean, rule.flags):
-            # Skip matches inside #Preview blocks: previews are not shipped UI.
+            if rule.code == "SWU010":
+                preceding = swift.clean[:match.start()].rstrip()
+                if not preceding or preceding[-1] not in ")}":
+                    continue  # implicit AnimationSchedule arguments are not View modifiers
+                depth, end = 1, match.end()
+                while end < len(swift.clean) and depth:
+                    if swift.clean[end] == "(": depth += 1
+                    elif swift.clean[end] == ")": depth -= 1
+                    end += 1
+                if re.search(r"\bvalue\s*:", swift.clean[match.end():end]):
+                    continue
+            if rule.code == "SWU005" and not text_has_fixed_width(swift.clean, match.end() - 1):
+                continue
             line = swift.line_of(match.start())
             hits += 1
             report.add(

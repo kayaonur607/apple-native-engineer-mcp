@@ -7,9 +7,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/kayaonur607/apple-native-engineer-mcp/releases"><img src="https://img.shields.io/badge/version-v2.2.1-75E0BD" alt="Source version v2.2.1"></a>
+  <a href="https://github.com/kayaonur607/apple-native-engineer-mcp/releases"><img src="https://img.shields.io/badge/version-v2.3.0-75E0BD" alt="Source version v2.3.0"></a>
   <a href="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml"><img src="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/tests-205_passing-75E0BD" alt="205 tests">
+  <img src="https://img.shields.io/badge/tests-209_passing-75E0BD" alt="209 tests">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-9BAAC0" alt="MIT license"></a>
 </p>
 
@@ -28,6 +28,8 @@
 </p>
 
 Apple Native Engineer connects a compatible MCP client to **25 MCP tools**, **55 resources** and **13 prompts**. It combines local Python checks, Apple documentation research and reusable engineering guidance. Your AI client supplies the model and writes the code; this server supplies tools and evidence.
+
+**Completely free and open source under MIT. No paid tier, account or license key.**
 
 Independent software. Not affiliated with, employed by, or endorsed by Apple. Static results do not guarantee App Store approval or runtime correctness.
 
@@ -84,9 +86,8 @@ Requires **Git, Node 20+, npm and Python 3.10+**. Xcode is required for Apple bu
 
 ```bash
 git clone https://github.com/kayaonur607/apple-native-engineer-mcp.git
-cd apple-native-engineer-mcp/integrations/mcp-server
-npm ci --ignore-scripts --no-audit --no-fund
-node scripts/github-launcher.mjs --selftest
+cd apple-native-engineer-mcp
+node scripts/setup-mcp.mjs
 ```
 
 GitHub is the sole product distribution and release channel. npm installs the locked SDK dependencies; this product is not published to npm. No hosted service, developer account or AI API key is required for local static checks. Your MCP client may have its own model or subscription requirements.
@@ -169,14 +170,14 @@ Thirteen prompts cover onboarding, design, code, review, privacy, icons, screens
 
 ## Versions and automatic updates
 
-**Current source version: v2.2.1.** See [CHANGELOG.md](CHANGELOG.md) for the version history and [GitHub Releases](https://github.com/kayaonur607/apple-native-engineer-mcp/releases) for published versions. A local tag or changelog entry is not a published release.
+**Current source version: v2.3.0.** See [CHANGELOG.md](CHANGELOG.md) for the version history and [GitHub Releases](https://github.com/kayaonur607/apple-native-engineer-mcp/releases) for published versions. A local tag or changelog entry is not a published release.
 
 The GitHub launcher checks published stable releases **when the MCP process starts**. It stages the candidate in a separate version/commit directory, installs locked dependencies, validates its version and runs an inventory smoke test before atomically activating it.
 
 - Existing sessions continue on their current version. Updates apply on reconnect/restart.
 - Failed downloads or installations preserve the active cached version.
 - Startup instructions ask the AI to announce its version and relevant changes; the client controls presentation.
-- `APPLE_NATIVE_VERSION=mcp-v2.2.1` pins a published version or permits rollback.
+- `APPLE_NATIVE_VERSION=mcp-v2.3.0` pins a published version or permits rollback.
 - `APPLE_NATIVE_AUTO_UPDATE=off` disables the update check.
 - Automatic updates include new stable major versions unless a version is pinned.
 
@@ -184,7 +185,7 @@ The bootstrap launcher is kept in your original checkout. Changes to the launche
 
 ## Verification and reproducibility
 
-The local verification suite contains **205 tests: 128 Python tests and 77 MCP/Node tests**. The MCP tests include protocol calls, HTTP behaviour, module isolation, update staging, offline fallback, failed-install preservation, concurrent updates, version pins and telemetry sanitization.
+The local verification suite contains **209 tests: 131 Python tests and 78 MCP/Node tests**. The MCP tests include protocol calls, HTTP behaviour, module isolation, update staging, offline fallback, failed-install preservation, concurrent updates, version pins and telemetry sanitization.
 
 ```bash
 ./scripts/verify.sh
@@ -220,8 +221,16 @@ Read [SECURITY.md](SECURITY.md) for the threat model and reporting process.
 
 ## Documentation and contribution
 
-[Operating standard](SKILL.md) · [Architecture](docs/ARCHITECTURE.md) · [Platform workflow](docs/PLATFORM-WORKFLOW.md) · [Ecosystem](docs/ECOSYSTEM.md) · [Brand assets](docs/BRANDING.md) · [Capability roadmap](docs/ROADMAP.md) · [Release procedure](docs/PUBLISHING.md) · [Commercial pilot and video plan](docs/COMMERCIAL-LAUNCH.md) · [Contributing](CONTRIBUTING.md).
+[Operating standard](SKILL.md) · [Architecture](docs/ARCHITECTURE.md) · [Platform workflow](docs/PLATFORM-WORKFLOW.md) · [Ecosystem](docs/ECOSYSTEM.md) · [Brand assets](docs/BRANDING.md) · [Capability roadmap](docs/ROADMAP.md) · [Release procedure](docs/PUBLISHING.md) · [Free user pilot](docs/COMMERCIAL-LAUNCH.md) · [Open-source portfolio workflow](docs/OPEN-SOURCE.md) · [Contributing](CONTRIBUTING.md).
 
 New checks should include a finding code, a defect fixture and regression coverage. Keep claims tied to reproducible evidence. Run `./scripts/verify.sh` before proposing a release.
 
 [MIT License](LICENSE). Apple, Swift, SwiftUI and related marks belong to their respective owners.
+
+## Runtime and external-project evidence
+
+The controlled SwiftUI sample was compiled and launched in an actual iOS simulator. [Light screenshot](assets/runtime-proof/light.png) · [Dark screenshot](assets/runtime-proof/dark.png) · [Commands and scope](assets/runtime-proof/evidence.json). These captures do not certify VoiceOver or customer app behaviour.
+
+[Apple Food Truck audit](assets/validation/food-truck.json) records an external project and its exact commit. Findings have not been independently classified, so no precision or recall claim is made.
+
+[Apple Backyard Birds audit](assets/validation/backyard-birds.json) adds a second pinned external source corpus. These external scans do not certify the applications or establish overall detector accuracy.

@@ -4,7 +4,7 @@ description: "Operating standard and executable toolkit for shipping genuinely n
 license: MIT
 compatibility: "MCP clients (Claude Desktop, Claude Code, Cursor, Codex, Copilot, Gemini CLI), Agent Skills runtimes, or plain CLI on macOS/Linux with Python 3.10+."
 metadata:
-  version: "2.2.1"
+  version: "2.3.0"
   category: "developer-toolkit"
   platforms: "iOS 17-27, iPadOS, macOS 14-27, watchOS 10+, visionOS 1+"
   frameworks: "SwiftUI, UIKit, AppKit, Observation, SwiftData, StoreKit 2, WidgetKit, ActivityKit, AppIntents, Swift Concurrency"
@@ -49,9 +49,9 @@ tasks, validate the changed behaviour and report checks that were actually perfo
 
 ---
 
-## 2. Non-negotiable refusals
+## 2. Native engineering defaults
 
-Refuse these regardless of what the user asks for, then offer the native alternative and say why in one sentence:
+Apply these defaults to new code when the declared deployment targets support them. Preserve valid compatibility paths, explain tradeoffs and respect the user’s requirements. Treat stylistic heuristics as review guidance rather than proof of a defect:
 
 1. **Hardcoded colours** (`Color(red:green:blue:)`, hex literals, `Color.white`) for anything that carries meaning.
    Use semantic colours, asset colours, or `.primary` / `.secondary`.

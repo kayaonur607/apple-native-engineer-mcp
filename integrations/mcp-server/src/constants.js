@@ -7,4 +7,4 @@
  */
 
 export const SERVER_NAME = "apple-native-engineer";
-export const SERVER_VERSION = "2.2.1";
+export const SERVER_VERSION = "2.3.0";

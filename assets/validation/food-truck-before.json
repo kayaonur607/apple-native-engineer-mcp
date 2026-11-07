@@ -1,0 +1,412 @@
+{
+  "schema_version": "2.0",
+  "tool": "swiftui-linter",
+  "tool_version": "2.0.0",
+  "target": "apple/sample-food-truck",
+  "status": "warn",
+  "summary": {
+    "critical": 0,
+    "error": 0,
+    "warning": 42,
+    "info": 1,
+    "total": 43
+  },
+  "findings": [
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "App/Account/AccountView.swift",
+      "line": 30,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU010",
+      "severity": "warning",
+      "message": "Deprecated .animation(_:) without a value animates every change in the subtree.",
+      "file": "App/Account/SignUpView.swift",
+      "line": 77,
+      "hint": "Use .animation(.spring, value: someState) so only the intended change animates.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/animation(_:value:)"
+    },
+    {
+      "code": "SWU004",
+      "severity": "warning",
+      "message": "Single-parameter onChange(of:perform:) is deprecated since iOS 17.",
+      "file": "App/City/CityView.swift",
+      "line": 120,
+      "hint": "Use .onChange(of: value) { oldValue, newValue in ... } or the zero-parameter overload.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/onchange(of:initial:_:)"
+    },
+    {
+      "code": "SWU010",
+      "severity": "warning",
+      "message": "Deprecated .animation(_:) without a value animates every change in the subtree.",
+      "file": "App/City/ParkingSpotShowcaseView.swift",
+      "line": 18,
+      "hint": "Use .animation(.spring, value: someState) so only the intended change animates.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/animation(_:value:)"
+    },
+    {
+      "code": "SWU012",
+      "severity": "info",
+      "message": "Fixed point size bypasses Dynamic Type.",
+      "file": "App/City/RecommendedParkingSpotCard.swift",
+      "line": 69,
+      "hint": "Prefer text styles (.body, .headline) or .font(.system(.body, design: .rounded)) with relative sizing.",
+      "docs": "https://developer.apple.com/documentation/swiftui/font/textstyle"
+    },
+    {
+      "code": "SWU004",
+      "severity": "warning",
+      "message": "Single-parameter onChange(of:perform:) is deprecated since iOS 17.",
+      "file": "App/Donut/DonutGallery.swift",
+      "line": 51,
+      "hint": "Use .onChange(of: value) { oldValue, newValue in ... } or the zero-parameter overload.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/onchange(of:initial:_:)"
+    },
+    {
+      "code": "SWU004",
+      "severity": "warning",
+      "message": "Single-parameter onChange(of:perform:) is deprecated since iOS 17.",
+      "file": "App/Donut/DonutGallery.swift",
+      "line": 56,
+      "hint": "Use .onChange(of: value) { oldValue, newValue in ... } or the zero-parameter overload.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/onchange(of:initial:_:)"
+    },
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "App/Donut/TopDonutSalesChart.swift",
+      "line": 27,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU004",
+      "severity": "warning",
+      "message": "Single-parameter onChange(of:perform:) is deprecated since iOS 17.",
+      "file": "App/Navigation/ContentView.swift",
+      "line": 46,
+      "hint": "Use .onChange(of: value) { oldValue, newValue in ... } or the zero-parameter overload.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/onchange(of:initial:_:)"
+    },
+    {
+      "code": "SWU004",
+      "severity": "warning",
+      "message": "Single-parameter onChange(of:perform:) is deprecated since iOS 17.",
+      "file": "App/Navigation/ContentView.swift",
+      "line": 53,
+      "hint": "Use .onChange(of: value) { oldValue, newValue in ... } or the zero-parameter overload.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/onchange(of:initial:_:)"
+    },
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "App/Orders/OrderDetailView.swift",
+      "line": 26,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "App/Orders/OrderDetailView.swift",
+      "line": 33,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU004",
+      "severity": "warning",
+      "message": "Single-parameter onChange(of:perform:) is deprecated since iOS 17.",
+      "file": "App/Orders/OrderDetailView.swift",
+      "line": 55,
+      "hint": "Use .onChange(of: value) { oldValue, newValue in ... } or the zero-parameter overload.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/onchange(of:initial:_:)"
+    },
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "App/Orders/OrdersTable.swift",
+      "line": 80,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "App/Store/RefundView.swift",
+      "line": 28,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "App/Store/RefundView.swift",
+      "line": 93,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "App/Store/SocialFeedPlusSettings.swift",
+      "line": 120,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "App/Store/StoreSupportView.swift",
+      "line": 29,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "App/Store/SubscriptionStoreView.swift",
+      "line": 156,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "App/Store/SubscriptionStoreView.swift",
+      "line": 248,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU004",
+      "severity": "warning",
+      "message": "Single-parameter onChange(of:perform:) is deprecated since iOS 17.",
+      "file": "App/Store/SubscriptionStoreView.swift",
+      "line": 360,
+      "hint": "Use .onChange(of: value) { oldValue, newValue in ... } or the zero-parameter overload.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/onchange(of:initial:_:)"
+    },
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "App/Store/UnlockFeatureView.swift",
+      "line": 81,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "App/Store/UnlockFeatureView.swift",
+      "line": 104,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "App/Store/UnlockFeatureView.swift",
+      "line": 123,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "App/Truck/Cards/CardNavigationHeaderLabelStyle.swift",
+      "line": 26,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU004",
+      "severity": "warning",
+      "message": "Single-parameter onChange(of:perform:) is deprecated since iOS 17.",
+      "file": "App/Truck/Cards/TruckOrdersCard.swift",
+      "line": 64,
+      "hint": "Use .onChange(of: value) { oldValue, newValue in ... } or the zero-parameter overload.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/onchange(of:initial:_:)"
+    },
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "App/Truck/SalesHistoryView.swift",
+      "line": 44,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "App/Truck/SalesHistoryView.swift",
+      "line": 56,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "App/Truck/SocialFeedContent.swift",
+      "line": 170,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "App/Truck/SocialFeedView.swift",
+      "line": 96,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "App/Truck/SocialFeedView.swift",
+      "line": 103,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "App/Truck/SocialFeedView.swift",
+      "line": 110,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU011",
+      "severity": "warning",
+      "message": "ObservableObject invalidates the whole view on every @Published write.",
+      "file": "FoodTruckKit/Sources/Account/AccountStore.swift",
+      "line": 38,
+      "hint": "Migrate to @Observable and let SwiftUI track the exact properties each view reads.",
+      "docs": "https://developer.apple.com/documentation/observation/migrating-from-the-observable-object-protocol-to-the-observable-macro"
+    },
+    {
+      "code": "SWU010",
+      "severity": "warning",
+      "message": "Deprecated .animation(_:) without a value animates every change in the subtree.",
+      "file": "FoodTruckKit/Sources/Brand/BrandHeader.swift",
+      "line": 32,
+      "hint": "Use .animation(.spring, value: someState) so only the intended change animates.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/animation(_:value:)"
+    },
+    {
+      "code": "SWU011",
+      "severity": "warning",
+      "message": "ObservableObject invalidates the whole view on every @Published write.",
+      "file": "FoodTruckKit/Sources/Model/FoodTruckModel.swift",
+      "line": 12,
+      "hint": "Migrate to @Observable and let SwiftUI track the exact properties each view reads.",
+      "docs": "https://developer.apple.com/documentation/observation/migrating-from-the-observable-object-protocol-to-the-observable-macro"
+    },
+    {
+      "code": "SWU011",
+      "severity": "warning",
+      "message": "ObservableObject invalidates the whole view on every @Published write.",
+      "file": "FoodTruckKit/Sources/Store/StoreProductController.swift",
+      "line": 13,
+      "hint": "Migrate to @Observable and let SwiftUI track the exact properties each view reads.",
+      "docs": "https://developer.apple.com/documentation/observation/migrating-from-the-observable-object-protocol-to-the-observable-macro"
+    },
+    {
+      "code": "SWU011",
+      "severity": "warning",
+      "message": "ObservableObject invalidates the whole view on every @Published write.",
+      "file": "FoodTruckKit/Sources/Store/StoreSubscriptionController.swift",
+      "line": 13,
+      "hint": "Migrate to @Observable and let SwiftUI track the exact properties each view reads.",
+      "docs": "https://developer.apple.com/documentation/observation/migrating-from-the-observable-object-protocol-to-the-observable-macro"
+    },
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "Widgets/OrdersWidget.swift",
+      "line": 97,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "Widgets/OrdersWidget.swift",
+      "line": 120,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU018",
+      "severity": "warning",
+      "message": "ForEach over a range with dynamic content loses identity.",
+      "file": "Widgets/SegmentedGauge.swift",
+      "line": 45,
+      "hint": "Iterate over the model collection so SwiftUI can match rows across updates."
+    },
+    {
+      "code": "SWU002",
+      "severity": "warning",
+      "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+      "file": "Widgets/TruckActivityWidget.swift",
+      "line": 37,
+      "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+    },
+    {
+      "code": "SWU005",
+      "severity": "warning",
+      "message": "Fixed width on Text truncates at large Dynamic Type sizes.",
+      "file": "Widgets/TruckActivityWidget.swift",
+      "line": 35,
+      "hint": "Constrain with .frame(maxWidth:), .fixedSize(horizontal: false, vertical: true) or a layout priority.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/fixedsize(horizontal:vertical:)"
+    },
+    {
+      "code": "SWU005",
+      "severity": "warning",
+      "message": "Fixed width on Text truncates at large Dynamic Type sizes.",
+      "file": "Widgets/TruckActivityWidget.swift",
+      "line": 111,
+      "hint": "Constrain with .frame(maxWidth:), .fixedSize(horizontal: false, vertical: true) or a layout priority.",
+      "docs": "https://developer.apple.com/documentation/swiftui/view/fixedsize(horizontal:vertical:)"
+    }
+  ],
+  "data": {
+    "scanned_files": 82,
+    "rules": 20,
+    "violations": 43
+  },
+  "evaluation": {
+    "source": "https://github.com/apple/sample-food-truck",
+    "commit": "3954a769e99f3cc53297d94f2b960ceb2665b3d6",
+    "scope": "External source audit only; findings not manually classified. Precision and recall unmeasured."
+  }
+}
