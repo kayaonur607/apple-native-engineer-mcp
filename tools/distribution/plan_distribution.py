@@ -47,6 +47,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 from apple_native import __version__
 from apple_native.cli import build_parser, emit, guard_directory
 from apple_native.report import Report
+from apple_native.frameworks import detect as detect_framework, xcode_containers
 from apple_native.xcode import discover, read_plist
 
 METHODS = {
@@ -83,7 +84,7 @@ def build_settings(root: Path) -> Dict[str, List[str]]:
             "ASSETCATALOG_COMPILER_APPICON_NAME", "SDKROOT", "SUPPORTED_PLATFORMS", "PRODUCT_BUNDLE_IDENTIFIER",
             "VERSIONING_SYSTEM", "ENABLE_APP_SANDBOX")
     found: Dict[str, List[str]] = {key: [] for key in keys}
-    for pbx in sorted(root.glob("*.xcodeproj/project.pbxproj")):
+    for pbx in sorted(path / "project.pbxproj" for path in xcode_containers(root) if path.suffix == ".xcodeproj"):
         text = pbx.read_text(encoding="utf-8", errors="ignore")
         for key in keys:
             for value in re.findall(rf"\b{key}\s*=\s*\"?([^\";\n]*)\"?\s*;", text):
@@ -95,7 +96,7 @@ def build_settings(root: Path) -> Dict[str, List[str]]:
 
 def shared_schemes(root: Path) -> List[str]:
     schemes = []
-    for container in list(root.glob("*.xcworkspace")) + list(root.glob("*.xcodeproj")):
+    for container in xcode_containers(root):
         for scheme in sorted(container.glob("xcshareddata/xcschemes/*.xcscheme")):
             if scheme.stem not in schemes:
                 schemes.append(scheme.stem)
@@ -203,6 +204,85 @@ def plan_steps(method: str, platform: str, container: Optional[str], scheme: str
     return steps
 
 
+def lockfile_install(root: Path) -> str:
+    if (root / "pnpm-lock.yaml").exists():
+        return "pnpm install --frozen-lockfile"
+    if (root / "yarn.lock").exists():
+        return "yarn install --frozen-lockfile"
+    if (root / "bun.lockb").exists() or (root / "bun.lock").exists():
+        return "bun install --frozen-lockfile"
+    return "npm ci"
+
+
+def framework_steps(framework, root: Path, method: str, platform: str, options_path: str,
+                    steps: List[Dict[str, object]]) -> List[Dict[str, object]]:
+    """Adapt the native plan to Flutter, React Native, Expo, Capacitor, MAUI or KMP."""
+
+    name = framework.framework
+    host = framework.hosts.get(platform)
+    pods = f"cd {q(host)} && pod install" if host and (root / host / "Podfile").exists() else None
+    prepare: List[Dict[str, object]] = []
+    if name == "flutter":
+        prepare.append({"step": "prepare", "purpose": "Fetch Dart packages.", "command": "flutter pub get"})
+        if platform == "iOS" and METHODS[method]["export"] != "developer-id":
+            export_method = {"app-store-connect": "app-store", "release-testing": "ad-hoc", "enterprise": "enterprise",
+                             "debugging": "development"}.get(METHODS[method]["export"], "app-store")
+            build = {"step": "archive", "purpose": "Build the Flutter app, archive and export an IPA "
+                     "(build/ios/archive, build/ios/ipa).",
+                     "command": f"flutter build ipa --release --export-options-plist={q(options_path)}",
+                     "writes": "build/ios/archive, build/ios/ipa", "network": "signing assets only",
+                     "note": f"Without an options plist: --export-method {export_method}. Override version/build "
+                             "with --build-name/--build-number (pubspec version is the default)."}
+            rest = [step for step in steps if step["step"] not in ("archive", "export")]
+            for step in rest:
+                if isinstance(step.get("command"), str):
+                    step["command"] = re.sub(r"build/export-[\w-]+/\S+\.ipa", "build/ios/ipa/*.ipa", step["command"])
+            return prepare + [build] + rest
+        prepare.append({"step": "prepare-macos", "purpose": "Build the Flutter macOS app once so the Xcode "
+                        "workspace has its generated files.", "command": "flutter build macos --release"})
+    elif name in ("react-native", "expo") and not framework.managed:
+        prepare.append({"step": "prepare", "purpose": "Install JavaScript dependencies.", "command": lockfile_install(root)})
+        if pods:
+            prepare.append({"step": "pods", "purpose": "Install CocoaPods for the native host.", "command": pods})
+        if name == "expo":
+            prepare.append({"step": "note", "purpose": "Continuous Native Generation: `npx expo prebuild` regenerates "
+                            "ios/. Keep native changes in config plugins or they are lost.", "command": "# informational"})
+    elif name == "expo" and framework.managed:
+        profile = "production"
+        submit = [{"step": "build", "purpose": "Build in EAS (cloud; EAS plan limits apply) — or add --local to build "
+                   "on this Mac.", "command": f"npx eas-cli@latest build -p ios --profile {profile}",
+                   "network": "uploads the project to EAS Build"},
+                  {"step": "upload", "purpose": "Submit the latest build to App Store Connect / TestFlight.",
+                   "command": "npx eas-cli@latest submit -p ios --latest", "network": "uploads the build to App Store Connect",
+                   "requires_approval": True},
+                  {"step": "confirm-processing", "purpose": "Confirm the build finished processing.",
+                   "command": "app_store_connect operation=builds app_id=<APP_ID>  (this MCP, read-only)"}]
+        alternative = {"step": "alternative-local", "purpose": "Without EAS: generate the native host, then use the "
+                       "Xcode steps (re-run plan_distribution after prebuild).", "command": "npx expo prebuild -p ios",
+                       "optional": True}
+        return [{"step": "prepare", "purpose": "Install JavaScript dependencies.", "command": lockfile_install(root)}] + submit + [alternative]
+    elif name == "capacitor":
+        prepare += [{"step": "prepare", "purpose": "Build the web assets and copy them into the iOS host.",
+                     "command": f"{lockfile_install(root)} && npm run build && npx cap sync ios"}]
+    elif name == "maui":
+        tfm = "net10.0-ios" if platform == "iOS" else "net10.0-maccatalyst"
+        if framework.version:
+            match = re.search(r"net[\d.]+-(ios|maccatalyst)", framework.version)
+            wanted = "ios" if platform == "iOS" else "maccatalyst"
+            found = re.findall(rf"net[\d.]+-{wanted}", framework.version)
+            tfm = found[0] if found else tfm
+        project = framework.config_files[0] if framework.config_files else "App.csproj"
+        build = {"step": "archive", "purpose": "Publish a signed, archived .NET MAUI app.",
+                 "command": f"dotnet publish {q(project)} -f {tfm} -c Release -p:ArchiveOnBuild=true",
+                 "writes": "bin/Release/<tfm>/<rid>/publish"}
+        rest = [step for step in steps if step["step"] not in ("archive", "export")]
+        return [build] + rest
+    elif name == "kmp":
+        prepare.append({"step": "prepare", "purpose": "Build the shared Kotlin framework (Xcode's build phase "
+                        "also runs Gradle).", "command": "./gradlew :shared:assemble"})
+    return prepare + steps
+
+
 def main(argv=None) -> int:
     parser = build_parser("distribution-planner",
                           "Plan archive, export, upload and notarization for an Apple app, with preflight checks.",
@@ -223,12 +303,24 @@ def main(argv=None) -> int:
     report = Report(tool="distribution-planner", target=str(root), version=__version__)
     project = discover(root)
     settings = build_settings(root)
+    framework = detect_framework(root)
+    if framework.framework == "flutter" and any("FLUTTER_BUILD" in value for value in settings["CURRENT_PROJECT_VERSION"]):
+        build_number = (framework.app_version or "").partition("+")[2]
+        settings["CURRENT_PROJECT_VERSION"] = [f"{build_number} (pubspec.yaml)"] if build_number else []
+    if framework.framework == "flutter" and any("FLUTTER_BUILD" in value for value in settings["MARKETING_VERSION"]):
+        settings["MARKETING_VERSION"] = [f"{framework.app_version.partition('+')[0]} (pubspec.yaml)"] if framework.app_version else []
 
     container = (project.workspace_files or project.project_files or [None])[0]
-    if container is None:
+    if container is None and framework.framework == "expo" and framework.managed:
+        report.info("DST002", "Expo app without a checked-in ios/ host: EAS Build generates it, so Xcode-level "
+                    "checks run on app.json instead (see audit_cross_platform).")
+    elif container is None:
         report.error("DST001", "No .xcodeproj or .xcworkspace found; an app archive needs an Xcode project.",
                      hint="Swift packages are distributed as source. Add an app target in Xcode to archive an app.")
-    platform = args.platform or detect_platform(project, settings)
+    platform = args.platform or ("iOS" if framework.framework != "native" and framework.hosts.get("iOS")
+                                 else detect_platform(project, settings))
+    if framework.framework == "expo" and framework.managed and not args.platform:
+        platform = "iOS"
     if platform not in METHODS[args.method]["platforms"]:
         report.error("DST060", f"Method '{args.method}' does not apply to {platform}.",
                      hint="macOS uses developer-id or mac-app-store; other platforms use app-store, "
@@ -260,8 +352,14 @@ def main(argv=None) -> int:
                     "Increase it before every upload (agvtool next-version -all, or the target's Build field).")
 
     plists = [read_plist(path) or {} for path in project.info_plists]
+    expo_ios = ((framework.expo_config or {}).get("ios") or {}) if framework.framework == "expo" else {}
     encryption_declared = bool(settings["INFOPLIST_KEY_ITSAppUsesNonExemptEncryption"]) or any(
-        "ITSAppUsesNonExemptEncryption" in plist for plist in plists)
+        "ITSAppUsesNonExemptEncryption" in plist for plist in plists) or \
+        "usesNonExemptEncryption" in (expo_ios.get("config") or {}) or \
+        "ITSAppUsesNonExemptEncryption" in (expo_ios.get("infoPlist") or {})
+    if framework.framework == "expo" and framework.managed and not expo_ios.get("bundleIdentifier"):
+        report.error("DST003", "expo.ios.bundleIdentifier is missing; EAS cannot build or submit.",
+                     hint="Set ios.bundleIdentifier in app.json to the App Store Connect bundle ID.")
     if METHODS[args.method]["export"] == "app-store-connect" and not encryption_declared:
         report.warn("DST030", "ITSAppUsesNonExemptEncryption is not declared.",
                     hint="Without it every build waits for an export-compliance answer in App Store Connect. "
@@ -314,8 +412,10 @@ def main(argv=None) -> int:
 
     steps = plan_steps(args.method, platform, container, scheme, archive, export_dir, options_path,
                        args.upload, scheme)
+    steps = framework_steps(framework, root, args.method, platform, options_path, steps)
     report.data = {
         "method": args.method,
+        "framework": framework.as_dict(),
         "export_method": options["method"],
         "platform": platform,
         "container": container,
