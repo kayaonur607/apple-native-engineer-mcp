@@ -4,6 +4,22 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] — 2026-11-07
+
+### Added
+
+- `audit_cross_platform`: Apple-native checks for Flutter, React Native, Expo, Capacitor, .NET MAUI and Kotlin Multiplatform apps through their iOS host.
+- Host projects in `ios/`, `macos/`, `ios/App`, `Platforms/iOS` and `iosApp/` are found by every tool.
+- `plan_distribution` plans `flutter build ipa`, EAS build/submit, `cap sync`, `dotnet publish` and KMP archives.
+- `XPL020`/`PROJ022`: deployment target below the installed SDK's minimum.
+- Capture: per-screen environment variables and a warning for custom-scheme deep links.
+- Prompts for Flutter, React Native/Expo and other cross-platform stacks; three new references.
+- Recorded Flutter run: template build failure found, fixed, captured and framed.
+
+### Changed
+
+- `audit_project` runs nine audits; `review_diff` also reviews changed Dart and JS/TS files.
+
 ## [2.4.0] — 2026-11-07
 
 ### Added

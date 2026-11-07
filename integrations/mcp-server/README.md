@@ -15,9 +15,9 @@ Claude Desktop · Cursor · Codex · Cline · Zed · any MCP client
   apple-native-engineer  ──►  python3 tools/<auditor>/<script>.py --json
         │                          │
         │                          └── stable envelope (schema_version 2.0)
-        ├── 30 tools        (audits, documentation, assets and diagnostics)
-        ├── 61 resources    (references, checklists, examples, SKILL.md)
-        └── 22 prompts      (the review workflows, parameterised)
+        ├── 31 tools        (audits, documentation, assets and diagnostics)
+        ├── 64 resources    (references, checklists, examples, SKILL.md)
+        └── 25 prompts      (the review workflows, parameterised)
 ```
 
 ## Why this exists
@@ -133,13 +133,13 @@ against your filesystem.
 
 ## Tools
 
-Twenty-five tools: CLI wrappers, documentation research and the audit/review entry points. If the MCP tool and the CLI ever
+Thirty-one tools: CLI wrappers, documentation research and the audit/review entry points. If the MCP tool and the CLI ever
 disagree, the CLI wins — that rule is why the server cannot drift.
 
 | Tool | What it answers | Backing script |
 | :--- | :--- | :--- |
-| `audit_project` | **Start here.** Eight read-only audits in one call, merged and tagged | *composite* |
-| `review_diff` | **Use in an edit loop.** Audits only the Swift files in `git diff` | *composite* |
+| `audit_project` | **Start here.** Nine read-only audits in one call, merged and tagged | *composite* |
+| `review_diff` | **Use in an edit loop.** Audits only the changed Swift, Dart and JS/TS files in `git diff` | *composite* |
 | `check_environment` | Why is a tool failing: Node, Python, auditors, git, Xcode, credentials | *self-diagnostic* |
 | `inspect_apple_project` | What is this project: targets, OS floor, Swift version, architecture | `tools/project-inspector/inspect_project.py` |
 | `lint_swiftui` | 20 rules: deprecated API, hardcoded colour, identity churn, force unwraps | `tools/swiftui-linter/lint_swiftui.py` |
@@ -154,9 +154,19 @@ disagree, the CLI wins — that rule is why the server cannot drift.
 | `forge_design_tokens` | Token JSON → SwiftUI source + `.xcassets` colour sets | `tools/design-token-forge/forge_tokens.py` |
 | `generate_release_report` | The release gate: ship / fix / blocked, with reasons | `tools/release-readiness/generate_report.py` |
 | `app_store_connect` | Real App Store Connect reads via JWT ES256 | `tools/app-store-connect/cli.py` |
+| `audit_cross_platform` | Flutter, React Native, Expo, Capacitor, MAUI, KMP: Apple-native quality through the iOS host | `tools/cross-platform-auditor/audit_cross_platform.py` |
+| `search_apple_guidelines` | Which HIG page covers this topic (offline index of 158 pages) | `tools/apple-docs-research/apple_docs.py` |
+| `search_apple_documentation` · `read_apple_documentation` · `inspect_apple_api_availability` · `find_apple_guidelines` | Live Apple documentation, availability and HIG pages with URLs | `tools/apple-docs-research/apple_docs.py` |
+| `get_app_store_specs` | Apple's screenshot, preview and icon specifications, dated and sourced | `tools/screenshot-studio/screenshot_studio.py` |
+| `capture_screenshots` | Real Simulator captures: devices × locales × appearances, flattened, with manifest | `tools/screenshot-studio/capture_batch.py` |
+| `audit_screenshots` | Slot sizes, alpha, 1–10 per set, required sets per platform | `tools/screenshot-studio/screenshot_studio.py` |
+| `compose_marketing_screenshots` | Localized marketing frames, native PNG at exact slot size | `tools/screenshot-studio/compose_marketing.py` |
+| `prepare_icon_assets` · `verify_icon_set` | One 1024 master → AppIcon set; verification | `tools/icon-studio/icon_studio.py` |
+| `audit_app_store_review` · `analyze_app_store_optimization` | Review-guideline risks; listing copy budgets and claims | `tools/app-store-review/review.py`, `tools/aso-engine/aso.py` |
+| `plan_distribution` | Preflight, ExportOptions and archive/upload/notarize commands (Swift, Flutter, Expo, Capacitor, MAUI, KMP) | `tools/distribution/plan_distribution.py` |
 
 `audit_project` is the one tool without a CLI equivalent, and it is not a second implementation: it runs
-eight existing auditors concurrently and merges their envelopes. Every finding keeps a `tool` field naming
+nine existing auditors concurrently and merges their envelopes. Every finding keeps a `tool` field naming
 the audit that produced it, so an agent can route the fix without re-running the sweep.
 
 `review_diff` exists because a full sweep is the wrong shape for an agent's edit loop. It reads
@@ -208,7 +218,7 @@ A tool that crashes still returns a valid envelope with `status: "fail"` and an 
 
 ## Capability modules
 
-Twelve modules, gated by `APPLE_NATIVE_MODULES` (comma-separated, always includes `core`):
+Thirteen modules, gated by `APPLE_NATIVE_MODULES` (comma-separated, always includes `core`):
 
 ```json
 { "env": { "APPLE_NATIVE_MODULES": "core,swift-engineering,privacy-security-audit" } }
@@ -226,21 +236,22 @@ available: they are knowledge, not capability. Full rules in [`docs/MODULES.md`]
 The knowledge base is exposed rather than pasted into prompts, so a client loads only what it needs.
 
 - `apple-native://skill` — the operating standard (`SKILL.md`)
-- `apple-native://references/<name>` — 36 guides, e.g. `apple-native://references/liquid-glass`, `tvos-design`, `iphone-duo-design`, `distribution-and-release`
+- `apple-native://references/<name>` — 39 guides, e.g. `liquid-glass`, `tvos-design`, `iphone-duo-design`, `distribution-and-release`, `flutter-apple-native`, `react-native-expo-apple-native`, `cross-platform-apple`
 - `apple-native://data/app-store-specs` and `apple-native://data/hig-catalog` — Apple's asset specifications and the HIG index as JSON
 - `apple-native://checklists/<name>` — 12 review checklists
 - `apple-native://examples/<name>` — 9 worked examples
 
 ## Prompts
 
-Twenty-two workflows, available as slash commands in clients that support prompts. Each takes an optional
+Twenty-five workflows, available as slash commands in clients that support prompts. Each takes an optional
 `project` path and an optional `focus` string.
 
 `apple-native-start` (developer/designer onboarding), `apple-native` (the umbrella audit), `apple-native-design`, `apple-native-code`, `apple-native-review`,
 `apple-native-privacy`, `apple-native-icon`, `apple-native-screenshots`, `apple-native-connect`,
 `apple-native-metadata`, `apple-native-widgets`, `apple-native-localization`, `apple-native-release`,
 `apple-native-new-screen`, `apple-native-distribute`, and one per platform: `apple-native-ios`, `apple-native-ipados`,
-`apple-native-macos`, `apple-native-watchos`, `apple-native-tvos`, `apple-native-visionos`, `apple-native-iphone-duo`.
+`apple-native-macos`, `apple-native-watchos`, `apple-native-tvos`, `apple-native-visionos`, `apple-native-iphone-duo`;
+and per framework: `apple-native-flutter`, `apple-native-react-native`, `apple-native-cross-platform`.
 
 Naming is mechanical: `commands/apple-native.md` → `apple-native`, `commands/<slug>.md` → `apple-native-<slug>`.
 A test enforces it so the doubled prefix cannot come back.
@@ -308,7 +319,7 @@ credentials, and fails if any of it survives.
 ## Verify the install
 
 ```bash
-node src/index.js --selftest        # inventory: 30 tools, 61 resources, 22 prompts
+node src/index.js --selftest        # inventory: 31 tools, 64 resources, 25 prompts
 node src/index.js --doctor          # Node, Python, auditors, git, Xcode, credentials
 node src/index.js --telemetry-preview
 npm test                            # protocol, CLI, diff, HTTP, update and telemetry tests

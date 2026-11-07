@@ -9,16 +9,16 @@ How the pieces fit, and the rules that keep them honest.
                                 │ stdio or Streamable HTTP
 ┌───────────────────────────────▼────────────────────────────────────────────┐
 │ integrations/mcp-server                                                    │
-│  modules.js   capability gating (12 modules, 30 tools)                     │
+│  modules.js   capability gating (13 modules, 31 tools)                     │
 │  tools.js     tool registry, zod schemas, annotations, output schema       │
 │  runner.js    spawns python3, parses the envelope, maps exit codes         │
-│  resources.js 61 resources as apple-native:// URIs                         │
-│  prompts.js   22 slash commands as MCP prompts                             │
+│  resources.js 64 resources as apple-native:// URIs                         │
+│  prompts.js   25 slash commands as MCP prompts                             │
 │  telemetry.js opt-in, five-key schema, sanitiser-tested                    │
 └───────────────────────────────┬────────────────────────────────────────────┘
                                 │ subprocess: python3 tools/<tool>/<script>.py --json
 ┌───────────────────────────────▼────────────────────────────────────────────┐
-│ tools/  19 CLIs + native Swift helper                                     │
+│ tools/  20 CLIs + native Swift helper                                     │
 │  lib/apple_native/  report contract · Swift scanner · colour maths ·       │
 │                     Xcode parsing · PNG codec (icon-studio) · imaging      │
 └───────────────────────────────┬────────────────────────────────────────────┘
@@ -48,7 +48,7 @@ the icon studio has its own PNG codec precisely so that the toolkit never grows 
 ## Where knowledge lives
 
 - `SKILL.md` — the standard an agent loads first.
-- `references/` — 36 guides; `whats-new-ios-27.md` is generated from the installed SDK.
+- `references/` — 39 guides; `whats-new-ios-27.md` is generated from the installed SDK.
 - `data/sf-symbols.json` — 9,649 symbols extracted from `CoreGlyphs.bundle`.
 - `data/app-store-specs.json` — Apple's screenshot, preview and icon specifications, dated and sourced.
 - `data/hig-catalog.json` — the 158-page HIG table of contents (`scripts/build_hig_catalog.py`).

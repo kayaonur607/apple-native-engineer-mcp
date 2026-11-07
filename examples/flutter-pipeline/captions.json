@@ -1,0 +1,10 @@
+{
+  "en-US": {
+    "01-today": {"headline": "Build habits that stick", "subhead": "Your day, one tap at a time"},
+    "02-insights": {"headline": "Watch your streak grow", "subhead": "Progress you can see"}
+  },
+  "tr-TR": {
+    "01-today": {"headline": "Kalıcı alışkanlıklar edin", "subhead": "Günün, her dokunuşta bir adım"},
+    "02-insights": {"headline": "Serini büyürken izle", "subhead": "Görebileceğin ilerleme"}
+  }
+}

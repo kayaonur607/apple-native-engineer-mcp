@@ -35,6 +35,21 @@ be **flattened** (they carry alpha); screenshot copy needs **per-locale fallback
 distribution guidance must name **exact ExportOptions keys** from the installed Xcode; and HIG pages must be
 **discoverable by topic** before they can be cited.
 
+## Cross-platform servers and skills (reviewed on GitHub, 2026-11-07)
+
+| Upstream | Stars / license at review | How it complements this server |
+| --- | --- | --- |
+| [Dart and Flutter MCP server](https://docs.flutter.dev/ai/mcp-server) ([dart-lang/ai](https://github.com/dart-lang/ai)) | 294 · BSD-3 | Dart analysis, pub.dev, tests and runtime errors; this server adds HIG, the iOS host, captures and release |
+| [flutter/agent-plugins](https://github.com/flutter/agent-plugins) | 3,161 · BSD-3 | Official Flutter skills (localization setup, responsive layout, routing, tests) |
+| [Expo MCP server](https://docs.expo.dev/mcp/) and [expo/skills](https://github.com/expo/skills) | 4,080 · MIT | Expo docs, compatible installs, EAS; `expo-ui`/`expo-native-ui` informed the `RNA020` and `EXP*` rules |
+| [callstackincubator/agent-skills](https://github.com/callstackincubator/agent-skills) | 1,701 · MIT | React Native performance, upgrades, React Navigation, tvOS |
+| [margelo/react-native-skills](https://github.com/margelo/react-native-skills) | 179 | Nitro/Swift native modules, VisionCamera |
+| [FormidableLabs/eslint-plugin-react-native-a11y](https://github.com/FormidableLabs/eslint-plugin-react-native-a11y) | 307 · MIT | Exhaustive RN accessibility lint for CI; `audit_cross_platform` covers the Apple-specific subset |
+
+Facts used by the new rules were taken from the frameworks' own documentation (Flutter platform adaptations and
+internationalization, React Native SafeAreaView and accessibility, Expo app config) and from runs on this machine
+(Flutter 3.44.8, Xcode 27.2). No upstream code or skill text was copied.
+
 ## Architecture boundary
 
 The MCP server continues to wrap the existing Python auditors. Shared envelopes carry stable finding codes.

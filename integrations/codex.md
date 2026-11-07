@@ -41,8 +41,8 @@ ln -s ~/Desktop/apple-native-engineer ~/.agents/skills/apple-native-engineer
 
 ## 3. The MCP server — stronger than the skill
 
-The skill is instructions. The MCP server is instructions **plus 30 tools that actually check the code**, 61
-resources and 22 prompts. If Codex is your daily client, use both: the skill sets policy, the server enforces it.
+The skill is instructions. The MCP server is instructions **plus 31 tools that actually check the code**, 61
+resources and 25 prompts. If Codex is your daily client, use both: the skill sets policy, the server enforces it.
 
 ```bash
 codex mcp add apple-native-engineer -- node /absolute/path/apple-native-engineer-mcp/integrations/mcp-server/scripts/github-launcher.mjs

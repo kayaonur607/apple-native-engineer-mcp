@@ -1,12 +1,13 @@
 # Capability modules
 
-The MCP server is a thin protocol shell around thirty tools. Those tools are grouped into twelve **capability
+The MCP server is a thin protocol shell around thirty-one tools. Those tools are grouped into thirteen **capability
 modules**, so a user can install one artefact and enable only what their project needs.
 
 ```
 core                      audit_project · inspect_apple_project · review_diff · check_environment
 swift-engineering         lint_swiftui · audit_accessibility · audit_liquid_glass
                           check_localization · validate_widgets
+cross-platform            audit_cross_platform  (Flutter, React Native, Expo, Capacitor, .NET MAUI, KMP)
 apple-docs-research       search_apple_guidelines · search_apple_documentation · read_apple_documentation
                           inspect_apple_api_availability · find_apple_guidelines
 sf-symbols                validate_sf_symbols

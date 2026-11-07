@@ -26,20 +26,20 @@ Recorded by `./scripts/update_proof.py` on 2026-11-07. Re-run it after any chang
   ✓ validation passed: 0 warning(s)
 
 ▸ Python tests (shared library + tools)
-..........................................................................................................................................................
+......................................................................................................................................................................
 ----------------------------------------------------------------------
-Ran 154 tests in 4.740s
+Ran 166 tests in 5.091s
 
 
 ▸ MCP protocol tests
-ℹ tests 85
-ℹ suites 15
-ℹ pass 85
+ℹ tests 88
+ℹ suites 16
+ℹ pass 88
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 1909.281917
+ℹ duration_ms 1958.195042
 
 ▸ Swift compilation (fixtures + documentation snippets)
   SDK: iPhoneSimulator27.2.sdk
@@ -56,14 +56,14 @@ Ran 154 tests in 4.740s
 
 ▸ Documentation API claims
 SDK index:        21,998 symbols from iPhoneSimulator27.2.sdk
-Documents:        45
+Documents:        48
 Modifiers taught: 129
 Verified:         127
 Allowlisted:      2
 Unverified:       0
 
 ────────────────────────────────────────────
-  passed: 5   failed: 0   skipped: 0   55s
+  passed: 5   failed: 0   skipped: 0   56s
 ────────────────────────────────────────────
 ```
 <!-- proof:end -->
@@ -471,8 +471,8 @@ severity reflects the confidence: `info` for suggestions, `error` for rules Appl
 | Claim | Command |
 | :--- | :--- |
 | "138 tests pass" | `./scripts/verify.sh` |
-| "19 CLI tools" | `ls -d tools/*/ \| wc -l` |
-| "30 MCP tools" | `node integrations/mcp-server/src/index.js --selftest` |
+| "20 CLI tools" | `ls -d tools/*/ \| wc -l` |
+| "31 MCP tools" | `node integrations/mcp-server/src/index.js --selftest` |
 | "the HTTP transport rejects a foreign origin" | `node integrations/mcp-server/src/index.js --http 3931 &` then the `curl` above |
 | "a review only reports the diff" | `cd integrations/mcp-server && npm test` (`review_diff` suite) |
 | "telemetry records nothing identifying" | `node integrations/mcp-server/src/index.js --telemetry-preview` |

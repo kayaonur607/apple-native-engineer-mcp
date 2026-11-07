@@ -20,7 +20,7 @@ build/test destination and platform-specific asset review.
 1. Install Node 20+ and Python 3.10+. Xcode is optional for static checks and required for SDK verification or simulator work.
 2. In `integrations/mcp-server`, run `npm ci`, then `node src/index.js --doctor` and `node src/index.js --selftest`.
 3. Start with `APPLE_NATIVE_MODULES=core,swift-engineering,privacy-security-audit`. This is tool exposure control,
-   not OS-level isolation. The default remains all twelve modules for compatibility; ASC reads credentials only when called.
+   not OS-level isolation. The default remains all thirteen modules for compatibility; ASC reads credentials only when called.
 4. Inspect the project and run `review_diff` while editing. Preserve minimum OS support and stable view identity.
 5. Run the complete static suite, then build and test with the project's own scheme and destination. Enable Swift
    concurrency diagnostics appropriate to the project's language mode; do not silence them with unchecked annotations.

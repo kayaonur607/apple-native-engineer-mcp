@@ -31,7 +31,7 @@ ln -s ~/Desktop/apple-native-engineer ~/.config/opencode/skills/apple-native-eng
 
 ## 3. The MCP server — the version that actually checks the code
 
-The skill sets policy. The MCP server adds 30 tools that run the audits, 61 resources and 22 prompts, and OpenCode
+The skill sets policy. The MCP server adds 31 tools that run the audits, 64 resources and 25 prompts, and OpenCode
 exposes all three.
 
 ```bash

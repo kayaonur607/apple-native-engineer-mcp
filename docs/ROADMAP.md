@@ -28,6 +28,7 @@ Last reviewed: 2026-11-07 · SDK 27.2 · Xcode 27.2
 | Screenshot audit | **Implemented** | `audit_screenshots`: slot sizes, alpha, 1–10 per set, orientation mix, Watch size consistency, required sets per platform | Cannot see content quality; a human still reviews the frames |
 | Screenshot composition | **Implemented (v2)** | Localized captions with reported fallbacks, drawn generic device frame with Dynamic Island, RTL layout, five themes, native CoreGraphics/San Francisco PNG at exact slot size, SVG for editing | No Apple device artwork (deliberately); no automatic translation |
 | Distribution planning | **Implemented (plan-only)** | `plan_distribution`: preflight (team, version/build, export compliance, Hardened Runtime, App Sandbox, entitlements, privacy manifest, icon), ExportOptions from `xcodebuild -help`, archive/upload/notarize/staple/assess commands | Executes nothing by design; the host runs approved steps |
+| Cross-platform apps | **Implemented (v1)** | `audit_cross_platform`: Flutter, React Native, Expo, Capacitor, .NET MAUI, KMP detection; host discovery; Dynamic Type, VoiceOver, Dark Mode, iOS idioms, permissions, localizations, SDK minimum, Expo config; framework-aware distribution plans; recorded Flutter run | Heuristic source scans, not AST analysis; React Native launch-argument routing and MAUI/KMP builds not yet recorded |
 | HIG discovery | **Implemented** | `search_apple_guidelines` over a 158-page index of Apple's HIG table of contents; table rendering in `find_apple_guidelines` | Index is refreshed with `scripts/build_hig_catalog.py`, not automatically |
 | Release gate | **Implemented** | Seven weighted gates, `NOT INSPECTED` blocks, score, Markdown report | — |
 | App Store Connect | **Read-only, widened** | ES256 JWT; apps, app details (content rights), versions, builds, listing copy per locale, screenshot sets and their delivery state; rate-limit aware; hard failure without credentials | No writes, no submission, no screenshot upload — deliberately, until a preview/approve/apply flow exists |
@@ -36,7 +37,7 @@ Last reviewed: 2026-11-07 · SDK 27.2 · Xcode 27.2
 | ASO | **Implemented (honest v1)** | Budget arithmetic, duplicate/wasted keywords, coverage against visible copy, risky-claim detection, candidates extracted from the developer's own description | No search-volume or competitor data — and it says so instead of inventing numbers |
 
 
-| Capability modules | **Implemented** | Twelve modules, `APPLE_NATIVE_MODULES`, isolation tests | No lazy dependency installation (there are no optional deps to install) |
+| Capability modules | **Implemented** | Thirteen modules, `APPLE_NATIVE_MODULES`, isolation tests | No lazy dependency installation (there are no optional deps to install) |
 | GitHub release updates | **Implemented** | Isolated version staging, locked dependencies, inventory smoke test, atomic activation, offline fallback, pins and update opt-out | Bootstrap launcher upgrades remain explicit; no publisher-signature verification |
 | MCP transports | **Implemented** | stdio and Streamable HTTP (`--http`), loopback-only default, Origin check | No auth for remote use (deliberately refused) |
 | Privacy controls | **Implemented** | Telemetry off by default, closed five-key schema, sanitiser tests, no source uploads | Session-level consent prompts are a client concern |

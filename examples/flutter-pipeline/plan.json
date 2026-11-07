@@ -1,0 +1,13 @@
+{
+  "bundle_id": "dev.applenative.habitsDemo",
+  "app": "../../.swiftwork/flutter-demo/build/ios/iphonesimulator/Runner.app",
+  "devices": ["iphone-6.9", "iphone-6.3"],
+  "locales": ["en-US", "tr-TR"],
+  "appearances": ["light", "dark"],
+  "screens": [
+    {"name": "01-today", "arguments": ["-screen", "today"]},
+    {"name": "02-insights", "arguments": ["-screen", "insights"]}
+  ],
+  "settle_seconds": 4,
+  "shutdown_after": true
+}

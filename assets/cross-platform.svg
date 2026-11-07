@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="760" viewBox="0 0 1600 760" role="img" aria-label="Swift, Flutter, React Native, Expo, Capacitor, .NET MAUI and Kotlin Multiplatform apps reach the App Store through a native iOS host. The server audits the framework layer, then runs Apple-side checks, Simulator captures and distribution on the host. Recorded Flutter run: two blocking findings fixed, 16 captures, 0 errors.">
+<rect width="1600" height="760" rx="28" fill="#0b1018"/>
+<g font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',Arial,sans-serif">
+<text x="60" y="68" fill="#75e0bd" font-size="21" letter-spacing="3">ONE STANDARD FOR EVERY STACK</text>
+<text x="60" y="114" fill="#edf3fb" font-size="34" font-weight="600">Your framework draws the UI. Apple reviews the app.</text>
+
+<g fill="#141d2a" stroke="#29374b" stroke-width="2">
+<rect x="60" y="160" width="330" height="56" rx="14"/><rect x="60" y="226" width="330" height="56" rx="14"/><rect x="60" y="292" width="330" height="56" rx="14"/>
+<rect x="60" y="358" width="330" height="56" rx="14"/><rect x="60" y="424" width="330" height="56" rx="14"/><rect x="60" y="490" width="330" height="56" rx="14"/>
+<rect x="60" y="556" width="330" height="56" rx="14"/>
+</g>
+<g fill="#edf3fb" font-size="22" font-weight="600">
+<text x="84" y="196">Swift · SwiftUI</text><text x="84" y="262">Flutter</text><text x="84" y="328">React Native</text>
+<text x="84" y="394">Expo</text><text x="84" y="460">Capacitor · Ionic</text><text x="84" y="526">.NET MAUI</text><text x="84" y="592">Compose Multiplatform</text>
+</g>
+<g fill="#a2b1c6" font-size="17" text-anchor="end">
+<text x="370" y="196">native</text><text x="370" y="262">FLT · Dart</text><text x="370" y="328">RNA · JS/TS</text>
+<text x="370" y="394">EXP · app.json</text><text x="370" y="460">CPC · web</text><text x="370" y="526">MAU · C#</text><text x="370" y="592">KMP</text>
+</g>
+
+<g fill="#75e0bd" font-size="34"><text x="410" y="398">→</text><text x="900" y="398">→</text></g>
+
+<rect x="460" y="160" width="420" height="452" rx="20" fill="#10201e" stroke="#2b5c50" stroke-width="2"/>
+<text x="490" y="206" fill="#75e0bd" font-size="18" letter-spacing="2">NATIVE iOS HOST</text>
+<g fill="#edf3fb" font-size="21" font-family="ui-monospace,'SF Mono',Menlo,monospace">
+<text x="490" y="256">ios/Runner.xcodeproj</text><text x="490" y="296">ios/&lt;App&gt;.xcworkspace</text><text x="490" y="336">ios/App</text>
+<text x="490" y="376">Platforms/iOS</text><text x="490" y="416">iosApp/</text>
+</g>
+<g fill="#a2b1c6" font-size="19"><text x="490" y="474">Info.plist · entitlements</text><text x="490" y="506">PrivacyInfo.xcprivacy · icons</text><text x="490" y="538">signing · deployment target</text><text x="490" y="570">found automatically, 3 levels deep</text></g>
+
+<g fill="#141d2a" stroke="#29374b" stroke-width="2">
+<rect x="950" y="160" width="590" height="98" rx="16"/><rect x="950" y="278" width="590" height="98" rx="16"/>
+<rect x="950" y="396" width="590" height="98" rx="16"/><rect x="950" y="514" width="590" height="98" rx="16"/>
+</g>
+<g fill="#edf3fb" font-size="22" font-weight="600"><text x="976" y="200">audit_cross_platform</text><text x="976" y="318">inspect · privacy · audit_project</text><text x="976" y="436">capture_screenshots</text><text x="976" y="554">plan_distribution</text></g>
+<g fill="#a2b1c6" font-size="18"><text x="976" y="232">Dynamic Type · VoiceOver · Dark Mode · iOS idioms · permissions</text><text x="976" y="350">Run on the host: targets, manifests, SDK minimum (XPL020)</text><text x="976" y="468">One -screen launch argument; recorded in Swift and Flutter</text><text x="976" y="586">flutter build ipa · EAS build/submit · cap sync · dotnet publish</text></g>
+
+<path d="M60 652H1540" stroke="#29374b"/>
+<text x="60" y="694" fill="#edf3fb" font-size="22">Recorded Flutter 3.44.8 run: fresh template failed to build on Xcode 27.2 (XPL020) and lacked Turkish (FLT009)</text>
+<text x="60" y="728" fill="#a2b1c6" font-size="20">Both fixed → 16 real Simulator captures → 16 localized frames → 0 errors. Record: assets/evidence/flutter-run.json</text>
+</g></svg>
