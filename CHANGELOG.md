@@ -4,6 +4,20 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.2] — 2026-11-07
+
+Found by using the server on a published Expo app.
+
+### Fixed
+
+- Git-ignored Expo `ios/` hosts are recognised: release plans start with `npx expo prebuild --clean`, and version and build number come from `app.json`.
+- No Swift-architecture advice (SwiftUI APIs, Swift 6, Swift Testing) for generated cross-platform hosts.
+- Privacy findings explain that framework runtimes and plugins use required-reason APIs.
+
+### Changed
+
+- React Native screen routing for captures is now verified; the guide lists the splash and Expo Router pitfalls.
+
 ## [2.5.1] — 2026-11-07
 
 Includes everything listed under 2.5.0. The v2.5.0 tag was pushed, but its release gate failed and no GitHub Release was published.
