@@ -12,7 +12,14 @@ the way a careful human would before a submission:
 4. set light or dark appearance,
 5. optionally install the ``.app`` you built,
 6. relaunch the app per locale with ``-AppleLanguages``/``-AppleLocale`` and
-   the screen's own launch arguments (or open a deep link),
+   the screen's own launch arguments, environment variables or a deep link.
+   Launch arguments are the portable route: iOS puts ``-screen insights`` in the
+   NSUserDefaults argument domain, which Swift (``UserDefaults``), React Native
+   (``Settings.get``) and Flutter (``SharedPreferencesAsync``) all read.
+   Environment variables (forwarded as ``SIMCTL_CHILD_*``) reach native code via
+   ``ProcessInfo`` but **not** Flutter, whose ``Platform.environment`` is empty
+   on iOS. Custom-scheme deep links make iOS ask "Open in …?", which would end up
+   in the screenshot,
 7. wait for the screen to settle and save a PNG,
 8. validate every file against Apple's slots and write ``manifest.json``.
 
@@ -30,7 +37,8 @@ Plan file (JSON)::
       "launch_arguments": ["-UITestScreenshotMode", "YES"],
       "screens": [
         {"name": "01-today", "arguments": ["-initialTab", "today"]},
-        {"name": "02-detail", "url": "planner://item/42"}
+        {"name": "02-detail", "url": "planner://item/42"},
+        {"name": "03-insights", "env": {"SCREEN": "insights"}}
       ],
       "settle_seconds": 3,
       "status_bar": {"time": "9:41"},
@@ -141,6 +149,9 @@ def load_plan(path: Path) -> Dict[str, object]:
             raise PlanError(f"screen {screen['name']}: arguments must be strings")
         if "url" in screen and not isinstance(screen["url"], str):
             raise PlanError(f"screen {screen['name']}: url must be a string")
+        if "env" in screen and not (isinstance(screen["env"], dict) and all(
+                re.match(r"^[A-Z][A-Z0-9_]*$", key) and isinstance(value, (str, int)) for key, value in screen["env"].items())):
+            raise PlanError(f"screen {screen['name']}: env must map UPPER_CASE names to strings")
 
     status_bar = dict(DEFAULT_STATUS_BAR)
     custom = plan.get("status_bar")
@@ -172,6 +183,7 @@ def load_plan(path: Path) -> Dict[str, object]:
         "settle_seconds": float(plan.get("settle_seconds", 3)),
         "shutdown_after": bool(plan.get("shutdown_after", False)),
         "flatten": bool(plan.get("flatten", True)),
+        "env": {key: str(value) for key, value in (plan.get("env") or {}).items()},
     }
 
 
@@ -194,8 +206,13 @@ def device_name_for(entry: str) -> str:
 Runner = Callable[[Sequence[str], float], subprocess.CompletedProcess]
 
 
-def default_runner(command: Sequence[str], timeout: float) -> subprocess.CompletedProcess:
-    return subprocess.run(list(command), capture_output=True, text=True, timeout=timeout)
+def default_runner(command: Sequence[str], timeout: float,
+                   env: Optional[Dict[str, str]] = None) -> subprocess.CompletedProcess:
+    merged = None
+    if env:
+        import os
+        merged = {**os.environ, **env}
+    return subprocess.run(list(command), capture_output=True, text=True, timeout=timeout, env=merged)
 
 
 class Simulator:
@@ -206,12 +223,18 @@ class Simulator:
         self._inventory: Optional[Dict[str, object]] = None
 
     def run(self, *args: str, timeout: float = 120, mutate: bool = True,
-            check: bool = True) -> subprocess.CompletedProcess:
+            check: bool = True, env: Optional[Dict[str, str]] = None) -> subprocess.CompletedProcess:
         command = ["xcrun", "simctl", *args]
+        if env:
+            # simctl forwards SIMCTL_CHILD_<NAME> to the launched app as <NAME>.
+            command_env = {f"SIMCTL_CHILD_{key}": str(value) for key, value in env.items()}
+            prefix = [f"{key}={value}" for key, value in command_env.items()]
+        else:
+            command_env, prefix = None, []
         if self.dry_run and mutate:
-            self.log.append({"command": command, "executed": False})
+            self.log.append({"command": ["env", *prefix, *command] if prefix else command, "executed": False})
             return subprocess.CompletedProcess(command, 0, "", "")
-        result = self.runner(command, timeout)
+        result = self.runner(command, timeout, command_env) if command_env else self.runner(command, timeout)
         if mutate:
             self.log.append({"command": command, "executed": True, "exit": result.returncode})
         if result.returncode != 0 and check:
@@ -324,7 +347,8 @@ def capture(plan: Dict[str, object], out: Path, report: Report, *, dry_run: bool
                     simulator.run("terminate", udid, plan["bundle_id"], timeout=60, check=False)
                     arguments = ["-AppleLanguages", f"({apple_language(locale)})", "-AppleLocale", apple_locale(locale)]
                     arguments += list(plan["launch_arguments"]) + list(screen.get("arguments", []))
-                    simulator.run("launch", udid, plan["bundle_id"], *arguments, timeout=120)
+                    environment = {**plan["env"], **(screen.get("env") or {}), "APPLE_LOCALE": locale}
+                    simulator.run("launch", udid, plan["bundle_id"], *arguments, timeout=120, env=environment)
                     if screen.get("url"):
                         simulator.run("openurl", udid, screen["url"], timeout=60)
                     if not dry_run:
@@ -351,6 +375,14 @@ def capture(plan: Dict[str, object], out: Path, report: Report, *, dry_run: bool
                 pass
         if plan["shutdown_after"]:
             simulator.run("shutdown", udid, timeout=120)
+
+    custom = sorted({screen["url"].split(":")[0] for screen in plan["screens"]
+                     if screen.get("url") and not screen["url"].startswith(("http://", "https://"))})
+    if custom:
+        report.warn("CAP040", f"Deep links with custom schemes ({', '.join(custom)}) make iOS show an "
+                    "\"Open in …?\" confirmation that can appear in the capture.",
+                    hint="Prefer launch arguments (-screen <name>) read from UserDefaults / Settings.get / "
+                         "SharedPreferencesAsync, or universal links.")
 
     report.data.update({
         "dry_run": dry_run,
@@ -446,8 +478,11 @@ def main(argv=None) -> int:
             app = (plan_path.parent / app).resolve()
         if not args.dry_run and not app.exists():
             report.error("CAP101", f"App bundle not found: {app}",
-                         hint="Build for the simulator first: xcodebuild -scheme <App> -destination "
-                              "'generic/platform=iOS Simulator' -derivedDataPath build build")
+                         hint="Build for the Simulator first. Swift: xcodebuild -scheme <App> -destination "
+                              "'generic/platform=iOS Simulator' -derivedDataPath build build · Flutter: flutter build "
+                              "ios --simulator (build/ios/iphonesimulator/Runner.app) · React Native/Expo: "
+                              "npx expo run:ios --configuration Release, or xcodebuild on ios/<App>.xcworkspace "
+                              "with -sdk iphonesimulator · Capacitor: npx cap sync ios, then xcodebuild on ios/App.")
             return emit(report, args, title="Apple Native Engineer — Screenshot capture")
         plan["app"] = str(app)
 

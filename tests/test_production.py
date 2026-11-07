@@ -132,8 +132,11 @@ class CapturePlanTests(unittest.TestCase):
             {"name": "iPhone 18 Pro Max", "udid": "UDID-1", "state": "Shutdown", "isAvailable": True}]},
             "devicetypes": [], "runtimes": []}
 
-        def runner(command, timeout):
+        envs = []
+
+        def runner(command, timeout, env=None):
             calls.append(command)
+            envs.append(env)
             if command[2:4] == ["list", "--json"]:
                 return subprocess.CompletedProcess(command, 0, json.dumps(inventory), "")
             if command[2:4] == ["io", "UDID-1"]:
@@ -152,6 +155,8 @@ class CapturePlanTests(unittest.TestCase):
         launches = [command for command in calls if command[2] == "launch"]
         self.assertIn("tr_TR", launches[1])
         self.assertIn("-screen", launches[0])
+        launch_envs = [env for command, env in zip(calls, envs) if command[2] == "launch"]
+        self.assertEqual(launch_envs[1]["SIMCTL_CHILD_APPLE_LOCALE"], "tr-TR")
         self.assertNotIn("CAP031", [finding.code for finding in report.findings])
 
 
