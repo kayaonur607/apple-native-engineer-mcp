@@ -20,6 +20,8 @@ PASS=0
 FAIL=0
 SKIP=0
 START=$(date +%s)
+VERIFY_LOG_DIR=$(mktemp -d)
+trap 'rm -rf "$VERIFY_LOG_DIR"' EXIT
 
 section() {
     printf '\n\033[1m▸ %s\033[0m\n' "$1"
@@ -56,17 +58,21 @@ else
 fi
 
 section "Python tests (shared library + tools)"
-if python3 -m unittest discover -s tests -t tests 2>&1 | tail -5; then
+if python3 -m unittest discover -s tests -t tests > "$VERIFY_LOG_DIR/python.log" 2>&1; then
+    tail -5 "$VERIFY_LOG_DIR/python.log"
     record pass
 else
+    cat "$VERIFY_LOG_DIR/python.log"
     record fail
 fi
 
 section "MCP protocol tests"
 if [ -d integrations/mcp-server/node_modules ]; then
-    if (cd integrations/mcp-server && node --test test/ 2>&1 | tail -8); then
+    if (cd integrations/mcp-server && npm test) > "$VERIFY_LOG_DIR/mcp.log" 2>&1; then
+        tail -8 "$VERIFY_LOG_DIR/mcp.log"
         record pass
     else
+        cat "$VERIFY_LOG_DIR/mcp.log"
         record fail
     fi
 else
