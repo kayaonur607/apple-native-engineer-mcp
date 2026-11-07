@@ -25,6 +25,7 @@ from apple_native import __version__
 from apple_native.cli import build_parser, emit, guard_directory
 from apple_native.report import Report
 from apple_native.swiftscan import load_swift_files
+from apple_native.frameworks import detect as detect_framework
 from apple_native.xcode import discover
 
 #: Required-Reason API categories and the reason codes Apple documents for each.
@@ -130,6 +131,8 @@ def audit_privacy(raw_root: str) -> Report:
     report = Report(tool="privacy-auditor", target=str(root), version=__version__)
 
     project = discover(root)
+    app_framework = detect_framework(root)
+    cross_platform = app_framework.framework != "native"
     manifest_path = project.privacy_manifests[0] if project.privacy_manifests else None
     manifest = _load_manifest(manifest_path) if manifest_path else None
 
@@ -210,11 +213,19 @@ def audit_privacy(raw_root: str) -> Report:
                 hint="Check the spelling against Apple's documented category identifiers.",
             )
         elif category not in detected:
-            report.info(
-                "PRIV014",
-                f"{category} is declared but no usage was detected in Swift sources.",
-                hint="Keep it only if a dependency needs it; unused declarations are harmless but noisy.",
-            )
+            if cross_platform:
+                report.info(
+                    "PRIV014",
+                    f"{category} is declared; usage is not visible in Swift sources of this {app_framework.label} host.",
+                    hint="Expected when the framework runtime or a plugin uses the API (React Native, Flutter and "
+                         "many plugins do). Keep it if any bundled code calls it.",
+                )
+            else:
+                report.info(
+                    "PRIV014",
+                    f"{category} is declared but no usage was detected in Swift sources.",
+                    hint="Keep it only if a dependency needs it; unused declarations are harmless but noisy.",
+                )
 
     joined = "\n".join(f.clean for f in sources)
     tracked = [label for pattern, label in TRACKING_SIGNATURES if re.search(pattern, joined)]

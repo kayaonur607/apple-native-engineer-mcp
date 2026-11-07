@@ -242,9 +242,14 @@ def framework_steps(framework, root: Path, method: str, platform: str, options_p
                         "workspace has its generated files.", "command": "flutter build macos --release"})
     elif name in ("react-native", "expo") and not framework.managed:
         prepare.append({"step": "prepare", "purpose": "Install JavaScript dependencies.", "command": lockfile_install(root)})
-        if pods:
+        if name == "expo" and framework.generated_hosts:
+            prepare.append({"step": "prebuild", "purpose": "ios/ is git-ignored (Continuous Native Generation): "
+                            "regenerate it from app.json and config plugins so the archive matches the source. "
+                            "Never accept Xcode's 'Update to recommended settings' in a generated host.",
+                            "command": "npx expo prebuild --platform ios --clean", "writes": "ios/ (regenerated)"})
+        elif pods:
             prepare.append({"step": "pods", "purpose": "Install CocoaPods for the native host.", "command": pods})
-        if name == "expo":
+        if name == "expo" and not framework.generated_hosts:
             prepare.append({"step": "note", "purpose": "Continuous Native Generation: `npx expo prebuild` regenerates "
                             "ios/. Keep native changes in config plugins or they are lost.", "command": "# informational"})
     elif name == "expo" and framework.managed:
@@ -304,6 +309,12 @@ def main(argv=None) -> int:
     project = discover(root)
     settings = build_settings(root)
     framework = detect_framework(root)
+    if framework.framework == "expo":
+        expo = framework.expo_config or {}
+        if (expo.get("ios") or {}).get("buildNumber"):
+            settings["CURRENT_PROJECT_VERSION"] = [f"{expo['ios']['buildNumber']} (app.json)"]
+        if expo.get("version"):
+            settings["MARKETING_VERSION"] = [f"{expo['version']} (app.json)"]
     if framework.framework == "flutter" and any("FLUTTER_BUILD" in value for value in settings["CURRENT_PROJECT_VERSION"]):
         build_number = (framework.app_version or "").partition("+")[2]
         settings["CURRENT_PROJECT_VERSION"] = [f"{build_number} (pubspec.yaml)"] if build_number else []
@@ -348,8 +359,10 @@ def main(argv=None) -> int:
         report.warn("DST021", "No CURRENT_PROJECT_VERSION (build number).",
                     hint="Each upload needs a higher build number for the same version.")
     elif settings["CURRENT_PROJECT_VERSION"]:
+        where = {"expo": "ios.buildNumber in app.json (then prebuild)", "flutter": "the +N in pubspec.yaml version",
+                 }.get(framework.framework, "agvtool next-version -all, or the target's Build field")
         report.info("DST022", f"Build number(s): {', '.join(settings['CURRENT_PROJECT_VERSION'])}. "
-                    "Increase it before every upload (agvtool next-version -all, or the target's Build field).")
+                    f"Increase it before every upload ({where}).")
 
     plists = [read_plist(path) or {} for path in project.info_plists]
     expo_ios = ((framework.expo_config or {}).get("ios") or {}) if framework.framework == "expo" else {}

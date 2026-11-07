@@ -5,7 +5,7 @@
 <p align="center">
   <a href="https://github.com/kayaonur607/apple-native-engineer-mcp/releases"><img src="https://img.shields.io/badge/version-v2.5.1-75E0BD" alt="Source version v2.5.1"></a>
   <a href="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml"><img src="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/tests-254_passing-75E0BD" alt="254 tests">
+  <img src="https://img.shields.io/badge/tests-256_passing-75E0BD" alt="256 tests">
   <img src="https://img.shields.io/badge/platforms-iOS_·_iPadOS_·_iPhone_Duo_·_macOS_·_watchOS_·_tvOS_·_visionOS-9BAAC0" alt="Platforms">
   <img src="https://img.shields.io/badge/stacks-Swift_·_Flutter_·_React_Native_·_Expo_·_Capacitor_·_MAUI_·_KMP-9BAAC0" alt="Stacks">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-9BAAC0" alt="MIT license"></a>
@@ -284,7 +284,7 @@ Full policy: [docs/UPDATES.md](docs/UPDATES.md).
 
 ## Verification
 
-**254 tests: 166 Python and 88 MCP/Node**, covering protocol calls, module isolation, updates, every auditor on
+**256 tests: 168 Python and 88 MCP/Node**, covering protocol calls, module isolation, updates, every auditor on
 clean and defective fixtures (Swift, Flutter and Expo), framework and host detection, the capture command sequence
 (through a fake `simctl`), screenshot slot and alpha rules, localized composition, distribution plans for Swift,
 Flutter, Expo and Capacitor, and HIG table rendering.

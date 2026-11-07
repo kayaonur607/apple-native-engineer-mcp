@@ -159,9 +159,12 @@ def inspect_project(raw_root: str) -> Report:
             hint="Check that you passed the repository root rather than a build folder.",
         )
 
+    # Swift-architecture advice (SwiftUI APIs, Swift 6 mode, Swift Testing) does not apply to the host of a
+    # Flutter/React Native/Expo app, where the host is mostly generated and the app code is Dart or JS.
+    swift_app = app_framework.framework in ("native", "kmp")
     ios_target = project.deployment_targets.get("iOS")
     if ios_target:
-        if parse_version(ios_target) < MINIMUM_MODERN_IOS:
+        if swift_app and parse_version(ios_target) < MINIMUM_MODERN_IOS:
             report.warn(
                 "PROJ003",
                 f"iOS deployment target is {ios_target}; anything below 17.0 blocks modern SwiftUI "
@@ -177,7 +180,7 @@ def inspect_project(raw_root: str) -> Report:
         )
 
     swift_versions = [v for v in project.swift_versions if v]
-    if swift_versions and all(parse_version(v)[0] < 6 for v in swift_versions):
+    if swift_app and swift_versions and all(parse_version(v)[0] < 6 for v in swift_versions):
         report.warn(
             "PROJ005",
             f"Project builds with Swift {', '.join(swift_versions)}; Swift 6 language mode enables "
@@ -186,7 +189,7 @@ def inspect_project(raw_root: str) -> Report:
             docs="https://www.swift.org/migration/documentation/swift-6-concurrency-migration-guide/",
         )
 
-    if not test_files:
+    if not test_files and swift_app:
         report.warn(
             "PROJ006",
             "No test target sources found.",
