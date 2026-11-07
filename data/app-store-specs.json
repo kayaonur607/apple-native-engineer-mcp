@@ -1,0 +1,997 @@
+{
+  "schema_version": "1",
+  "retrieved": "2026-11-07",
+  "sources": {
+    "screenshots": "https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications",
+    "previews": "https://developer.apple.com/help/app-store-connect/reference/app-information/app-preview-specifications",
+    "icons": "https://developer.apple.com/design/human-interface-guidelines/app-icons"
+  },
+  "note": "Transcribed from Apple's published specifications on the retrieved date. Apple changes these pages; re-check the source URLs before a submission and update this file with the new retrieval date.",
+  "screenshots": {
+    "formats": [
+      "png",
+      "jpg",
+      "jpeg"
+    ],
+    "min_per_set": 1,
+    "max_per_set": 10,
+    "alpha_allowed": false,
+    "scaling": "When the UI is identical across sizes and localizations, provide only the highest required resolution; App Store Connect scales it down.",
+    "slots": [
+      {
+        "id": "iphone-duo-outer",
+        "label": "iPhone Duo outer display",
+        "platform": "iOS",
+        "display_class": "iPhone Duo, outer display",
+        "portrait": [
+          [
+            1398,
+            2034
+          ]
+        ],
+        "landscape": [
+          [
+            2034,
+            1398
+          ]
+        ],
+        "required": "from April 2027 for apps built with the iOS 27.1 SDK or later",
+        "requirement": "future",
+        "fallback": null,
+        "devices": [
+          "iPhone Duo"
+        ],
+        "simulator": "iPhone Duo"
+      },
+      {
+        "id": "iphone-duo-inner",
+        "label": "iPhone Duo inner display",
+        "platform": "iOS",
+        "display_class": "iPhone Duo, inner display",
+        "portrait": [
+          [
+            2007,
+            2853
+          ]
+        ],
+        "landscape": [
+          [
+            2853,
+            2007
+          ]
+        ],
+        "required": "from April 2027 for apps built with the iOS 27.1 SDK or later",
+        "requirement": "future",
+        "fallback": null,
+        "devices": [
+          "iPhone Duo"
+        ],
+        "simulator": "iPhone Duo"
+      },
+      {
+        "id": "iphone-6.9",
+        "label": "iPhone 6.9\"",
+        "platform": "iOS",
+        "display_class": "Dynamic Island (large)",
+        "portrait": [
+          [
+            1320,
+            2868
+          ],
+          [
+            1290,
+            2796
+          ],
+          [
+            1260,
+            2736
+          ]
+        ],
+        "landscape": [
+          [
+            2868,
+            1320
+          ],
+          [
+            2796,
+            1290
+          ],
+          [
+            2736,
+            1260
+          ]
+        ],
+        "required": "optional; substitutes for Face ID (large)",
+        "requirement": "alternative",
+        "alternative_to": "iphone-6.5",
+        "fallback": "iphone-6.5",
+        "devices": [
+          "iPhone Air",
+          "iPhone 18 Pro Max",
+          "iPhone 17 Pro Max",
+          "iPhone 16 Pro Max",
+          "iPhone 16 Plus",
+          "iPhone 15 Pro Max",
+          "iPhone 15 Plus",
+          "iPhone 14 Pro Max"
+        ],
+        "simulator": "iPhone 18 Pro Max"
+      },
+      {
+        "id": "iphone-6.5",
+        "label": "iPhone 6.5\"",
+        "platform": "iOS",
+        "display_class": "Face ID (large)",
+        "portrait": [
+          [
+            1284,
+            2778
+          ],
+          [
+            1242,
+            2688
+          ]
+        ],
+        "landscape": [
+          [
+            2778,
+            1284
+          ],
+          [
+            2688,
+            1242
+          ]
+        ],
+        "required": "required for iPhone apps unless Dynamic Island (large) screenshots are provided",
+        "requirement": "alternative",
+        "alternative_to": "iphone-6.9",
+        "fallback": "iphone-6.9",
+        "devices": [
+          "iPhone 14 Plus",
+          "iPhone 13 Pro Max",
+          "iPhone 12 Pro Max",
+          "iPhone 11 Pro Max",
+          "iPhone 11",
+          "iPhone XS Max",
+          "iPhone XR"
+        ],
+        "simulator": "iPhone 14 Plus"
+      },
+      {
+        "id": "iphone-6.3",
+        "label": "iPhone 6.3\"",
+        "platform": "iOS",
+        "display_class": "Dynamic Island (medium)",
+        "portrait": [
+          [
+            1206,
+            2622
+          ],
+          [
+            1179,
+            2556
+          ]
+        ],
+        "landscape": [
+          [
+            2622,
+            1206
+          ],
+          [
+            2556,
+            1179
+          ]
+        ],
+        "required": "required: at least one set for iPhone apps",
+        "requirement": "required",
+        "fallback": "iphone-6.5",
+        "devices": [
+          "iPhone 18 Pro",
+          "iPhone 17 Pro",
+          "iPhone 17",
+          "iPhone 16 Pro",
+          "iPhone 16",
+          "iPhone 15 Pro",
+          "iPhone 15",
+          "iPhone 14 Pro"
+        ],
+        "simulator": "iPhone 18 Pro"
+      },
+      {
+        "id": "iphone-6.1",
+        "label": "iPhone 6.1\"",
+        "platform": "iOS",
+        "display_class": "Face ID (medium)",
+        "portrait": [
+          [
+            1170,
+            2532
+          ],
+          [
+            1125,
+            2436
+          ],
+          [
+            1080,
+            2340
+          ]
+        ],
+        "landscape": [
+          [
+            2532,
+            1170
+          ],
+          [
+            2436,
+            1125
+          ],
+          [
+            2340,
+            1080
+          ]
+        ],
+        "required": "optional",
+        "requirement": "optional",
+        "fallback": "iphone-6.3",
+        "devices": [
+          "iPhone 17e",
+          "iPhone 16e",
+          "iPhone 14",
+          "iPhone 13 Pro",
+          "iPhone 13",
+          "iPhone 13 mini",
+          "iPhone 12 Pro",
+          "iPhone 12",
+          "iPhone 12 mini",
+          "iPhone 11 Pro",
+          "iPhone XS",
+          "iPhone X"
+        ],
+        "simulator": "iPhone 17e"
+      },
+      {
+        "id": "iphone-5.5",
+        "label": "iPhone 5.5\"",
+        "platform": "iOS",
+        "display_class": "Home Button (large)",
+        "portrait": [
+          [
+            1242,
+            2208
+          ]
+        ],
+        "landscape": [
+          [
+            2208,
+            1242
+          ]
+        ],
+        "required": "optional",
+        "requirement": "optional",
+        "fallback": "iphone-6.1",
+        "devices": [
+          "iPhone 8 Plus",
+          "iPhone 7 Plus",
+          "iPhone 6s Plus",
+          "iPhone 6 Plus"
+        ],
+        "simulator": "iPhone 8 Plus"
+      },
+      {
+        "id": "iphone-4.7",
+        "label": "iPhone 4.7\"",
+        "platform": "iOS",
+        "display_class": "Home Button (medium)",
+        "portrait": [
+          [
+            750,
+            1334
+          ]
+        ],
+        "landscape": [
+          [
+            1334,
+            750
+          ]
+        ],
+        "required": "optional",
+        "requirement": "optional",
+        "fallback": "iphone-5.5",
+        "devices": [
+          "iPhone SE (3rd generation)",
+          "iPhone SE (2nd generation)",
+          "iPhone 8",
+          "iPhone 7",
+          "iPhone 6s",
+          "iPhone 6"
+        ],
+        "simulator": "iPhone SE (3rd generation)"
+      },
+      {
+        "id": "iphone-4",
+        "label": "iPhone 4\"",
+        "platform": "iOS",
+        "display_class": "Home Button (4\")",
+        "portrait": [
+          [
+            640,
+            1136
+          ],
+          [
+            640,
+            1096
+          ]
+        ],
+        "landscape": [
+          [
+            1136,
+            640
+          ],
+          [
+            1136,
+            600
+          ]
+        ],
+        "required": "optional",
+        "requirement": "optional",
+        "fallback": "iphone-4.7",
+        "devices": [
+          "iPhone SE (1st generation)",
+          "iPhone 5s",
+          "iPhone 5c",
+          "iPhone 5"
+        ],
+        "simulator": null
+      },
+      {
+        "id": "iphone-3.5",
+        "label": "iPhone 3.5\"",
+        "platform": "iOS",
+        "display_class": "Home Button (3.5\")",
+        "portrait": [
+          [
+            640,
+            960
+          ],
+          [
+            640,
+            920
+          ]
+        ],
+        "landscape": [
+          [
+            960,
+            640
+          ],
+          [
+            960,
+            600
+          ]
+        ],
+        "required": "optional",
+        "requirement": "optional",
+        "fallback": "iphone-4",
+        "devices": [
+          "iPhone 4s",
+          "iPhone 4"
+        ],
+        "simulator": null
+      },
+      {
+        "id": "ipad-13",
+        "label": "iPad 13\"",
+        "platform": "iPadOS",
+        "display_class": "iPad 13\"",
+        "portrait": [
+          [
+            2064,
+            2752
+          ],
+          [
+            2048,
+            2732
+          ]
+        ],
+        "landscape": [
+          [
+            2752,
+            2064
+          ],
+          [
+            2732,
+            2048
+          ]
+        ],
+        "required": "required when the app runs on iPad",
+        "requirement": "required",
+        "fallback": null,
+        "devices": [
+          "iPad Pro 13-inch (M5)",
+          "iPad Pro 13-inch (M4)",
+          "iPad Air 13-inch (M4)",
+          "iPad Air 13-inch (M3)",
+          "iPad Air 13-inch (M2)",
+          "iPad Pro (12.9-inch) (6th generation)"
+        ],
+        "simulator": "iPad Pro 13-inch (M5)"
+      },
+      {
+        "id": "ipad-12.9",
+        "label": "iPad 12.9\"",
+        "platform": "iPadOS",
+        "display_class": "iPad 12.9\" (iPad Pro 2nd generation)",
+        "portrait": [
+          [
+            2048,
+            2732
+          ]
+        ],
+        "landscape": [
+          [
+            2732,
+            2048
+          ]
+        ],
+        "required": "optional",
+        "requirement": "optional",
+        "fallback": "ipad-13",
+        "devices": [
+          "iPad Pro (12.9-inch) (2nd generation)"
+        ],
+        "simulator": null
+      },
+      {
+        "id": "ipad-11",
+        "label": "iPad 11\"",
+        "platform": "iPadOS",
+        "display_class": "iPad 11\"",
+        "portrait": [
+          [
+            1668,
+            2420
+          ],
+          [
+            1668,
+            2388
+          ],
+          [
+            1640,
+            2360
+          ],
+          [
+            1512,
+            2316
+          ],
+          [
+            1488,
+            2266
+          ]
+        ],
+        "landscape": [
+          [
+            2420,
+            1668
+          ],
+          [
+            2388,
+            1668
+          ],
+          [
+            2360,
+            1640
+          ],
+          [
+            2316,
+            1512
+          ],
+          [
+            2266,
+            1488
+          ]
+        ],
+        "required": "optional",
+        "requirement": "optional",
+        "fallback": "ipad-13",
+        "devices": [
+          "iPad Pro 11-inch (M5)",
+          "iPad Pro 11-inch (M4)",
+          "iPad Air 11-inch (M4)",
+          "iPad (A16)",
+          "iPad mini (A17 Pro)"
+        ],
+        "simulator": "iPad Pro 11-inch (M5)"
+      },
+      {
+        "id": "ipad-10.5",
+        "label": "iPad 10.5\"",
+        "platform": "iPadOS",
+        "display_class": "iPad 10.5\"",
+        "portrait": [
+          [
+            1668,
+            2224
+          ]
+        ],
+        "landscape": [
+          [
+            2224,
+            1668
+          ]
+        ],
+        "required": "optional",
+        "requirement": "optional",
+        "fallback": "ipad-12.9",
+        "devices": [
+          "iPad Pro 10.5-inch",
+          "iPad Air (3rd generation)",
+          "iPad (7th-9th generation)"
+        ],
+        "simulator": "iPad (9th generation)"
+      },
+      {
+        "id": "ipad-9.7",
+        "label": "iPad 9.7\"",
+        "platform": "iPadOS",
+        "display_class": "iPad 9.7\"",
+        "portrait": [
+          [
+            1536,
+            2048
+          ],
+          [
+            1536,
+            2008
+          ],
+          [
+            768,
+            1024
+          ],
+          [
+            768,
+            1004
+          ]
+        ],
+        "landscape": [
+          [
+            2048,
+            1536
+          ],
+          [
+            2048,
+            1496
+          ],
+          [
+            1024,
+            768
+          ],
+          [
+            1024,
+            748
+          ]
+        ],
+        "required": "optional",
+        "requirement": "optional",
+        "fallback": "ipad-10.5",
+        "devices": [
+          "iPad Pro 9.7-inch",
+          "iPad Air",
+          "iPad (2nd-6th generation)",
+          "iPad mini 2-5"
+        ],
+        "simulator": null
+      },
+      {
+        "id": "mac",
+        "label": "Mac",
+        "platform": "macOS",
+        "display_class": "Mac (16:10)",
+        "portrait": [],
+        "landscape": [
+          [
+            2880,
+            1800
+          ],
+          [
+            2560,
+            1600
+          ],
+          [
+            1440,
+            900
+          ],
+          [
+            1280,
+            800
+          ]
+        ],
+        "required": "required for Mac apps",
+        "requirement": "required",
+        "fallback": null,
+        "devices": [
+          "Mac"
+        ],
+        "simulator": null
+      },
+      {
+        "id": "apple-tv",
+        "label": "Apple TV",
+        "platform": "tvOS",
+        "display_class": "Apple TV",
+        "portrait": [],
+        "landscape": [
+          [
+            3840,
+            2160
+          ],
+          [
+            1920,
+            1080
+          ]
+        ],
+        "required": "required for Apple TV apps",
+        "requirement": "required",
+        "fallback": null,
+        "devices": [
+          "Apple TV 4K",
+          "Apple TV HD"
+        ],
+        "simulator": "Apple TV 4K (3rd generation)"
+      },
+      {
+        "id": "apple-vision-pro",
+        "label": "Apple Vision Pro",
+        "platform": "visionOS",
+        "display_class": "Apple Vision Pro",
+        "portrait": [],
+        "landscape": [
+          [
+            3840,
+            2160
+          ]
+        ],
+        "required": "required for Apple Vision Pro apps",
+        "requirement": "required",
+        "fallback": null,
+        "devices": [
+          "Apple Vision Pro"
+        ],
+        "simulator": "Apple Vision Pro"
+      },
+      {
+        "id": "watch-ultra-3",
+        "label": "Apple Watch Ultra 3/4",
+        "platform": "watchOS",
+        "display_class": "Apple Watch 422x514",
+        "portrait": [
+          [
+            422,
+            514
+          ]
+        ],
+        "landscape": [],
+        "required": "one watch size is required for watch apps; use the same size in every localization",
+        "requirement": "one-of-watch",
+        "fallback": null,
+        "devices": [
+          "Apple Watch Ultra 4",
+          "Apple Watch Ultra 3"
+        ],
+        "simulator": "Apple Watch Ultra 3 (49mm)"
+      },
+      {
+        "id": "watch-ultra",
+        "label": "Apple Watch Ultra",
+        "platform": "watchOS",
+        "display_class": "Apple Watch 410x502",
+        "portrait": [
+          [
+            410,
+            502
+          ]
+        ],
+        "landscape": [],
+        "required": "one watch size is required for watch apps; use the same size in every localization",
+        "requirement": "one-of-watch",
+        "fallback": null,
+        "devices": [
+          "Apple Watch Ultra 2",
+          "Apple Watch Ultra"
+        ],
+        "simulator": "Apple Watch Ultra 2 (49mm)"
+      },
+      {
+        "id": "watch-series-10",
+        "label": "Apple Watch Series 10/11/12",
+        "platform": "watchOS",
+        "display_class": "Apple Watch 416x496",
+        "portrait": [
+          [
+            416,
+            496
+          ]
+        ],
+        "landscape": [],
+        "required": "one watch size is required for watch apps; use the same size in every localization",
+        "requirement": "one-of-watch",
+        "fallback": null,
+        "devices": [
+          "Apple Watch Series 12",
+          "Apple Watch Series 11",
+          "Apple Watch Series 10"
+        ],
+        "simulator": "Apple Watch Series 11 (46mm)"
+      },
+      {
+        "id": "watch-series-7",
+        "label": "Apple Watch Series 7/8/9",
+        "platform": "watchOS",
+        "display_class": "Apple Watch 396x484",
+        "portrait": [
+          [
+            396,
+            484
+          ]
+        ],
+        "landscape": [],
+        "required": "one watch size is required for watch apps; use the same size in every localization",
+        "requirement": "one-of-watch",
+        "fallback": null,
+        "devices": [
+          "Apple Watch Series 9",
+          "Apple Watch Series 8",
+          "Apple Watch Series 7"
+        ],
+        "simulator": "Apple Watch Series 9 (45mm)"
+      },
+      {
+        "id": "watch-series-4",
+        "label": "Apple Watch Series 4-6/SE",
+        "platform": "watchOS",
+        "display_class": "Apple Watch 368x448",
+        "portrait": [
+          [
+            368,
+            448
+          ]
+        ],
+        "landscape": [],
+        "required": "one watch size is required for watch apps; use the same size in every localization",
+        "requirement": "one-of-watch",
+        "fallback": null,
+        "devices": [
+          "Apple Watch Series 6",
+          "Apple Watch Series 5",
+          "Apple Watch Series 4",
+          "Apple Watch SE"
+        ],
+        "simulator": "Apple Watch SE (44mm) (2nd generation)"
+      },
+      {
+        "id": "watch-series-3",
+        "label": "Apple Watch Series 1-3",
+        "platform": "watchOS",
+        "display_class": "Apple Watch 312x390",
+        "portrait": [
+          [
+            312,
+            390
+          ]
+        ],
+        "landscape": [],
+        "required": "one watch size is required for watch apps; use the same size in every localization",
+        "requirement": "one-of-watch",
+        "fallback": null,
+        "devices": [
+          "Apple Watch Series 3",
+          "Apple Watch Series 2",
+          "Apple Watch Series 1"
+        ],
+        "simulator": "Apple Watch Series 3 (42mm)"
+      }
+    ]
+  },
+  "previews": {
+    "duration_seconds": {
+      "min": 15,
+      "max": 30
+    },
+    "default_poster_frame_seconds": 5,
+    "max_file_size_mb": 500,
+    "max_per_size_and_locale": 3,
+    "max_frame_rate": 30,
+    "formats": {
+      "H.264": {
+        "extensions": [
+          "mov",
+          "m4v",
+          "mp4"
+        ],
+        "bit_rate": "10-12 Mbps",
+        "profile": "progressive, up to High Profile Level 4.0",
+        "audio": "stereo, 256 kbps AAC, 44.1 or 48 kHz"
+      },
+      "ProRes 422 (HQ only)": {
+        "extensions": [
+          "mov"
+        ],
+        "bit_rate": "VBR ~220 Mbps",
+        "profile": "progressive, no external references",
+        "audio": "stereo, PCM (16/24/32-bit) or 256 kbps AAC, 44.1 or 48 kHz"
+      }
+    },
+    "orientation": "iOS: portrait or landscape. macOS, tvOS, visionOS: landscape only.",
+    "resolutions": [
+      {
+        "display": "iPhone 6.9\"/6.5\"/6.3\"/6.1\" (Dynamic Island and Face ID)",
+        "portrait": [
+          886,
+          1920
+        ],
+        "landscape": [
+          1920,
+          886
+        ]
+      },
+      {
+        "display": "iPhone 5.5\"",
+        "portrait": [
+          1080,
+          1920
+        ],
+        "landscape": [
+          1920,
+          1080
+        ]
+      },
+      {
+        "display": "iPhone 4.7\"",
+        "portrait": [
+          750,
+          1334
+        ],
+        "landscape": [
+          1334,
+          750
+        ]
+      },
+      {
+        "display": "iPhone 4\"",
+        "portrait": [
+          1080,
+          1920
+        ],
+        "landscape": [
+          1920,
+          1080
+        ]
+      },
+      {
+        "display": "iPad 13\", 11\", 10.5\"",
+        "portrait": [
+          1200,
+          1600
+        ],
+        "landscape": [
+          1600,
+          1200
+        ]
+      },
+      {
+        "display": "iPad 12.9\" (2nd generation)",
+        "portrait": [
+          1200,
+          1600
+        ],
+        "landscape": [
+          1600,
+          1200
+        ],
+        "alternate": [
+          900,
+          1200
+        ]
+      },
+      {
+        "display": "iPad 9.7\"",
+        "portrait": [
+          900,
+          1200
+        ],
+        "landscape": [
+          1200,
+          900
+        ]
+      },
+      {
+        "display": "Mac",
+        "landscape": [
+          1920,
+          1080
+        ]
+      },
+      {
+        "display": "Apple TV",
+        "landscape": [
+          1920,
+          1080
+        ]
+      },
+      {
+        "display": "Apple Vision Pro",
+        "landscape": [
+          3840,
+          2160
+        ]
+      }
+    ],
+    "rules": [
+      "Previews play before screenshots on iPhone, iPad, Mac and Apple TV product pages.",
+      "A preview whose aspect ratio differs from the screenshots appears in the 'A Closer Look' section.",
+      "Missing sizes are scaled from the next larger display; missing localizations fall back to the next best language.",
+      "Not available for App Store for iMessage apps. Processing can take up to 24 hours."
+    ]
+  },
+  "icons": {
+    "formats_note": "iOS, iPadOS, macOS and watchOS accept a nonlayered bitmap (PNG) or a layered Icon Composer (.icon) file. tvOS and visionOS use image stacks in the asset catalog.",
+    "platforms": [
+      {
+        "platform": "iOS, iPadOS, macOS",
+        "layout": "square",
+        "mask": "rounded rectangle",
+        "size": [
+          1024,
+          1024
+        ],
+        "style": "layered (Liquid Glass)",
+        "appearances": [
+          "default",
+          "dark",
+          "clear light",
+          "clear dark",
+          "tinted light",
+          "tinted dark"
+        ]
+      },
+      {
+        "platform": "tvOS",
+        "layout": "rectangle (landscape)",
+        "mask": "rounded rectangle",
+        "size": [
+          800,
+          480
+        ],
+        "style": "layered parallax, 2-5 layers",
+        "appearances": []
+      },
+      {
+        "platform": "visionOS",
+        "layout": "square",
+        "mask": "circle",
+        "size": [
+          1024,
+          1024
+        ],
+        "style": "layered 3D: background plus 1-2 layers",
+        "appearances": []
+      },
+      {
+        "platform": "watchOS",
+        "layout": "square",
+        "mask": "circle",
+        "size": [
+          1088,
+          1088
+        ],
+        "style": "layered",
+        "appearances": []
+      }
+    ],
+    "rules": [
+      "Provide unmasked square (or rectangular for tvOS) layers; the system applies corner or circular masking.",
+      "Do not bake in specular highlights, drop shadows, bevels, blurs or glows; the system applies dynamic effects.",
+      "Keep primary content centered, especially for circular watchOS and visionOS masks.",
+      "Alternate iOS/iPadOS icons need their own dark, clear and tinted variants and are subject to App Review.",
+      "Prefer vector layers (SVG/PDF) in Icon Composer; use PNG for raster or mesh-gradient artwork."
+    ]
+  }
+}

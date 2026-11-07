@@ -190,6 +190,11 @@ def document_url(kind: str, path: str) -> str:
 # --------------------------------------------------------------------------- #
 
 
+#: The ``references`` map of the payload being rendered, so inline links can
+#: show Apple's own titles and URLs instead of bare identifiers.
+_REFERENCES: Dict[str, dict] = {}
+
+
 def inline_text(items: Optional[Iterable[dict]]) -> str:
     parts: List[str] = []
     for item in items or []:
@@ -199,7 +204,14 @@ def inline_text(items: Optional[Iterable[dict]]) -> str:
         elif kind == "codeVoice":
             parts.append(f"`{item.get('code', '')}`")
         elif kind == "reference":
-            parts.append(item.get("identifier", "").split("/")[-1])
+            identifier = item.get("identifier", "")
+            reference = _REFERENCES.get(identifier, {})
+            title = inline_text(item.get("overridingTitleInlineContent")) or reference.get("title")
+            url = reference.get("url", "")
+            if url.startswith("/"):
+                url = f"https://developer.apple.com{url}"
+            label = title or identifier.split("/")[-1]
+            parts.append(f"[{label}]({url})" if url else label)
         elif kind == "emphasis" or kind == "strong":
             parts.append(inline_text(item.get("inlineContent")))
         else:
@@ -207,11 +219,23 @@ def inline_text(items: Optional[Iterable[dict]]) -> str:
     return "".join(parts).strip()
 
 
+def table_cell(cell: Any) -> str:
+    """Render one DocC table cell (a list of blocks, or a single block) on one line."""
+
+    if isinstance(cell, dict):
+        if "inlineContent" in cell:
+            return inline_text(cell.get("inlineContent")).replace("|", "\\|")
+        return render_block(cell).strip().replace("\n", " ").replace("|", "\\|")
+    if isinstance(cell, list):
+        return " ".join(table_cell(part) for part in cell).strip()
+    return str(cell)
+
+
 def render_block(block: Any, depth: int = 0) -> str:
     if not isinstance(block, dict):
         if isinstance(block, list):
-            return " | ".join(inline_text(cell.get("inlineContent")) if isinstance(cell, dict) else str(cell)
-                              for cell in block)
+            # A DocC table row is a list of cells; each cell is a list of blocks.
+            return " | ".join(table_cell(cell) for cell in block)
         return ""
     kind = block.get("type")
     if kind == "heading":
@@ -247,7 +271,18 @@ def render_block(block: Any, depth: int = 0) -> str:
     if kind == "table":
         rows = block.get("rows", [])
         rendered = [render_block(row, depth + 1) for row in rows]
-        return "\n".join(f"| {r} |" for r in rendered if r) + "\n"
+        rendered = [row for row in rendered if row.strip(" |")]
+        if not rendered:
+            return ""
+        lines = [f"| {rendered[0]} |"]
+        columns = rendered[0].count(" | ") + 1
+        if block.get("header") in ("row", "both"):
+            lines.append("|" + " --- |" * columns)
+        else:
+            lines.insert(0, "|" + "   |" * columns)
+            lines.insert(1, "|" + " --- |" * columns)
+        lines.extend(f"| {row} |" for row in rendered[1:])
+        return "\n".join(lines) + "\n"
     if kind == "links":
         return "\n".join(f"- {inline_text([item]) if isinstance(item, dict) else item}" for item in block.get("items", [])) + "\n"
     return ""
@@ -304,6 +339,8 @@ def related_symbols(payload: dict) -> List[Dict[str, str]]:
 
 
 def read_document(payload: dict) -> Dict[str, Any]:
+    global _REFERENCES
+    _REFERENCES = payload.get("references", {}) or {}
     metadata = payload.get("metadata", {})
     return {
         "title": metadata.get("title"),
@@ -429,6 +466,76 @@ def operation_guidelines(page: str, cache: Cache, fetcher, refresh: bool, offlin
     return report
 
 
+HIG_CATALOG = Path(__file__).resolve().parents[2] / "data" / "hig-catalog.json"
+
+#: Words that point at a platform's "Designing for …" page.
+PLATFORM_PAGES = {
+    "ios": "designing-for-ios", "iphone": "designing-for-ios", "ipados": "designing-for-ipados",
+    "ipad": "designing-for-ipados", "macos": "designing-for-macos", "mac": "designing-for-macos",
+    "tvos": "designing-for-tvos", "tv": "designing-for-tvos", "visionos": "designing-for-visionos",
+    "vision": "designing-for-visionos", "watchos": "designing-for-watchos", "watch": "designing-for-watchos",
+    "duo": "designing-for-iphone-duo", "foldable": "designing-for-iphone-duo", "games": "designing-for-games",
+}
+
+
+def operation_guidelines_search(query: str, section: Optional[str], limit: int,
+                                catalog_path: Path = HIG_CATALOG) -> Report:
+    """Rank HIG pages from the offline table of contents. No network."""
+
+    report = Report(tool="apple-docs-research", target=query or "(all)", version=__version__)
+    try:
+        catalogue = json.loads(catalog_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        report.error("DOC050", f"HIG catalogue unavailable: {exc}",
+                     hint="Run python3 scripts/build_hig_catalog.py to rebuild data/hig-catalog.json.")
+        return report
+
+    pages = catalogue.get("pages", [])
+    if section:
+        wanted = section.strip().lower()
+        pages = [page for page in pages if wanted in (page.get("section") or "").lower()
+                 or wanted in (page.get("group") or "").lower()]
+
+    terms = [term for term in re.split(r"[^a-z0-9]+", (query or "").lower()) if term]
+    scored = []
+    for page in pages:
+        slug = page["slug"]
+        title = page["title"].lower()
+        abstract = (page.get("abstract") or "").lower()
+        score = 0
+        for term in terms:
+            if PLATFORM_PAGES.get(term) == slug:
+                score += 12
+            if term == slug or term in slug.split("-"):
+                score += 8
+            elif term in slug:
+                score += 5
+            if term in title:
+                score += 6
+            if term in abstract:
+                score += 2
+        if not terms:
+            score = 1
+        if score:
+            scored.append((score, page))
+    scored.sort(key=lambda item: (-item[0], item[1]["slug"]))
+    matches = [{**page, "score": score} for score, page in scored[:max(1, limit)]]
+
+    report.data = {
+        "query": query,
+        "section": section,
+        "matches": matches,
+        "catalogued_pages": catalogue.get("count"),
+        "catalog_retrieved": catalogue.get("retrieved"),
+        "source_url": catalogue.get("source"),
+        "next_step": "Call find_apple_guidelines with a match's slug to read the live page and cite its URL.",
+    }
+    if not matches:
+        report.warn("DOC051", f"No HIG page matched '{query}'.",
+                    hint="Try one concrete noun (e.g. 'tab', 'sheet', 'widgets') or drop the section filter.")
+    return report
+
+
 def main(argv=None) -> int:
     import argparse
 
@@ -454,7 +561,13 @@ def main(argv=None) -> int:
     guidelines_cmd = sub.add_parser("guidelines", help="Read a Human Interface Guidelines page")
     guidelines_cmd.add_argument("page", help="e.g. buttons, navigation-and-search, materials")
 
-    for command in (read_cmd, availability_cmd, search_cmd, guidelines_cmd):
+    hig_search_cmd = sub.add_parser("guidelines-search",
+                                    help="Find Human Interface Guidelines pages in the offline catalogue")
+    hig_search_cmd.add_argument("query", nargs="?", default="", help="e.g. 'tab bar', 'tvos focus', 'onboarding'")
+    hig_search_cmd.add_argument("--section", help="Foundations, Patterns, Components, Inputs, Technologies, …")
+    hig_search_cmd.add_argument("--limit", type=int, default=10)
+
+    for command in (read_cmd, availability_cmd, search_cmd, guidelines_cmd, hig_search_cmd):
         command.add_argument("--json", action="store_true", help="Emit the machine-readable envelope")
         command.add_argument("--strict", action="store_true")
         command.add_argument("--color", choices=("auto", "always", "never"), default="auto")
@@ -475,7 +588,9 @@ def main(argv=None) -> int:
         fetcher = HttpFetcher()
 
     try:
-        if args.command == "read":
+        if args.command == "guidelines-search":
+            report = operation_guidelines_search(args.query, args.section, args.limit)
+        elif args.command == "read":
             report = operation_read(args.path, cache, fetcher, args.refresh, args.offline)
         elif args.command == "availability":
             report = operation_availability(args.path, cache, fetcher, args.refresh, args.offline)

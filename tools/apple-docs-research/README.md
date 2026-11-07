@@ -11,6 +11,7 @@ python3 tools/apple-docs-research/apple_docs.py search "navigation stack" --fram
 python3 tools/apple-docs-research/apple_docs.py read swiftui/view/glassEffect(_:in:)
 python3 tools/apple-docs-research/apple_docs.py availability swiftui/navigationstack
 python3 tools/apple-docs-research/apple_docs.py guidelines buttons
+python3 tools/apple-docs-research/apple_docs.py guidelines-search "tvos focus"
 ```
 
 Every tool accepts `--json` (stable envelope, see below), `--strict` (warnings become failures) and
@@ -22,7 +23,8 @@ Every tool accepts `--json` (stable envelope, see below), `--strict` (warnings b
 - `search`: ranked symbol lookup across a framework index (8,000+ symbols for SwiftUI)
 - `read`: page rendered as Markdown — declaration, overview, code listings, parameters
 - `availability`: the per-platform table Apple publishes (introduced, deprecated, beta)
-- `guidelines`: Human Interface Guidelines pages as Markdown
+- `guidelines`: Human Interface Guidelines pages as Markdown, tables included
+- `guidelines-search`: offline ranking over Apple's HIG table of contents (`data/hig-catalog.json`, 158 pages)
 - every result carries `source_url` and `fetched_at`; cached seven days, `--refresh` to bypass, `--offline` to forbid the network
 
 ## Findings

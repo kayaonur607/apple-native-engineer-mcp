@@ -8,10 +8,11 @@ keeps the toolkit installable with nothing but ``python3``.
 
 from __future__ import annotations
 
+import json
 import struct
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 
@@ -24,45 +25,35 @@ PNG_COLOR_TYPES = {
     6: ("truecolour+alpha", True),
 }
 
-#: App Store Connect screenshot slots (portrait), pixel sizes accepted as of 2026.
-SCREENSHOT_SPECS: Dict[str, Dict[str, Tuple[Tuple[int, int], ...]]] = {
-    'iPhone 6.9"': {
-        "portrait": ((1320, 2868), (1290, 2796)),
-        "landscape": ((2868, 1320), (2796, 1290)),
-    },
-    'iPhone 6.7"': {
-        "portrait": ((1290, 2796),),
-        "landscape": ((2796, 1290),),
-    },
-    'iPhone 6.5"': {
-        "portrait": ((1242, 2688), (1284, 2778)),
-        "landscape": ((2688, 1242), (2778, 1284)),
-    },
-    'iPhone 5.5"': {
-        "portrait": ((1242, 2208),),
-        "landscape": ((2208, 1242),),
-    },
-    'iPad 13"': {
-        "portrait": ((2064, 2752), (2048, 2732)),
-        "landscape": ((2752, 2064), (2732, 2048)),
-    },
-    'Apple Watch Ultra': {
-        "portrait": ((410, 502),),
-        "landscape": ((502, 410),),
-    },
-    'Apple Watch Series 10/11': {
-        "portrait": ((416, 496),),
-        "landscape": ((496, 416),),
-    },
-    "Apple Vision Pro": {
-        "portrait": ((3840, 2160),),
-        "landscape": ((3840, 2160),),
-    },
-    "Mac": {
-        "portrait": ((2880, 1800), (2560, 1600), (1440, 900), (1280, 800), (3840, 2160)),
-        "landscape": ((2880, 1800), (2560, 1600), (1440, 900), (1280, 800), (3840, 2160)),
-    },
-}
+#: Apple's published App Store specifications (screenshots, previews, icons).
+#: ``data/app-store-specs.json`` is the single source of truth; it records the
+#: source URLs and the date it was transcribed.
+SPECS_PATH = Path(__file__).resolve().parents[3] / "data" / "app-store-specs.json"
+
+
+def load_app_store_specs(path: Path = SPECS_PATH) -> Dict[str, object]:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _screenshot_specs() -> Dict[str, Dict[str, Tuple[Tuple[int, int], ...]]]:
+    specs: Dict[str, Dict[str, Tuple[Tuple[int, int], ...]]] = {}
+    for slot in load_app_store_specs()["screenshots"]["slots"]:
+        specs[slot["label"]] = {
+            "portrait": tuple(tuple(size) for size in slot["portrait"]),
+            "landscape": tuple(tuple(size) for size in slot["landscape"]),
+        }
+    return specs
+
+
+def screenshot_slots() -> List[Dict[str, object]]:
+    """Every slot with its requirement metadata, in Apple's order."""
+
+    return list(load_app_store_specs()["screenshots"]["slots"])
+
+
+#: label -> orientation -> accepted pixel sizes. A size can appear in more than
+#: one slot (2048x2732 is both 13" and 12.9"); the first, larger class wins.
+SCREENSHOT_SPECS: Dict[str, Dict[str, Tuple[Tuple[int, int], ...]]] = _screenshot_specs()
 
 
 @dataclass
