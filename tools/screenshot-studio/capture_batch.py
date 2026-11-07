@@ -243,7 +243,14 @@ class Simulator:
 
     def inventory(self) -> Dict[str, object]:
         if self._inventory is None:
-            payload = json.loads(self.run("list", "--json", mutate=False).stdout or "{}")
+            try:
+                # A dry run must stay fast: CoreSimulator can take minutes to start on a cold machine (CI).
+                payload = json.loads(self.run("list", "--json", mutate=False,
+                                              timeout=15 if self.dry_run else 300).stdout or "{}")
+            except (subprocess.TimeoutExpired, RuntimeError, ValueError):
+                if not self.dry_run:
+                    raise
+                payload = {"devices": {}, "devicetypes": [], "runtimes": []}
             self._inventory = payload
         return self._inventory
 
