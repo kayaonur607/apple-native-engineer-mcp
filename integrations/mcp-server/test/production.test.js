@@ -114,3 +114,42 @@ describe('store production and distribution tools', () => {
     assert.ok(data.steps.some(step => step.step === 'archive' && step.command.startsWith('xcodebuild archive')));
   });
 });
+
+describe('cross-platform apps', () => {
+  let client, server;
+
+  before(async () => {
+    server = createServer();
+    const [ct, st] = InMemoryTransport.createLinkedPair();
+    client = new Client({ name: 'cross-platform-test', version: '1.0.0' });
+    await Promise.all([server.connect(st), client.connect(ct)]);
+  });
+
+  after(async () => {
+    await client?.close();
+    await server?.close();
+  });
+
+  it('audits a Flutter app through its iOS host', async () => {
+    const result = await client.callTool({ name: 'audit_cross_platform', arguments: {
+      path: path.join(REPO_ROOT, 'tests/fixtures/flutter-app') } });
+    assert.equal(result.structuredContent.data.framework, 'flutter');
+    for (const code of ['FLT001', 'FLT002', 'FLT009', 'XPL010']) assert.ok(codes(result).includes(code), code);
+  });
+
+  it('plans an Expo release through EAS when there is no iOS host', async () => {
+    const result = await client.callTool({ name: 'plan_distribution', arguments: {
+      path: path.join(REPO_ROOT, 'tests/fixtures/react-native-app') } });
+    const steps = result.structuredContent.data.steps;
+    assert.ok(steps.some(step => step.command.includes('eas-cli@latest submit')));
+    assert.ok(steps.find(step => step.step === 'upload').requires_approval);
+    assert.ok(codes(result).includes('DST003'));
+  });
+
+  it('plans a Flutter release with flutter build ipa', async () => {
+    const result = await client.callTool({ name: 'plan_distribution', arguments: {
+      path: path.join(REPO_ROOT, 'tests/fixtures/flutter-app') } });
+    const archive = result.structuredContent.data.steps.find(step => step.step === 'archive');
+    assert.match(archive.command, /^flutter build ipa --release --export-options-plist=/);
+  });
+});

@@ -5,6 +5,7 @@ This guide routes intent to the server's existing capabilities. Discover the cur
 | User goal | First action | Evidence to collect |
 | --- | --- | --- |
 | Build a new app from an idea | `/apple-native-start`, then `inspect_apple_project` once a project exists | Platforms, deployment floor, first runnable slice, build result |
+| Cross-platform app (Flutter, React Native, Expo, Capacitor, MAUI, KMP) | `audit_cross_platform`, then `/apple-native-flutter`, `-react-native` or `-cross-platform` | Framework, iOS host, `FLT`/`RNA`/`EXP`/`XPL` findings, Simulator captures |
 | Understand an existing app | `inspect_apple_project`, then `audit_project` | Targets, deployment floors, attributed finding codes |
 | Design a native screen | `/apple-native-new-screen`; `search_apple_guidelines` → `find_apple_guidelines` | HIG source URLs, screen states, semantic type/colour decisions |
 | Platform-specific work | `/apple-native-ios`, `-ipados`, `-macos`, `-watchos`, `-tvos`, `-visionos`, `-iphone-duo` | Platform reference, verified API availability, captures on that platform |

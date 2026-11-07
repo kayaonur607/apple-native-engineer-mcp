@@ -104,6 +104,7 @@ export const AUDIT_SUITE = [
   { name: "localization-checker", script: "tools/localization-checker/check_localization.py" },
   { name: "widget-validator", script: "tools/widget-validator/validate_widget.py" },
   { name: "sf-symbols-catalog", script: "tools/sf-symbols-catalog/check_symbols.py" },
+  { name: "cross-platform-auditor", script: "tools/cross-platform-auditor/audit_cross_platform.py" },
 ];
 
 /**
@@ -119,14 +120,43 @@ export const FILE_AUDITORS = [
   { name: "liquid-glass-auditor", script: "tools/liquid-glass-auditor/audit_liquid_glass.py" },
 ];
 
+/** Files the cross-platform auditor understands: Dart, JS/TS sources and their app configs. */
+const CROSS_PLATFORM_FILE = /\.(dart|jsx?|tsx?)$|(^|\/)(app\.json|pubspec\.yaml|capacitor\.config\.json)$/;
+const SEVERITIES = ["critical", "error", "warning", "info"];
+
+/** Run the cross-platform auditor on the project, keep findings in the changed files. */
+async function crossPlatformReview(target, changed) {
+  const run = await runTool("tools/cross-platform-auditor/audit_cross_platform.py", [target]);
+  const keep = new Set(changed);
+  const findings = (run.envelope.findings ?? []).filter((finding) => finding.file && keep.has(finding.file));
+  const summary = Object.fromEntries(SEVERITIES.map((level) => [level, findings.filter((f) => f.severity === level).length]));
+  summary.total = findings.length;
+  const status = summary.critical || summary.error ? "fail" : summary.warning ? "warn" : "pass";
+  return {
+    envelope: { ...run.envelope, tool: "diff-review", status, summary, findings,
+      data: { framework: run.envelope.data?.framework, note: "Cross-platform rules applied to the changed files." } },
+    summary: `diff-review · ${status.toUpperCase()} · ${findings.length} finding(s) in ${changed.length} cross-platform file(s)`,
+    exitCode: status === "fail" ? 2 : 0,
+  };
+}
+
+function mergeFindings(result, findings, source) {
+  if (!findings.length) return;
+  const envelope = result.envelope;
+  envelope.findings = [...(envelope.findings ?? []), ...findings.map((finding) => ({ ...finding, source }))];
+  for (const level of SEVERITIES) envelope.summary[level] = envelope.findings.filter((f) => f.severity === level).length;
+  envelope.summary.total = envelope.findings.length;
+  envelope.status = envelope.summary.critical || envelope.summary.error ? "fail" : envelope.summary.warning ? "warn" : "pass";
+}
+
 /** @type {ToolSpec[]} */
 export const TOOL_SPECS = [
   {
     name: "review_diff",
     title: "Review only the files this change touched",
     description:
-      "Reads `git diff` for the project, keeps the changed Swift files, and runs the SwiftUI, accessibility and " +
-      "Liquid Glass auditors on each one. Use this in an edit loop instead of audit_project: it costs seconds, " +
+      "Reads `git diff` for the project, runs the SwiftUI, accessibility and Liquid Glass auditors on each changed " +
+      "Swift file, and the cross-platform auditor on changed Dart, TypeScript/JavaScript and app-config files. Use this in an edit loop instead of audit_project: it costs seconds, " +
       "reports only what you just wrote, and groups findings by file. Set `staged` to review the index, or `base` " +
       "to review against a branch.",
     inputSchema: {
@@ -152,6 +182,13 @@ export const TOOL_SPECS = [
         maxFiles: args.max_files ?? 60,
       });
       const swiftFiles = selected.filter((file) => file.endsWith(".swift"));
+      const crossFiles = selected.filter((file) => CROSS_PLATFORM_FILE.test(file));
+      const cross = crossFiles.length ? await crossPlatformReview(target, crossFiles) : null;
+
+      if (swiftFiles.length === 0 && cross) {
+        cross.envelope.data = { ...cross.envelope.data, changed_files: files, audited: crossFiles, truncated };
+        return cross;
+      }
 
       if (swiftFiles.length === 0) {
         return {
@@ -186,6 +223,7 @@ export const TOOL_SPECS = [
       });
       result.envelope.data.truncated = truncated;
       result.envelope.data.changed_files = files;
+      if (cross) mergeFindings(result, cross.envelope.findings, "cross-platform-auditor");
       return result;
     },
   },
@@ -203,8 +241,9 @@ export const TOOL_SPECS = [
     name: "audit_project",
     title: "Audit the whole project in one call",
     description:
-      "Runs eight read-only audits concurrently — project structure, SwiftUI lint, accessibility, Liquid Glass, " +
-      "privacy manifest, localisation, widgets and SF Symbols — and returns one merged envelope with every " +
+      "Runs nine read-only audits concurrently — project structure, SwiftUI lint, accessibility, Liquid Glass, " +
+      "privacy manifest, localisation, widgets, SF Symbols and the cross-platform auditor (Flutter, React Native, " +
+      "Expo, Capacitor, .NET MAUI, KMP) — and returns one merged envelope with every " +
       "finding tagged by the audit that produced it. Use this first on an unfamiliar project; follow up with a " +
       "single audit when you need its full detail.",
     inputSchema: { path: OPTIONAL_PATH },
@@ -225,6 +264,19 @@ export const TOOL_SPECS = [
       const target = resolveTarget(args.path);
       return runTool("tools/project-inspector/inspect_project.py", [target]);
     },
+  },
+  {
+    name: "audit_cross_platform",
+    title: "Audit a Flutter, React Native, Expo, Capacitor, MAUI or KMP app for Apple-native quality",
+    description:
+      "Detects the framework and its native iOS host, then checks what makes a cross-platform app feel made for " +
+      "iPhone and pass review: Dynamic Type not disabled, VoiceOver labels on icon buttons, Dark Mode (Flutter " +
+      "darkTheme, Expo userInterfaceStyle), Flutter .adaptive() controls and Cupertino tab bars, deprecated " +
+      "SafeAreaView, resizable windows, right-to-left layout, usage descriptions for permission plugins, iOS " +
+      "localizations in Xcode, Expo bundle ID/export compliance/privacy manifest, Capacitor remote URLs, and " +
+      "native-UI options (@expo/ui SwiftUI, expo-glass-effect).",
+    inputSchema: { path: OPTIONAL_PATH },
+    run: async (args) => runTool("tools/cross-platform-auditor/audit_cross_platform.py", [resolveTarget(args.path)]),
   },
   {
     name: "audit_privacy_manifest",
@@ -515,7 +567,8 @@ export const TOOL_SPECS = [
     description:
       "Drives the iOS/iPadOS/tvOS/visionOS/watchOS Simulator from a JSON plan: for every device × locale × " +
       "appearance × screen it boots the simulator, sets the 9:41 status bar, applies light/dark, (re)installs the " +
-      "app, launches it with -AppleLanguages/-AppleLocale plus the screen's launch arguments or deep link, and " +
+      "app, launches it with -AppleLanguages/-AppleLocale plus the screen's launch arguments (read through " +
+      "UserDefaults in Swift, Settings.get in React Native, SharedPreferencesAsync in Flutter), env or deep link, and " +
       "saves a PNG to <out>/<locale>/<device>/<screen>.png. Captures are flattened to opaque RGB and validated " +
       "against Apple's slots; manifest.json records provenance. Devices may be simulator names or slot ids from " +
       "get_app_store_specs (e.g. 'iphone-6.9'). Use dry_run first to show the exact commands. Real captures only.",

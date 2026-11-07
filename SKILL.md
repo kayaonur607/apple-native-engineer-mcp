@@ -1,10 +1,10 @@
 ---
 name: apple-native-engineer-mcp
-description: "Operating standard and executable toolkit for shipping genuinely native Apple software. Use when building, reviewing or auditing SwiftUI/UIKit/AppKit apps for iOS 17–27, iPadOS, iPhone Duo, macOS 14–27, tvOS, visionOS or watchOS: enforces Human Interface Guidelines, Liquid Glass (iOS 26+) adoption with availability guards, Dynamic Type, semantic colour, VoiceOver, 44pt targets, Swift 6 concurrency and @Observable state, Required-Reason API privacy manifests, String Catalog localisation and RTL, WidgetKit/Live Activity completeness, App Store metadata limits, Simulator screenshot capture with native marketing frames, archive/TestFlight/notarization planning, and a weighted release gate. Ships 19 CLI tools and 30 MCP tools that return machine-readable finding codes."
+description: "Operating standard and executable toolkit for shipping genuinely native Apple software. Use when building, reviewing or auditing SwiftUI/UIKit/AppKit apps for iOS 17–27, iPadOS, iPhone Duo, macOS 14–27, tvOS, visionOS or watchOS — in Swift or through Flutter, React Native, Expo, Capacitor, .NET MAUI or Kotlin Multiplatform: enforces Human Interface Guidelines, Liquid Glass (iOS 26+) adoption with availability guards, Dynamic Type, semantic colour, VoiceOver, 44pt targets, Swift 6 concurrency and @Observable state, Required-Reason API privacy manifests, String Catalog localisation and RTL, WidgetKit/Live Activity completeness, App Store metadata limits, Simulator screenshot capture with native marketing frames, archive/TestFlight/notarization planning, and a weighted release gate. Ships 20 CLI tools and 31 MCP tools that return machine-readable finding codes."
 license: MIT
 compatibility: "MCP clients (Claude Desktop, Claude Code, Cursor, Codex, Copilot, Gemini CLI), Agent Skills runtimes, or plain CLI on macOS/Linux with Python 3.10+."
 metadata:
-  version: "2.4.0"
+  version: "2.5.0"
   category: "developer-toolkit"
   platforms: "iOS 17-27, iPadOS, iPhone Duo, macOS 14-27, tvOS 17+, watchOS 10+, visionOS 1+"
   frameworks: "SwiftUI, UIKit, AppKit, Observation, SwiftData, StoreKit 2, WidgetKit, ActivityKit, AppIntents, Swift Concurrency"
@@ -37,6 +37,13 @@ Follow this order for every Apple task. Skipping step 1 is the single most commo
 | 7 | Certify with the release gate and quote its verdict | `generate_release_report` |
 | 8 | Produce store assets from the real app | `get_app_store_specs`, `capture_screenshots`, `audit_screenshots`, `compose_marketing_screenshots` |
 | 9 | Ship: preflight, ExportOptions, ordered commands; run account-changing steps only with approval | `plan_distribution` |
+
+**Cross-platform apps** (Flutter, React Native, Expo, Capacitor, .NET MAUI, KMP) follow the same loop: start with
+`audit_cross_platform`, which finds the framework and its native iOS host; every Apple-side tool then runs on that
+host, and `plan_distribution` switches to `flutter build ipa`, EAS or `cap sync` as appropriate. Apply the same
+standard as Swift — Dynamic Type, VoiceOver, Dark Mode, iOS idioms, usage descriptions, privacy manifest — and use
+native Swift targets for Apple-only features. Prompts: `/apple-native-flutter`, `/apple-native-react-native`,
+`/apple-native-cross-platform`.
 
 For design decisions, find the page first with `search_apple_guidelines` (offline index of 158 HIG pages), read
 it live with `find_apple_guidelines`, and cite the URL. Platform prompts (`/apple-native-ios`, `-ipados`,

@@ -14,6 +14,7 @@ When the user says “I am an Apple developer” or “I am a designer” (inclu
 - New app: establish the user problem, primary journey and supported platforms; propose a small runnable slice before implementation.
 - Design work: establish the screen and its states, then read the relevant HIG guidance. Cover loading, empty, error, success, Dark Mode, Dynamic Type, RTL and reduced motion where applicable.
 - Release work: gather the icon, metadata and real screenshots (`/apple-native-screenshots`), run the relevant validators, then `generate_release_report` and `plan_distribution` (`/apple-native-distribute`). Missing inputs remain uninspected.
+- Cross-platform apps (Flutter, React Native, Expo, Capacitor, .NET MAUI, KMP): run `audit_cross_platform` first, then `/apple-native-flutter`, `/apple-native-react-native` or `/apple-native-cross-platform`.
 - Platform work: use the matching prompt — `/apple-native-ios`, `-ipados`, `-macos`, `-watchos`, `-tvos`, `-visionos`, `-iphone-duo` — and `/apple-native-new-screen` for a screen from scratch.
 
 ## Discover and use capabilities

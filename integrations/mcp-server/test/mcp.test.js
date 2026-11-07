@@ -176,6 +176,7 @@ describe("apple-native-engineer MCP server", () => {
     const audited = Object.keys(envelope.data.tools).sort();
     assert.deepEqual(audited, [
       "accessibility-auditor",
+      "cross-platform-auditor",
       "liquid-glass-auditor",
       "localization-checker",
       "privacy-auditor",
@@ -214,9 +215,9 @@ describe("apple-native-engineer MCP server", () => {
     } finally {
       await fresh.close();
     }
-    assert.equal(updates.length, 8, "one progress notification per audit");
-    assert.equal(updates.at(-1).progress, 8);
-    assert.equal(updates.at(-1).total, 8);
+    assert.equal(updates.length, 9, "one progress notification per audit");
+    assert.equal(updates.at(-1).progress, 9);
+    assert.equal(updates.at(-1).total, 9);
     assert.equal(updates[0].progressToken, "review-1");
   });
 });

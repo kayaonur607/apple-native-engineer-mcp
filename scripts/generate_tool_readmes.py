@@ -215,6 +215,25 @@ TOOLS: Dict[str, dict] = {
                   "SHOT021": "more than 10 in a set", "SHOT022": "required set missing",
                   "SHOT115": "locale fell back to other copy", "CAP032": "capture still has alpha"},
     },
+    "cross-platform-auditor": {
+        "script": "audit_cross_platform.py",
+        "title": "Cross-Platform Auditor",
+        "summary": "Apple-native quality for Flutter, React Native, Expo, Capacitor, .NET MAUI and Kotlin/Compose Multiplatform apps, checked through their native iOS host.",
+        "usage": [
+            "python3 tools/cross-platform-auditor/audit_cross_platform.py path/to/flutter-app",
+            "python3 tools/cross-platform-auditor/audit_cross_platform.py path/to/expo-app --json",
+        ],
+        "checks": [
+            "framework and native host detection (`ios/Runner`, `ios/<App>.xcworkspace`, `ios/App`, `Platforms/iOS`, `iosApp`)",
+            "Dynamic Type overrides, VoiceOver labels on icon-only controls, Dark Mode (Flutter `darkTheme`, Expo `userInterfaceStyle` defaulting to light)",
+            "Flutter `.adaptive()` controls and Cupertino tab bars; React Native deprecated `SafeAreaView`, `Dimensions.get`, start/end layout",
+            "usage descriptions for permission plugins, Flutter languages missing from Xcode `knownRegions`, deployment target below the installed SDK's minimum",
+            "Expo bundle identifier, export compliance, privacy manifests, build number, icon appearances; Capacitor remote `server.url`",
+        ],
+        "codes": {"FLT001": "Flutter text scaling disabled", "FLT009": "language missing from knownRegions",
+                  "RNA001": "React Native font scaling disabled", "EXP003": "Expo Dark Mode off",
+                  "XPL010": "usage description missing", "XPL020": "deployment target below SDK minimum"},
+    },
     "distribution": {
         "script": "plan_distribution.py",
         "title": "Distribution Planner",

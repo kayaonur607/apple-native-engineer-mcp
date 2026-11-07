@@ -33,6 +33,13 @@ export const MODULES = [
     defaultEnabled: true,
   },
   {
+    id: "cross-platform",
+    label: "Cross-platform apps",
+    description: "Apple-native checks for Flutter, React Native, Expo, Capacitor, .NET MAUI and Kotlin Multiplatform.",
+    tools: ["audit_cross_platform"],
+    defaultEnabled: true,
+  },
+  {
     id: "sf-symbols",
     label: "SF Symbols",
     description: "Symbol existence and OS availability against the 9,649-entry system catalogue.",
