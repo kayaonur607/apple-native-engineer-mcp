@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1010" viewBox="0 0 1600 1010" role="img" aria-label="The same request to an AI assistant, with and without Apple Native Engineer. Alone, the assistant works from memory and its own judgment. With the server, every step returns Apple sources, finding codes, real Simulator captures and a distribution plan.">
+<rect width="1600" height="1010" rx="28" fill="#0b1018"/>
+<g font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',Arial,sans-serif">
+<text x="60" y="68" fill="#75e0bd" font-size="21" letter-spacing="3">SAME REQUEST · DIFFERENT EVIDENCE</text>
+<rect x="60" y="96" width="1480" height="84" rx="20" fill="#141d2a" stroke="#29374b" stroke-width="2"/>
+<text x="92" y="148" fill="#edf3fb" font-size="27">“Build me a habit tracker for iPhone and iPad, and get it ready for the App Store.”</text>
+
+<rect x="60" y="214" width="715" height="640" rx="22" fill="#11161f" stroke="#29374b" stroke-width="2"/>
+<rect x="825" y="214" width="715" height="640" rx="22" fill="#10201e" stroke="#2b5c50" stroke-width="2"/>
+<text x="92" y="268" fill="#a2b1c6" font-size="20" letter-spacing="2">AI ASSISTANT ALONE</text>
+<text x="92" y="306" fill="#edf3fb" font-size="30" font-weight="600">Works from memory and taste</text>
+<text x="857" y="268" fill="#75e0bd" font-size="20" letter-spacing="2">AI ASSISTANT + APPLE NATIVE ENGINEER</text>
+<text x="857" y="306" fill="#edf3fb" font-size="30" font-weight="600">Works from Apple sources and checks</text>
+
+<g font-size="22">
+<g fill="#f2a58e"><circle cx="104" cy="360" r="7"/><circle cx="104" cy="460" r="7"/><circle cx="104" cy="560" r="7"/><circle cx="104" cy="660" r="7"/><circle cx="104" cy="760" r="7"/></g>
+<g fill="#edf3fb" font-weight="600"><text x="126" y="368">APIs recalled from training data</text><text x="126" y="468">Layout by personal judgment</text><text x="126" y="568">“Looks done” after reading the diff</text><text x="126" y="668">Mockups, or no screenshots at all</text><text x="126" y="768">“Upload it in Xcode”</text></g>
+<g fill="#a2b1c6" font-size="20"><text x="126" y="400">Availability for your deployment target is a guess.</text><text x="126" y="500">No HIG citation; platform rules easy to miss.</text><text x="126" y="600">No lint, accessibility, privacy or review checks.</text><text x="126" y="700">Pixel sizes and alpha channel unchecked.</text><text x="126" y="800">Compliance, build number, sandbox found at upload.</text></g>
+
+<g fill="#75e0bd"><circle cx="869" cy="360" r="7"/><circle cx="869" cy="460" r="7"/><circle cx="869" cy="560" r="7"/><circle cx="869" cy="660" r="7"/><circle cx="869" cy="760" r="7"/></g>
+<g fill="#edf3fb" font-weight="600"><text x="891" y="368">inspect_apple_api_availability</text><text x="891" y="468">search_apple_guidelines → find_apple_guidelines</text><text x="891" y="568">review_diff · audit_project</text><text x="891" y="668">capture_screenshots → compose → audit</text><text x="891" y="768">plan_distribution</text></g>
+<g fill="#a2b1c6" font-size="20"><text x="891" y="400">Real deployment floor + Apple's platform table and URL.</text><text x="891" y="500">158 HIG pages indexed; the live page is cited.</text><text x="891" y="600">Finding codes with file:line; legacy fixture 14 → clean 0.</text><text x="891" y="700">Real Simulator captures, every locale, Apple's 24 slots.</text><text x="891" y="800">Preflight codes, ExportOptions, approval before upload.</text></g>
+</g>
+
+<g fill="#75e0bd" font-size="40"><text x="783" y="548">→</text></g>
+<path d="M60 894H1540" stroke="#29374b"/>
+<text x="60" y="938" fill="#edf3fb" font-size="23">Your AI client still writes the code. This server gives it Apple's sources, deterministic checks and real captures.</text>
+<text x="60" y="976" fill="#a2b1c6" font-size="20">Static checks do not prove runtime behaviour or App Review approval; builds, devices and human review stay separate evidence.</text>
+</g></svg>

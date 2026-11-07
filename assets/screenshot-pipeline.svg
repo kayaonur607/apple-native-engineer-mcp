@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="600" viewBox="0 0 1600 600" role="img" aria-label="Recorded screenshot pipeline run: Apple's specification, 24 real Simulator captures across 3 devices, 2 locales and 2 appearances, 24 alpha channels flattened, 24 localized frames rendered natively, final audit with zero errors.">
+<rect width="1600" height="600" rx="28" fill="#0b1018"/>
+<g font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',Arial,sans-serif">
+<text x="60" y="68" fill="#75e0bd" font-size="21" letter-spacing="3">SCREENSHOT PIPELINE · RECORDED RUN</text>
+<text x="60" y="114" fill="#edf3fb" font-size="34" font-weight="600">From the real app to an App Store-ready upload set</text>
+<g fill="#141d2a" stroke="#29374b" stroke-width="2"><rect x="60" y="165" width="275" height="260" rx="18"/><rect x="360" y="165" width="275" height="260" rx="18"/><rect x="660" y="165" width="275" height="260" rx="18"/><rect x="960" y="165" width="275" height="260" rx="18"/></g>
+<g fill="#10201e" stroke="#2b5c50" stroke-width="2"><rect x="1260" y="165" width="280" height="260" rx="18"/></g>
+<g fill="#a2b1c6" font-size="17" letter-spacing="1"><text x="86" y="203">GET_APP_STORE_SPECS</text><text x="386" y="203">CAPTURE_SCREENSHOTS</text><text x="686" y="203">FLATTEN + AUDIT</text><text x="986" y="203">COMPOSE … RENDER</text><text x="1286" y="203">AUDIT_SCREENSHOTS</text></g>
+<g fill="#75e0bd" font-size="58" font-weight="700"><text x="86" y="276">24</text><text x="386" y="276">24</text><text x="686" y="276">24/24</text><text x="986" y="276">24</text><text x="1286" y="276">0</text></g>
+<g fill="#edf3fb" font-size="21" font-weight="600"><text x="86" y="314">Apple slots, dated</text><text x="386" y="314">real captures</text><text x="686" y="314">had alpha → flattened</text><text x="986" y="314">localized frames</text><text x="1286" y="314">errors in upload set</text></g>
+<g fill="#a2b1c6" font-size="18"><text x="86" y="350">Required sets per</text><text x="86" y="376">platform + fallbacks</text><text x="386" y="350">3 devices × 2 locales</text><text x="386" y="376">× light/dark × 2 screens</text><text x="686" y="350">App Store Connect</text><text x="686" y="376">rejects alpha channels</text><text x="986" y="350">CoreGraphics + SF Pro</text><text x="986" y="376">opaque RGB, exact size</text><text x="1286" y="350">iPhone 6.9″, 6.3″ and</text><text x="1286" y="376">iPad 13″ sets present</text></g>
+<g fill="#75e0bd" font-size="28"><text x="337" y="300">→</text><text x="637" y="300">→</text><text x="937" y="300">→</text><text x="1237" y="300">→</text></g>
+<path d="M60 465H1540" stroke="#29374b"/>
+<text x="60" y="510" fill="#edf3fb" font-size="23">iOS 27.2 Simulator · status bar 9:41 · -AppleLanguages per locale · -screen launch argument per screen</text>
+<text x="60" y="548" fill="#a2b1c6" font-size="20">Controlled demo app, not a customer app. Raw run record and checksums: assets/evidence/pipeline-run.json, SHA256SUMS.</text>
+</g></svg>

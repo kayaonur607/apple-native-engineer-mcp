@@ -4,7 +4,7 @@ This repository's argument is that claims should be checkable. That applies to t
 listed as **implemented** only when a tool implements it, a test exercises it and `./scripts/verify.sh` runs that
 test. Everything else says so.
 
-Last reviewed: 2026-11-06 · SDK 27.2 · Xcode 27.2
+Last reviewed: 2026-11-07 · SDK 27.2 · Xcode 27.2
 
 ---
 
@@ -23,8 +23,12 @@ Last reviewed: 2026-11-06 · SDK 27.2 · Xcode 27.2
 | Metadata validation | **Implemented** | Character limits, URL rules, keyword duplicates, screenshot counts | Does not suggest copy (see ASO) |
 | Icon validation | **Implemented** | 1024×1024, PNG, alpha, asset catalogue consistency | — |
 | Icon generation | **Implemented** | `icon-studio prepare`: one 1024 master → 18 slots + Contents.json, pure-Python PNG codec and box-filter downscale | No generative artwork; the master is the designer's |
-| Screenshot capture | **Partial** | `xcrun simctl` capture + App Store slot validation | No multi-locale batch orchestration |
-| Screenshot composition | **Implemented (SVG v1)** | Exact-size marketing frames around real captures: background, headline, subheadline, embedded screenshot, three themes, optional rasterisation when a renderer exists | No device-frame artwork, no automatic localisation of headlines |
+| App Store specifications | **Implemented** | `data/app-store-specs.json`: every screenshot slot (iPhone Duo → Watch), required sets and fallbacks, previews, icons; dated, sourced; `get_app_store_specs` | Re-transcribed by hand when Apple changes the page |
+| Screenshot capture | **Implemented** | `capture_screenshots`: devices × locales × appearances × screens, 9:41 status bar, launch-argument routing or deep links, automatic RGB flattening, `manifest.json` | Physical devices and Mac window capture are not driven |
+| Screenshot audit | **Implemented** | `audit_screenshots`: slot sizes, alpha, 1–10 per set, orientation mix, Watch size consistency, required sets per platform | Cannot see content quality; a human still reviews the frames |
+| Screenshot composition | **Implemented (v2)** | Localized captions with reported fallbacks, drawn generic device frame with Dynamic Island, RTL layout, five themes, native CoreGraphics/San Francisco PNG at exact slot size, SVG for editing | No Apple device artwork (deliberately); no automatic translation |
+| Distribution planning | **Implemented (plan-only)** | `plan_distribution`: preflight (team, version/build, export compliance, Hardened Runtime, App Sandbox, entitlements, privacy manifest, icon), ExportOptions from `xcodebuild -help`, archive/upload/notarize/staple/assess commands | Executes nothing by design; the host runs approved steps |
+| HIG discovery | **Implemented** | `search_apple_guidelines` over a 158-page index of Apple's HIG table of contents; table rendering in `find_apple_guidelines` | Index is refreshed with `scripts/build_hig_catalog.py`, not automatically |
 | Release gate | **Implemented** | Seven weighted gates, `NOT INSPECTED` blocks, score, Markdown report | — |
 | App Store Connect | **Read-only, widened** | ES256 JWT; apps, app details (content rights), versions, builds, listing copy per locale, screenshot sets and their delivery state; rate-limit aware; hard failure without credentials | No writes, no submission, no screenshot upload — deliberately, until a preview/approve/apply flow exists |
 | App Store Review analysis | **Implemented (v1)** | `app-store-review`: usage descriptions vs sensor use (5.1.1), placeholder copy (2.1), account deletion (5.1.1(v)), external payments (3.1.1), web wrapper (4.2), private API (2.5.1), metadata URLs (2.3.1) — each finding cites the section and the evidence | Not a full guideline crawl; entitlement and IAP receipt flows are out of scope |
@@ -32,7 +36,7 @@ Last reviewed: 2026-11-06 · SDK 27.2 · Xcode 27.2
 | ASO | **Implemented (honest v1)** | Budget arithmetic, duplicate/wasted keywords, coverage against visible copy, risky-claim detection, candidates extracted from the developer's own description | No search-volume or competitor data — and it says so instead of inventing numbers |
 
 
-| Capability modules | **Implemented** | Eleven modules, `APPLE_NATIVE_MODULES`, isolation tests | No lazy dependency installation (there are no optional deps to install) |
+| Capability modules | **Implemented** | Twelve modules, `APPLE_NATIVE_MODULES`, isolation tests | No lazy dependency installation (there are no optional deps to install) |
 | GitHub release updates | **Implemented** | Isolated version staging, locked dependencies, inventory smoke test, atomic activation, offline fallback, pins and update opt-out | Bootstrap launcher upgrades remain explicit; no publisher-signature verification |
 | MCP transports | **Implemented** | stdio and Streamable HTTP (`--http`), loopback-only default, Origin check | No auth for remote use (deliberately refused) |
 | Privacy controls | **Implemented** | Telemetry off by default, closed five-key schema, sanitiser tests, no source uploads | Session-level consent prompts are a client concern |
@@ -72,8 +76,9 @@ Next in this phase: PDF and WWDC transcript retrieval, an offline mirror for air
 ### Phase 4 — Visual production
 
 - Icon studio: original artwork directions, then the existing validator as the gate.
-- Screenshot studio: capture, then composition onto device frames with localisation-aware text.
+- Screenshot studio: capture, then composition onto device frames with localisation-aware text. **Shipped in v2.4.**
 - Both must distinguish *actual screenshots* from *marketing compositions* in the output, always.
+- Next: app preview recording (`simctl io recordVideo`) with duration and resolution validation.
 
 ### Phase 5 — The app
 

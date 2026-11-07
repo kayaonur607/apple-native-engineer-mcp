@@ -4,6 +4,25 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] — 2026-11-07
+
+### Added
+
+- `capture_screenshots`: real Simulator captures across devices, locales and light/dark from one plan, 9:41 status bar, launch-argument routing, automatic RGB flattening and a provenance manifest.
+- `audit_screenshots` and `get_app_store_specs`: Apple's current slot table (incl. iPhone Duo, Watch Ultra 3, Apple TV), alpha, 1–10 per set and required sets per platform.
+- Marketing frames: localized captions, drawn device frame with Dynamic Island, RTL, native CoreGraphics/San Francisco PNG rendering.
+- `plan_distribution`: preflight, ExportOptions and ordered archive, TestFlight/App Store upload and Developer ID notarization commands. Executes nothing.
+- `search_apple_guidelines`: offline index of 158 HIG pages.
+- Nine prompts: iOS, iPadOS, iPhone Duo, macOS, watchOS, tvOS, visionOS, new screen, distribute.
+- References: tvOS, iPhone Duo, distribution and release, App Store product page assets.
+- README with recorded evidence and new SVG visuals.
+
+### Fixed
+
+- HIG tables rendered as raw data; links now keep Apple's titles and URLs.
+- Mac screenshot slots listed an unsupported 3840×2160 size.
+- Outdated screenshot and design prompts.
+
 ## [2.3.0] — 2026-11-07
 
 - GitHub release launcher validates existing cache directories before activation, including rollback installations.

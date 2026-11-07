@@ -15,9 +15,9 @@ Claude Desktop · Cursor · Codex · Cline · Zed · any MCP client
   apple-native-engineer  ──►  python3 tools/<auditor>/<script>.py --json
         │                          │
         │                          └── stable envelope (schema_version 2.0)
-        ├── 25 tools        (audits, documentation, assets and diagnostics)
-        ├── 55 resources    (references, checklists, examples, SKILL.md)
-        └── 13 prompts      (the review workflows, parameterised)
+        ├── 30 tools        (audits, documentation, assets and diagnostics)
+        ├── 61 resources    (references, checklists, examples, SKILL.md)
+        └── 22 prompts      (the review workflows, parameterised)
 ```
 
 ## Why this exists
@@ -208,7 +208,7 @@ A tool that crashes still returns a valid envelope with `status: "fail"` and an 
 
 ## Capability modules
 
-Eleven modules, gated by `APPLE_NATIVE_MODULES` (comma-separated, always includes `core`):
+Twelve modules, gated by `APPLE_NATIVE_MODULES` (comma-separated, always includes `core`):
 
 ```json
 { "env": { "APPLE_NATIVE_MODULES": "core,swift-engineering,privacy-security-audit" } }
@@ -226,18 +226,21 @@ available: they are knowledge, not capability. Full rules in [`docs/MODULES.md`]
 The knowledge base is exposed rather than pasted into prompts, so a client loads only what it needs.
 
 - `apple-native://skill` — the operating standard (`SKILL.md`)
-- `apple-native://references/<name>` — 32 guides, e.g. `apple-native://references/liquid-glass`
+- `apple-native://references/<name>` — 36 guides, e.g. `apple-native://references/liquid-glass`, `tvos-design`, `iphone-duo-design`, `distribution-and-release`
+- `apple-native://data/app-store-specs` and `apple-native://data/hig-catalog` — Apple's asset specifications and the HIG index as JSON
 - `apple-native://checklists/<name>` — 12 review checklists
 - `apple-native://examples/<name>` — 9 worked examples
 
 ## Prompts
 
-Thirteen workflows, available as slash commands in clients that support prompts. Each takes an optional
+Twenty-two workflows, available as slash commands in clients that support prompts. Each takes an optional
 `project` path and an optional `focus` string.
 
 `apple-native-start` (developer/designer onboarding), `apple-native` (the umbrella audit), `apple-native-design`, `apple-native-code`, `apple-native-review`,
 `apple-native-privacy`, `apple-native-icon`, `apple-native-screenshots`, `apple-native-connect`,
-`apple-native-metadata`, `apple-native-widgets`, `apple-native-localization`, `apple-native-release`.
+`apple-native-metadata`, `apple-native-widgets`, `apple-native-localization`, `apple-native-release`,
+`apple-native-new-screen`, `apple-native-distribute`, and one per platform: `apple-native-ios`, `apple-native-ipados`,
+`apple-native-macos`, `apple-native-watchos`, `apple-native-tvos`, `apple-native-visionos`, `apple-native-iphone-duo`.
 
 Naming is mechanical: `commands/apple-native.md` → `apple-native`, `commands/<slug>.md` → `apple-native-<slug>`.
 A test enforces it so the doubled prefix cannot come back.
@@ -305,7 +308,7 @@ credentials, and fails if any of it survives.
 ## Verify the install
 
 ```bash
-node src/index.js --selftest        # inventory: 25 tools, 55 resources, 13 prompts
+node src/index.js --selftest        # inventory: 30 tools, 61 resources, 22 prompts
 node src/index.js --doctor          # Node, Python, auditors, git, Xcode, credentials
 node src/index.js --telemetry-preview
 npm test                            # protocol, CLI, diff, HTTP, update and telemetry tests

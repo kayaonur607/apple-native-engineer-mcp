@@ -41,7 +41,7 @@ ln -s ~/Desktop/apple-native-engineer ~/.claude/skills/apple-native-engineer
 
 ## 3. The MCP server — where the audits actually run
 
-The skill is a policy document. The MCP server adds 25 tools that run the audits, 55 resources and 13 prompts.
+The skill is a policy document. The MCP server adds 30 tools that run the audits, 61 resources and 22 prompts.
 Claude Code supports both, and the server is the one that can say `status: fail`.
 
 ```bash

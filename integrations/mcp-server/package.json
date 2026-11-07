@@ -1,8 +1,8 @@
 {
   "name": "apple-native-engineer-mcp",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "mcpName": "io.github.kayaonur607/apple-native-engineer",
-  "description": "MCP server for Apple-platform engineering: 14 verifiable audits (SwiftUI, Liquid Glass, accessibility, privacy manifest, localisation, widgets, App Store) plus the reference knowledge base as resources, for any MCP client.",
+  "description": "MCP server for Apple-platform design engineering: HIG research, SwiftUI and accessibility audits, Simulator screenshot capture with native marketing frames, App Store specs, release gate and distribution plans.",
   "license": "MIT",
   "author": "Onur Kaya",
   "type": "module",
@@ -34,7 +34,13 @@
     "widgetkit",
     "storekit",
     "code-review",
-    "linter"
+    "linter",
+    "app-store-screenshots",
+    "testflight",
+    "notarization",
+    "human-interface-guidelines",
+    "tvos",
+    "visionos"
   ],
   "repository": {
     "type": "git",

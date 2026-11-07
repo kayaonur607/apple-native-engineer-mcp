@@ -26,44 +26,44 @@ Recorded by `./scripts/update_proof.py` on 2026-11-07. Re-run it after any chang
   ✓ validation passed: 0 warning(s)
 
 ▸ Python tests (shared library + tools)
-...................................................................................................................................
+..........................................................................................................................................................
 ----------------------------------------------------------------------
-Ran 131 tests in 4.468s
+Ran 154 tests in 4.740s
 
-OK
 
 ▸ MCP protocol tests
-ℹ tests 78
-ℹ suites 14
-ℹ pass 78
+ℹ tests 85
+ℹ suites 15
+ℹ pass 85
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 2091.789958
+ℹ duration_ms 1909.281917
 
 ▸ Swift compilation (fixtures + documentation snippets)
   SDK: iPhoneSimulator27.2.sdk
   ✓ fixture: clean-app/App
   ✓ fixture: clean-app/Widgets
-162
-  ✓ documentation snippets parse (162 blocks)
+  ✓ example: screenshot-pipeline
+163
+  ✓ documentation snippets parse (163 blocks)
   type-checking every snippet against the iOS SDK...
-  Type-check clean: 73
+  Type-check clean: 74
   Fragments:        89
   Real errors:      0
-  checked 3 unit(s), 0 failure(s)
+  checked 4 unit(s), 0 failure(s)
 
 ▸ Documentation API claims
 SDK index:        21,998 symbols from iPhoneSimulator27.2.sdk
-Documents:        41
+Documents:        45
 Modifiers taught: 129
 Verified:         127
 Allowlisted:      2
 Unverified:       0
 
 ────────────────────────────────────────────
-  passed: 5   failed: 0   skipped: 0   58s
+  passed: 5   failed: 0   skipped: 0   55s
 ────────────────────────────────────────────
 ```
 <!-- proof:end -->
@@ -471,8 +471,8 @@ severity reflects the confidence: `info` for suggestions, `error` for rules Appl
 | Claim | Command |
 | :--- | :--- |
 | "138 tests pass" | `./scripts/verify.sh` |
-| "18 CLI tools" | `ls -d tools/*/ \| wc -l` |
-| "25 MCP tools" | `node integrations/mcp-server/src/index.js --selftest` |
+| "19 CLI tools" | `ls -d tools/*/ \| wc -l` |
+| "30 MCP tools" | `node integrations/mcp-server/src/index.js --selftest` |
 | "the HTTP transport rejects a foreign origin" | `node integrations/mcp-server/src/index.js --http 3931 &` then the `curl` above |
 | "a review only reports the diff" | `cd integrations/mcp-server && npm test` (`review_diff` suite) |
 | "telemetry records nothing identifying" | `node integrations/mcp-server/src/index.js --telemetry-preview` |

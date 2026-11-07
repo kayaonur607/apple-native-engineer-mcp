@@ -1,13 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="550" viewBox="0 0 1600 550" role="img" aria-label="GitHub releases feed the local version launcher. AI client calls local MCP tools and receives findings. Builds and runtime checks are separate.">
-<rect width="1600" height="550" rx="24" fill="#0b1018"/>
-<g font-family="-apple-system,BlinkMacSystemFont,Arial,sans-serif">
-<text x="60" y="65" fill="#75e0bd" font-size="22" letter-spacing="2">HOW THE WORKFLOW FITS TOGETHER</text>
-<text x="60" y="115" fill="#a2b1c6" font-size="26">Versioned delivery. Local tools. Explicit evidence.</text>
-<g fill="#141d2a" stroke="#29374b" stroke-width="2"><rect x="60" y="185" width="330" height="165" rx="18"/><rect x="445" y="185" width="330" height="165" rx="18"/><rect x="830" y="185" width="330" height="165" rx="18"/><rect x="1215" y="185" width="325" height="165" rx="18"/></g>
-<g fill="#edf3fb" font-size="27" font-weight="600"><text x="90" y="235">GitHub Releases</text><text x="475" y="235">Local launcher</text><text x="860" y="235">AI + MCP client</text><text x="1245" y="235">Local MCP tools</text></g>
-<g fill="#a2b1c6" font-size="21"><text x="90" y="282">Published stable versions</text><text x="90" y="315">Changelog per release</text><text x="475" y="282">Stage + smoke-test</text><text x="475" y="315">Activate on restart</text><text x="860" y="282">Reason and implement</text><text x="860" y="315">Invoke available tools</text><text x="1245" y="282">Inspect, research, verify</text><text x="1245" y="315">Return structured results</text></g>
-<g fill="#75e0bd" font-size="36"><text x="400" y="278">→</text><text x="785" y="278">→</text><text x="1170" y="278">⇄</text></g>
-<path d="M60 395H1540" stroke="#29374b"/>
-<text x="60" y="445" fill="#edf3fb" font-size="25">Evidence returned: finding codes · file/line · source URLs · asset validation · release verdict</text>
-<text x="60" y="493" fill="#a2b1c6" font-size="22">Separate proof still required: compilation, device behaviour, visual accessibility and App Store approval.</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="640" viewBox="0 0 1600 640" role="img" aria-label="GitHub releases feed the local launcher. The AI client calls 30 local MCP tools grouped in 12 modules, which read the project, Apple's documentation, the Simulator and App Store Connect read-only, and return evidence.">
+<rect width="1600" height="640" rx="24" fill="#0b1018"/>
+<g font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',Arial,sans-serif">
+<text x="60" y="65" fill="#75e0bd" font-size="21" letter-spacing="3">HOW THE WORKFLOW FITS TOGETHER</text>
+<text x="60" y="113" fill="#a2b1c6" font-size="26">Versioned delivery. Local tools. Explicit evidence.</text>
+<g fill="#141d2a" stroke="#29374b" stroke-width="2"><rect x="60" y="165" width="330" height="190" rx="18"/><rect x="445" y="165" width="330" height="190" rx="18"/><rect x="830" y="165" width="330" height="190" rx="18"/><rect x="1215" y="165" width="325" height="190" rx="18"/></g>
+<g fill="#edf3fb" font-size="27" font-weight="600"><text x="90" y="215">GitHub Releases</text><text x="475" y="215">Local launcher</text><text x="860" y="215">AI + MCP client</text><text x="1245" y="215">30 MCP tools</text></g>
+<g fill="#a2b1c6" font-size="21"><text x="90" y="262">Stable versions</text><text x="90" y="295">Release notes per tag</text><text x="475" y="262">Stage + smoke-test</text><text x="475" y="295">Activate on restart</text><text x="860" y="262">Reasons and writes code</text><text x="860" y="295">22 prompts · 61 resources</text><text x="1245" y="262">12 modules</text><text x="1245" y="295">19 local CLI tools</text><text x="1245" y="328">Python + native Swift</text></g>
+<g fill="#75e0bd" font-size="36"><text x="400" y="268">→</text><text x="785" y="268">→</text><text x="1170" y="268">⇄</text></g>
+<g fill="#10201e" stroke="#2b5c50" stroke-width="2"><rect x="60" y="395" width="352" height="96" rx="16"/><rect x="436" y="395" width="352" height="96" rx="16"/><rect x="812" y="395" width="352" height="96" rx="16"/><rect x="1188" y="395" width="352" height="96" rx="16"/></g>
+<g fill="#edf3fb" font-size="22" font-weight="600"><text x="84" y="432">Your project</text><text x="460" y="432">developer.apple.com</text><text x="836" y="432">Simulator · Xcode</text><text x="1212" y="432">App Store Connect</text></g>
+<g fill="#a2b1c6" font-size="18"><text x="84" y="465">Swift, plists, assets, schemes</text><text x="460" y="465">Docs, availability, 158 HIG pages</text><text x="836" y="465">Captures, native PNG render</text><text x="1212" y="465">Read-only API; uploads need approval</text></g>
+<path d="M60 525H1540" stroke="#29374b"/>
+<text x="60" y="570" fill="#edf3fb" font-size="24">Evidence returned: finding codes · file/line · Apple URLs · slot-checked images · release verdict · distribution plan</text>
+<text x="60" y="608" fill="#a2b1c6" font-size="20">Separate proof still required: compilation, device behaviour, visual accessibility and App Store approval.</text>
 </g></svg>

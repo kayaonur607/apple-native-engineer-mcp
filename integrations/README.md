@@ -5,7 +5,7 @@ MCP server runs the audits — but you should know which is which before you ins
 
 | | Skill | MCP server |
 | :--- | :--- | :--- |
-| **What it is** | A `SKILL.md` the agent reads | A process exposing 25 tools, 55 resources, 13 prompts |
+| **What it is** | A `SKILL.md` the agent reads | A process exposing 30 tools, 61 resources, 22 prompts |
 | **What it can do** | Advise | *Check*: run the audits, return finding codes, fail |
 | **Install** | copy or symlink one directory | `node /absolute/path/apple-native-engineer-mcp/integrations/mcp-server/scripts/github-launcher.mjs` |
 | **Works offline** | yes | yes — no network call in any audit |

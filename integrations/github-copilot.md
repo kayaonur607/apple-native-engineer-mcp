@@ -27,7 +27,7 @@ Key Mandates:
 
 ## 2. The MCP server — agent mode with real checks
 
-Custom instructions are advice Copilot may follow. The MCP server is 25 tools that run the audits and return
+Custom instructions are advice Copilot may follow. The MCP server is 30 tools that run the audits and return
 finding codes, and VS Code's agent mode supports it directly.
 
 This repository already ships a portable `.mcp.json` at the root, which VS Code offers as a workspace

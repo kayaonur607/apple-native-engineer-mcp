@@ -36,8 +36,8 @@ ln -s ~/Desktop/apple-native-engineer .gemini/skills/apple-native-engineer
 
 ## 3. The MCP server — tools, prompts and `@`-addressable resources
 
-The skill is instructions. The MCP server adds 25 tools that run the audits, and Gemini CLI maps its 13 prompts to
-slash commands and its 55 resources to `@` references.
+The skill is instructions. The MCP server adds 30 tools that run the audits, and Gemini CLI maps its 22 prompts to
+slash commands and its 61 resources to `@` references.
 
 ```bash
 gemini mcp add apple-native-engineer node /absolute/path/apple-native-engineer-mcp/integrations/mcp-server/scripts/github-launcher.mjs

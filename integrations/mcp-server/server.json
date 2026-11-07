@@ -1,8 +1,8 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
   "name": "io.github.kayaonur607/apple-native-engineer",
-  "description": "Verifiable Apple-platform engineering audits for AI agents: SwiftUI lint, Liquid Glass, accessibility, privacy manifests, localisation, widgets, App Store readiness \u2014 plus the reference library as resources.",
-  "version": "2.3.0",
+  "description": "Apple-platform design engineering for AI agents: HIG research, SwiftUI audits, Simulator screenshots with native marketing frames, App Store specs, and archive/TestFlight/notarization plans.",
+  "version": "2.4.0",
   "websiteUrl": "https://github.com/kayaonur607/apple-native-engineer-mcp",
   "repository": {
     "url": "https://github.com/kayaonur607/apple-native-engineer-mcp",

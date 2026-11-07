@@ -34,7 +34,7 @@ ln -s ~/Desktop/apple-native-engineer .cursor/skills/apple-native-engineer
 
 ## 3. The MCP server — the version that actually checks the code
 
-A `.cursorrules` file is advice. The MCP server is 25 tools that run the same audits a senior reviewer would, and
+A `.cursorrules` file is advice. The MCP server is 30 tools that run the same audits a senior reviewer would, and
 return finding codes instead of opinions. Cursor supports both, and they compose.
 
 Project config, `.cursor/mcp.json` (or `~/.cursor/mcp.json` for every workspace):
@@ -54,8 +54,8 @@ Project config, `.cursor/mcp.json` (or `~/.cursor/mcp.json` for every workspace)
 Restart Cursor, then check **Settings → MCP** for a green connection. The server registers three things beyond
 tools:
 
-- **13 prompts** become slash commands — type `/` and look for `apple-native-review`.
-- **55 resources** — ask for `apple-native://references/liquid-glass` by URI and Cursor reads the guide instead of
+- **22 prompts** become slash commands — type `/` and look for `apple-native-review`.
+- **61 resources** — ask for `apple-native://references/liquid-glass` by URI and Cursor reads the guide instead of
   you pasting it.
 - **Server instructions** — the operating loop arrives with the tools, not in your prompt.
 

@@ -1,6 +1,6 @@
 # Optional ecosystem integrations
 
-Research reviewed 2026-11-06. These are complementary upstream projects, not bundled dependencies or implemented adapters.
+Research reviewed 2026-11-07. These are complementary upstream projects, not bundled dependencies or implemented adapters.
 This revision adds a local xcresult summary utility; it does not install or invoke any of these projects.
 
 | Upstream source | Useful boundary | Integration decision |
@@ -15,6 +15,25 @@ This revision adds a local xcresult summary utility; it does not install or invo
 No upstream implementation or skill text was copied for this work. Before vendoring anything, pin an upstream commit,
 inspect its license and retain required notices. External MCPs have their own network, execution and privacy policies;
 enabling a local module here does not configure or authorize them.
+
+## Agent skills that pair well (reviewed 2026-11-07)
+
+These skill collections were used as **research input** for v2.4 — to check which jobs developers actually ask
+agents to do and where this server's evidence was missing. No skill text or code was copied; every fact in the
+new tools and references was re-derived from Apple's own pages (`find_apple_guidelines`, App Store Connect help)
+or from the installed Xcode 27.2 tools (`xcodebuild -help`, `simctl`, `altool`, `notarytool`).
+
+| Upstream | What it is good at | How it complements this server |
+| --- | --- | --- |
+| [swift-ios-skills](https://github.com/dpearson2699/swift-ios-skills) | Framework-by-framework guidance (WidgetKit, StoreKit, ActivityKit, AlarmKit, …) and SwiftUI Liquid Glass | Load the framework skill for implementation detail; verify every API with `inspect_apple_api_availability` |
+| [apple-design-skill](https://github.com/dickwu/apple-design-skill) | Design review grounded in HIG pages | Use for critique; cite the live page from `find_apple_guidelines` and capture the result |
+| [ios-marketing-capture](https://github.com/ParthJadhav/ios-marketing-capture) | Marketing screenshot pages built in a web stack | This server stays native: Simulator captures, CoreGraphics/San Francisco rendering, Apple's slot table |
+| [SwiftUI Expert](https://github.com/AvdLee/SwiftUI-Agent-Skill) | State, identity, performance judgment | Pair with `review_diff`; style advice is not a release blocker |
+
+Lessons adopted from this review: capture must be **localized and per-device in one plan**; Simulator PNGs must
+be **flattened** (they carry alpha); screenshot copy needs **per-locale fallbacks reported**, not silently reused;
+distribution guidance must name **exact ExportOptions keys** from the installed Xcode; and HIG pages must be
+**discoverable by topic** before they can be cited.
 
 ## Architecture boundary
 

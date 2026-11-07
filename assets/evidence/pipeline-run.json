@@ -1,0 +1,379 @@
+{
+  "recorded_with": "examples/screenshot-pipeline (plan.json, captions.json)",
+  "tool_version": "2.0.0",
+  "devices": [
+    {
+      "name": "iPhone 18 Pro Max",
+      "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-2"
+    },
+    {
+      "name": "iPhone 18 Pro",
+      "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-2"
+    },
+    {
+      "name": "iPad Pro 13-inch (M5)",
+      "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-2"
+    }
+  ],
+  "captures": [
+    {
+      "file": "en-US/iphone-18-pro-max/01-today-light.png",
+      "locale": "en-US",
+      "appearance": "light",
+      "size": "1320x2868",
+      "alpha": false,
+      "flattened": true
+    },
+    {
+      "file": "en-US/iphone-18-pro-max/02-insights-light.png",
+      "locale": "en-US",
+      "appearance": "light",
+      "size": "1320x2868",
+      "alpha": false,
+      "flattened": true
+    },
+    {
+      "file": "tr-TR/iphone-18-pro-max/01-today-light.png",
+      "locale": "tr-TR",
+      "appearance": "light",
+      "size": "1320x2868",
+      "alpha": false,
+      "flattened": true
+    },
+    {
+      "file": "tr-TR/iphone-18-pro-max/02-insights-light.png",
+      "locale": "tr-TR",
+      "appearance": "light",
+      "size": "1320x2868",
+      "alpha": false,
+      "flattened": true
+    },
+    {
+      "file": "en-US/iphone-18-pro-max/01-today-dark.png",
+      "locale": "en-US",
+      "appearance": "dark",
+      "size": "1320x2868",
+      "alpha": false,
+      "flattened": true
+    },
+    {
+      "file": "en-US/iphone-18-pro-max/02-insights-dark.png",
+      "locale": "en-US",
+      "appearance": "dark",
+      "size": "1320x2868",
+      "alpha": false,
+      "flattened": true
+    },
+    {
+      "file": "tr-TR/iphone-18-pro-max/01-today-dark.png",
+      "locale": "tr-TR",
+      "appearance": "dark",
+      "size": "1320x2868",
+      "alpha": false,
+      "flattened": true
+    },
+    {
+      "file": "tr-TR/iphone-18-pro-max/02-insights-dark.png",
+      "locale": "tr-TR",
+      "appearance": "dark",
+      "size": "1320x2868",
+      "alpha": false,
+      "flattened": true
+    },
+    {
+      "file": "en-US/iphone-18-pro/01-today-light.png",
+      "locale": "en-US",
+      "appearance": "light",
+      "size": "1206x2622",
+      "alpha": false,
+      "flattened": true
+    },
+    {
+      "file": "en-US/iphone-18-pro/02-insights-light.png",
+      "locale": "en-US",
+      "appearance": "light",
+      "size": "1206x2622",
+      "alpha": false,
+      "flattened": true
+    },
+    {
+      "file": "tr-TR/iphone-18-pro/01-today-light.png",
+      "locale": "tr-TR",
+      "appearance": "light",
+      "size": "1206x2622",
+      "alpha": false,
+      "flattened": true
+    },
+    {
+      "file": "tr-TR/iphone-18-pro/02-insights-light.png",
+      "locale": "tr-TR",
+      "appearance": "light",
+      "size": "1206x2622",
+      "alpha": false,
+      "flattened": true
+    },
+    {
+      "file": "en-US/iphone-18-pro/01-today-dark.png",
+      "locale": "en-US",
+      "appearance": "dark",
+      "size": "1206x2622",
+      "alpha": false,
+      "flattened": true
+    },
+    {
+      "file": "en-US/iphone-18-pro/02-insights-dark.png",
+      "locale": "en-US",
+      "appearance": "dark",
+      "size": "1206x2622",
+      "alpha": false,
+      "flattened": true
+    },
+    {
+      "file": "tr-TR/iphone-18-pro/01-today-dark.png",
+      "locale": "tr-TR",
+      "appearance": "dark",
+      "size": "1206x2622",
+      "alpha": false,
+      "flattened": true
+    },
+    {
+      "file": "tr-TR/iphone-18-pro/02-insights-dark.png",
+      "locale": "tr-TR",
+      "appearance": "dark",
+      "size": "1206x2622",
+      "alpha": false,
+      "flattened": true
+    },
+    {
+      "file": "en-US/ipad-pro-13-inch-m5/01-today-light.png",
+      "locale": "en-US",
+      "appearance": "light",
+      "size": "2064x2752",
+      "alpha": false,
+      "flattened": true
+    },
+    {
+      "file": "en-US/ipad-pro-13-inch-m5/02-insights-light.png",
+      "locale": "en-US",
+      "appearance": "light",
+      "size": "2064x2752",
+      "alpha": false,
+      "flattened": true
+    },
+    {
+      "file": "tr-TR/ipad-pro-13-inch-m5/01-today-light.png",
+      "locale": "tr-TR",
+      "appearance": "light",
+      "size": "2064x2752",
+      "alpha": false,
+      "flattened": true
+    },
+    {
+      "file": "tr-TR/ipad-pro-13-inch-m5/02-insights-light.png",
+      "locale": "tr-TR",
+      "appearance": "light",
+      "size": "2064x2752",
+      "alpha": false,
+      "flattened": true
+    },
+    {
+      "file": "en-US/ipad-pro-13-inch-m5/01-today-dark.png",
+      "locale": "en-US",
+      "appearance": "dark",
+      "size": "2064x2752",
+      "alpha": false,
+      "flattened": true
+    },
+    {
+      "file": "en-US/ipad-pro-13-inch-m5/02-insights-dark.png",
+      "locale": "en-US",
+      "appearance": "dark",
+      "size": "2064x2752",
+      "alpha": false,
+      "flattened": true
+    },
+    {
+      "file": "tr-TR/ipad-pro-13-inch-m5/01-today-dark.png",
+      "locale": "tr-TR",
+      "appearance": "dark",
+      "size": "2064x2752",
+      "alpha": false,
+      "flattened": true
+    },
+    {
+      "file": "tr-TR/ipad-pro-13-inch-m5/02-insights-dark.png",
+      "locale": "tr-TR",
+      "appearance": "dark",
+      "size": "2064x2752",
+      "alpha": false,
+      "flattened": true
+    }
+  ],
+  "capture_sizes": {
+    "1320x2868": 8,
+    "1206x2622": 8,
+    "2064x2752": 8
+  },
+  "flattened_from_alpha": 24,
+  "frames_rendered": 24,
+  "renderer": "native",
+  "envelopes": {
+    "capture": {
+      "status": "pass",
+      "summary": {
+        "critical": 0,
+        "error": 0,
+        "warning": 0,
+        "info": 2,
+        "total": 2
+      },
+      "codes": {
+        "CAP034": 1,
+        "CAP002": 1
+      }
+    },
+    "audit-captures": {
+      "status": "pass",
+      "summary": {
+        "critical": 0,
+        "error": 0,
+        "warning": 0,
+        "info": 28,
+        "total": 28
+      },
+      "codes": {
+        "SHOT012": 24,
+        "SHOT024": 4
+      }
+    },
+    "compose": {
+      "status": "pass",
+      "summary": {
+        "critical": 0,
+        "error": 0,
+        "warning": 0,
+        "info": 2,
+        "total": 2
+      },
+      "codes": {
+        "SHOT110": 1,
+        "SHOT112": 1
+      }
+    },
+    "audit-frames": {
+      "status": "pass",
+      "summary": {
+        "critical": 0,
+        "error": 0,
+        "warning": 0,
+        "info": 28,
+        "total": 28
+      },
+      "codes": {
+        "SHOT012": 24,
+        "SHOT024": 4
+      }
+    }
+  },
+  "simctl_commands": [
+    "xcrun simctl create 'ANE iPhone 18 Pro Max' com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro-Max com.apple.CoreSimulator.SimRuntime.iOS-27-2",
+    "xcrun simctl boot 52944349-2853-4D02-AB2D-FEA95B3ED883",
+    "xcrun simctl bootstatus 52944349-2853-4D02-AB2D-FEA95B3ED883 -b",
+    "xcrun simctl status_bar 52944349-2853-4D02-AB2D-FEA95B3ED883 override --time 9:41 --dataNetwork wifi --wifiMode active --wifiBars 3 --cellularMode active --cellularBars 4 --operatorName '' --batteryState charged --batteryLevel 100",
+    "xcrun simctl install 52944349-2853-4D02-AB2D-FEA95B3ED883 <repository>/.swiftwork/PlannerDemo.app",
+    "xcrun simctl ui 52944349-2853-4D02-AB2D-FEA95B3ED883 appearance light",
+    "xcrun simctl terminate 52944349-2853-4D02-AB2D-FEA95B3ED883 dev.applenative.plannerdemo",
+    "xcrun simctl launch 52944349-2853-4D02-AB2D-FEA95B3ED883 dev.applenative.plannerdemo -AppleLanguages '(en-US)' -AppleLocale en_US -screen today",
+    "xcrun simctl io 52944349-2853-4D02-AB2D-FEA95B3ED883 screenshot --type=png <run>/shots/en-US/iphone-18-pro-max/01-today-light.png",
+    "xcrun simctl terminate 52944349-2853-4D02-AB2D-FEA95B3ED883 dev.applenative.plannerdemo",
+    "xcrun simctl launch 52944349-2853-4D02-AB2D-FEA95B3ED883 dev.applenative.plannerdemo -AppleLanguages '(en-US)' -AppleLocale en_US -screen insights",
+    "xcrun simctl io 52944349-2853-4D02-AB2D-FEA95B3ED883 screenshot --type=png <run>/shots/en-US/iphone-18-pro-max/02-insights-light.png",
+    "xcrun simctl terminate 52944349-2853-4D02-AB2D-FEA95B3ED883 dev.applenative.plannerdemo",
+    "xcrun simctl launch 52944349-2853-4D02-AB2D-FEA95B3ED883 dev.applenative.plannerdemo -AppleLanguages '(tr-TR)' -AppleLocale tr_TR -screen today",
+    "xcrun simctl io 52944349-2853-4D02-AB2D-FEA95B3ED883 screenshot --type=png <run>/shots/tr-TR/iphone-18-pro-max/01-today-light.png",
+    "xcrun simctl terminate 52944349-2853-4D02-AB2D-FEA95B3ED883 dev.applenative.plannerdemo",
+    "xcrun simctl launch 52944349-2853-4D02-AB2D-FEA95B3ED883 dev.applenative.plannerdemo -AppleLanguages '(tr-TR)' -AppleLocale tr_TR -screen insights",
+    "xcrun simctl io 52944349-2853-4D02-AB2D-FEA95B3ED883 screenshot --type=png <run>/shots/tr-TR/iphone-18-pro-max/02-insights-light.png",
+    "xcrun simctl ui 52944349-2853-4D02-AB2D-FEA95B3ED883 appearance dark",
+    "xcrun simctl terminate 52944349-2853-4D02-AB2D-FEA95B3ED883 dev.applenative.plannerdemo",
+    "xcrun simctl launch 52944349-2853-4D02-AB2D-FEA95B3ED883 dev.applenative.plannerdemo -AppleLanguages '(en-US)' -AppleLocale en_US -screen today",
+    "xcrun simctl io 52944349-2853-4D02-AB2D-FEA95B3ED883 screenshot --type=png <run>/shots/en-US/iphone-18-pro-max/01-today-dark.png",
+    "xcrun simctl terminate 52944349-2853-4D02-AB2D-FEA95B3ED883 dev.applenative.plannerdemo",
+    "xcrun simctl launch 52944349-2853-4D02-AB2D-FEA95B3ED883 dev.applenative.plannerdemo -AppleLanguages '(en-US)' -AppleLocale en_US -screen insights",
+    "xcrun simctl io 52944349-2853-4D02-AB2D-FEA95B3ED883 screenshot --type=png <run>/shots/en-US/iphone-18-pro-max/02-insights-dark.png",
+    "xcrun simctl terminate 52944349-2853-4D02-AB2D-FEA95B3ED883 dev.applenative.plannerdemo",
+    "xcrun simctl launch 52944349-2853-4D02-AB2D-FEA95B3ED883 dev.applenative.plannerdemo -AppleLanguages '(tr-TR)' -AppleLocale tr_TR -screen today",
+    "xcrun simctl io 52944349-2853-4D02-AB2D-FEA95B3ED883 screenshot --type=png <run>/shots/tr-TR/iphone-18-pro-max/01-today-dark.png",
+    "xcrun simctl terminate 52944349-2853-4D02-AB2D-FEA95B3ED883 dev.applenative.plannerdemo",
+    "xcrun simctl launch 52944349-2853-4D02-AB2D-FEA95B3ED883 dev.applenative.plannerdemo -AppleLanguages '(tr-TR)' -AppleLocale tr_TR -screen insights",
+    "xcrun simctl io 52944349-2853-4D02-AB2D-FEA95B3ED883 screenshot --type=png <run>/shots/tr-TR/iphone-18-pro-max/02-insights-dark.png",
+    "xcrun simctl status_bar 52944349-2853-4D02-AB2D-FEA95B3ED883 clear",
+    "xcrun simctl shutdown 52944349-2853-4D02-AB2D-FEA95B3ED883",
+    "xcrun simctl boot 23D5E282-2DDC-4DE1-B497-A0566F681B3A",
+    "xcrun simctl bootstatus 23D5E282-2DDC-4DE1-B497-A0566F681B3A -b",
+    "xcrun simctl status_bar 23D5E282-2DDC-4DE1-B497-A0566F681B3A override --time 9:41 --dataNetwork wifi --wifiMode active --wifiBars 3 --cellularMode active --cellularBars 4 --operatorName '' --batteryState charged --batteryLevel 100",
+    "xcrun simctl install 23D5E282-2DDC-4DE1-B497-A0566F681B3A <repository>/.swiftwork/PlannerDemo.app",
+    "xcrun simctl ui 23D5E282-2DDC-4DE1-B497-A0566F681B3A appearance light",
+    "xcrun simctl terminate 23D5E282-2DDC-4DE1-B497-A0566F681B3A dev.applenative.plannerdemo",
+    "xcrun simctl launch 23D5E282-2DDC-4DE1-B497-A0566F681B3A dev.applenative.plannerdemo -AppleLanguages '(en-US)' -AppleLocale en_US -screen today",
+    "xcrun simctl io 23D5E282-2DDC-4DE1-B497-A0566F681B3A screenshot --type=png <run>/shots/en-US/iphone-18-pro/01-today-light.png",
+    "xcrun simctl terminate 23D5E282-2DDC-4DE1-B497-A0566F681B3A dev.applenative.plannerdemo",
+    "xcrun simctl launch 23D5E282-2DDC-4DE1-B497-A0566F681B3A dev.applenative.plannerdemo -AppleLanguages '(en-US)' -AppleLocale en_US -screen insights",
+    "xcrun simctl io 23D5E282-2DDC-4DE1-B497-A0566F681B3A screenshot --type=png <run>/shots/en-US/iphone-18-pro/02-insights-light.png",
+    "xcrun simctl terminate 23D5E282-2DDC-4DE1-B497-A0566F681B3A dev.applenative.plannerdemo",
+    "xcrun simctl launch 23D5E282-2DDC-4DE1-B497-A0566F681B3A dev.applenative.plannerdemo -AppleLanguages '(tr-TR)' -AppleLocale tr_TR -screen today",
+    "xcrun simctl io 23D5E282-2DDC-4DE1-B497-A0566F681B3A screenshot --type=png <run>/shots/tr-TR/iphone-18-pro/01-today-light.png",
+    "xcrun simctl terminate 23D5E282-2DDC-4DE1-B497-A0566F681B3A dev.applenative.plannerdemo",
+    "xcrun simctl launch 23D5E282-2DDC-4DE1-B497-A0566F681B3A dev.applenative.plannerdemo -AppleLanguages '(tr-TR)' -AppleLocale tr_TR -screen insights",
+    "xcrun simctl io 23D5E282-2DDC-4DE1-B497-A0566F681B3A screenshot --type=png <run>/shots/tr-TR/iphone-18-pro/02-insights-light.png",
+    "xcrun simctl ui 23D5E282-2DDC-4DE1-B497-A0566F681B3A appearance dark",
+    "xcrun simctl terminate 23D5E282-2DDC-4DE1-B497-A0566F681B3A dev.applenative.plannerdemo",
+    "xcrun simctl launch 23D5E282-2DDC-4DE1-B497-A0566F681B3A dev.applenative.plannerdemo -AppleLanguages '(en-US)' -AppleLocale en_US -screen today",
+    "xcrun simctl io 23D5E282-2DDC-4DE1-B497-A0566F681B3A screenshot --type=png <run>/shots/en-US/iphone-18-pro/01-today-dark.png",
+    "xcrun simctl terminate 23D5E282-2DDC-4DE1-B497-A0566F681B3A dev.applenative.plannerdemo",
+    "xcrun simctl launch 23D5E282-2DDC-4DE1-B497-A0566F681B3A dev.applenative.plannerdemo -AppleLanguages '(en-US)' -AppleLocale en_US -screen insights",
+    "xcrun simctl io 23D5E282-2DDC-4DE1-B497-A0566F681B3A screenshot --type=png <run>/shots/en-US/iphone-18-pro/02-insights-dark.png",
+    "xcrun simctl terminate 23D5E282-2DDC-4DE1-B497-A0566F681B3A dev.applenative.plannerdemo",
+    "xcrun simctl launch 23D5E282-2DDC-4DE1-B497-A0566F681B3A dev.applenative.plannerdemo -AppleLanguages '(tr-TR)' -AppleLocale tr_TR -screen today",
+    "xcrun simctl io 23D5E282-2DDC-4DE1-B497-A0566F681B3A screenshot --type=png <run>/shots/tr-TR/iphone-18-pro/01-today-dark.png",
+    "xcrun simctl terminate 23D5E282-2DDC-4DE1-B497-A0566F681B3A dev.applenative.plannerdemo",
+    "xcrun simctl launch 23D5E282-2DDC-4DE1-B497-A0566F681B3A dev.applenative.plannerdemo -AppleLanguages '(tr-TR)' -AppleLocale tr_TR -screen insights",
+    "xcrun simctl io 23D5E282-2DDC-4DE1-B497-A0566F681B3A screenshot --type=png <run>/shots/tr-TR/iphone-18-pro/02-insights-dark.png",
+    "xcrun simctl status_bar 23D5E282-2DDC-4DE1-B497-A0566F681B3A clear",
+    "xcrun simctl shutdown 23D5E282-2DDC-4DE1-B497-A0566F681B3A",
+    "xcrun simctl create 'ANE iPad Pro 13-inch (M5)' com.apple.CoreSimulator.SimDeviceType.iPad-Pro-13-inch-M5-12GB com.apple.CoreSimulator.SimRuntime.iOS-27-2",
+    "xcrun simctl boot 828A0E8B-033E-45B7-9E30-0580199B06FE",
+    "xcrun simctl bootstatus 828A0E8B-033E-45B7-9E30-0580199B06FE -b",
+    "xcrun simctl status_bar 828A0E8B-033E-45B7-9E30-0580199B06FE override --time 9:41 --dataNetwork wifi --wifiMode active --wifiBars 3 --cellularMode active --cellularBars 4 --operatorName '' --batteryState charged --batteryLevel 100",
+    "xcrun simctl install 828A0E8B-033E-45B7-9E30-0580199B06FE <repository>/.swiftwork/PlannerDemo.app",
+    "xcrun simctl ui 828A0E8B-033E-45B7-9E30-0580199B06FE appearance light",
+    "xcrun simctl terminate 828A0E8B-033E-45B7-9E30-0580199B06FE dev.applenative.plannerdemo",
+    "xcrun simctl launch 828A0E8B-033E-45B7-9E30-0580199B06FE dev.applenative.plannerdemo -AppleLanguages '(en-US)' -AppleLocale en_US -screen today",
+    "xcrun simctl io 828A0E8B-033E-45B7-9E30-0580199B06FE screenshot --type=png <run>/shots/en-US/ipad-pro-13-inch-m5/01-today-light.png",
+    "xcrun simctl terminate 828A0E8B-033E-45B7-9E30-0580199B06FE dev.applenative.plannerdemo",
+    "xcrun simctl launch 828A0E8B-033E-45B7-9E30-0580199B06FE dev.applenative.plannerdemo -AppleLanguages '(en-US)' -AppleLocale en_US -screen insights",
+    "xcrun simctl io 828A0E8B-033E-45B7-9E30-0580199B06FE screenshot --type=png <run>/shots/en-US/ipad-pro-13-inch-m5/02-insights-light.png",
+    "xcrun simctl terminate 828A0E8B-033E-45B7-9E30-0580199B06FE dev.applenative.plannerdemo",
+    "xcrun simctl launch 828A0E8B-033E-45B7-9E30-0580199B06FE dev.applenative.plannerdemo -AppleLanguages '(tr-TR)' -AppleLocale tr_TR -screen today",
+    "xcrun simctl io 828A0E8B-033E-45B7-9E30-0580199B06FE screenshot --type=png <run>/shots/tr-TR/ipad-pro-13-inch-m5/01-today-light.png",
+    "xcrun simctl terminate 828A0E8B-033E-45B7-9E30-0580199B06FE dev.applenative.plannerdemo",
+    "xcrun simctl launch 828A0E8B-033E-45B7-9E30-0580199B06FE dev.applenative.plannerdemo -AppleLanguages '(tr-TR)' -AppleLocale tr_TR -screen insights",
+    "xcrun simctl io 828A0E8B-033E-45B7-9E30-0580199B06FE screenshot --type=png <run>/shots/tr-TR/ipad-pro-13-inch-m5/02-insights-light.png",
+    "xcrun simctl ui 828A0E8B-033E-45B7-9E30-0580199B06FE appearance dark",
+    "xcrun simctl terminate 828A0E8B-033E-45B7-9E30-0580199B06FE dev.applenative.plannerdemo",
+    "xcrun simctl launch 828A0E8B-033E-45B7-9E30-0580199B06FE dev.applenative.plannerdemo -AppleLanguages '(en-US)' -AppleLocale en_US -screen today",
+    "xcrun simctl io 828A0E8B-033E-45B7-9E30-0580199B06FE screenshot --type=png <run>/shots/en-US/ipad-pro-13-inch-m5/01-today-dark.png",
+    "xcrun simctl terminate 828A0E8B-033E-45B7-9E30-0580199B06FE dev.applenative.plannerdemo",
+    "xcrun simctl launch 828A0E8B-033E-45B7-9E30-0580199B06FE dev.applenative.plannerdemo -AppleLanguages '(en-US)' -AppleLocale en_US -screen insights",
+    "xcrun simctl io 828A0E8B-033E-45B7-9E30-0580199B06FE screenshot --type=png <run>/shots/en-US/ipad-pro-13-inch-m5/02-insights-dark.png",
+    "xcrun simctl terminate 828A0E8B-033E-45B7-9E30-0580199B06FE dev.applenative.plannerdemo",
+    "xcrun simctl launch 828A0E8B-033E-45B7-9E30-0580199B06FE dev.applenative.plannerdemo -AppleLanguages '(tr-TR)' -AppleLocale tr_TR -screen today",
+    "xcrun simctl io 828A0E8B-033E-45B7-9E30-0580199B06FE screenshot --type=png <run>/shots/tr-TR/ipad-pro-13-inch-m5/01-today-dark.png",
+    "xcrun simctl terminate 828A0E8B-033E-45B7-9E30-0580199B06FE dev.applenative.plannerdemo",
+    "xcrun simctl launch 828A0E8B-033E-45B7-9E30-0580199B06FE dev.applenative.plannerdemo -AppleLanguages '(tr-TR)' -AppleLocale tr_TR -screen insights",
+    "xcrun simctl io 828A0E8B-033E-45B7-9E30-0580199B06FE screenshot --type=png <run>/shots/tr-TR/ipad-pro-13-inch-m5/02-insights-dark.png",
+    "xcrun simctl status_bar 828A0E8B-033E-45B7-9E30-0580199B06FE clear",
+    "xcrun simctl shutdown 828A0E8B-033E-45B7-9E30-0580199B06FE"
+  ],
+  "scope": "Real iOS 27.2 Simulator captures of a controlled demo app (not a customer app). Frames are marketing compositions of those captures. No upload to App Store Connect was made."
+}
