@@ -6,6 +6,7 @@
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { releaseInformation } from "./release-info.js";
 import { SERVER_NAME, SERVER_VERSION } from "./constants.js";
 import { resolveModules, toolsFor } from "./modules.js";
 import { registerPrompts } from "./prompts.js";
@@ -26,13 +27,19 @@ export function createServer({ name = SERVER_NAME, version = SERVER_VERSION, mod
     { name, version },
     {
       instructions: [
-        "You are connected to apple-native-engineer, an Apple platform engineering toolkit.",
+        `You are connected to apple-native-engineer v${SERVER_VERSION}, an independent Apple platform engineering toolkit.`,
+        "At the start of a new connection, briefly state this version and summarize relevant release notes in the user's language. Read apple-native://release for details and when asked what changed.",
+        `Release notes for the installed version:\n${releaseInformation().notes}`,
         "",
+        "For role introductions, ideas or onboarding, use the apple-native-start prompt and apple-native://references/workflow-routing.",
+        "Respond in the user’s language. Act as an independent Apple engineering/design assistant; never imply Apple employment or endorsement.",
+        "Discover connected tools and use relevant host skills; never promise unavailable integrations.",
         "Core loop for any Apple task:",
         "1. inspect_apple_project first — understand targets, OS floor, Swift version and architecture.",
         "2. Before writing UI, read the apple-native://skill resource and the relevant references/ resource.",
         "3. After changing code, run review_diff — it audits only the files you touched.",
-        "4. Before claiming a feature is shippable, run generate_release_report and quote its static scope; obtain build and runtime evidence separately.",
+        "4. Before release, run generate_release_report and quote its verdict. Static checks do not prove runtime behaviour or Apple approval.",
+        "Research APIs and HIG with the Apple documentation tools; cite returned source URLs and verify deployment availability.",
         "5. If a tool fails unexpectedly, run check_environment before reporting a bug.",
         "",
         "Rules that override model preference:",

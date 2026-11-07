@@ -17,13 +17,13 @@ Claude Code discovers skills placed in either of two locations:
 
 ## 2. Installation Methods
 
-### Method A: Automated via Vercel Skills CLI (Recommended)
+### Method A: Local installer from the GitHub checkout
 ```bash
 # Install to current project
-npx skills add kayaonur607/apple-native-engineer-mcp -a claude-code
+./scripts/install-skill.sh
 
 # Install globally to user profile
-npx skills add kayaonur607/apple-native-engineer-mcp -g -a claude-code
+./scripts/install-skill.sh
 ```
 
 ### Method B: Native Symlink / Clone (Fastest for Local Development)
@@ -41,11 +41,11 @@ ln -s ~/Desktop/apple-native-engineer ~/.claude/skills/apple-native-engineer
 
 ## 3. The MCP server — where the audits actually run
 
-The skill is a policy document. The MCP server adds 16 tools that run the audits, 53 resources and 12 prompts.
+The skill is a policy document. The MCP server adds 25 tools that run the audits, 55 resources and 13 prompts.
 Claude Code supports both, and the server is the one that can say `status: fail`.
 
 ```bash
-claude mcp add apple-native-engineer -- npx -y apple-native-engineer-mcp
+claude mcp add apple-native-engineer -- node /absolute/path/apple-native-engineer-mcp/integrations/mcp-server/scripts/github-launcher.mjs
 ```
 
 Add `--scope project` to write a committed `.mcp.json` instead of the default local scope. This repository ships
@@ -107,3 +107,4 @@ Once installed, Claude Code activates the skill automatically when working on Ap
 
 > Refactor this card button animation according to Emil Kowalski's motion principles in SwiftUI.
 ```
+Installation is from GitHub only. Replace `/absolute/path` with your checkout location. See the [update policy](../docs/UPDATES.md) for automatic updates, first-start prewarming, version pins and rollback.

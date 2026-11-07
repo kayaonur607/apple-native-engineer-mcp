@@ -31,11 +31,11 @@ ln -s ~/Desktop/apple-native-engineer ~/.config/opencode/skills/apple-native-eng
 
 ## 3. The MCP server — the version that actually checks the code
 
-The skill sets policy. The MCP server adds 16 tools that run the audits, 53 resources and 12 prompts, and OpenCode
+The skill sets policy. The MCP server adds 25 tools that run the audits, 55 resources and 13 prompts, and OpenCode
 exposes all three.
 
 ```bash
-opencode mcp add apple-native-engineer -- npx -y apple-native-engineer-mcp
+opencode mcp add apple-native-engineer -- node /absolute/path/apple-native-engineer-mcp/integrations/mcp-server/scripts/github-launcher.mjs
 opencode mcp list          # expect: ✓ apple-native-engineer  connected
 ```
 
@@ -49,7 +49,7 @@ names under `mcp`:
     "servers": {
       "apple-native-engineer": {
         "type": "local",
-        "command": ["npx", "-y", "apple-native-engineer-mcp"],
+        "command": ["node", "/absolute/path/apple-native-engineer-mcp/integrations/mcp-server/scripts/github-launcher.mjs"],
         "environment": { "APPLE_NATIVE_PYTHON": "python3" }
       }
     }
@@ -77,3 +77,4 @@ inspect, read the reference, `review_diff`, then `generate_release_report` — a
 ## 4. Invocation in OpenCode
 
 OpenCode reads `SKILL.md` frontmatter metadata and description at boot. When a task requires iOS/macOS interface design, accessibility auditing, or SwiftUI refactoring, the skill is automatically injected into the agent context.
+Installation is from GitHub only. Replace `/absolute/path` with your checkout location. See the [update policy](../docs/UPDATES.md) for automatic updates, first-start prewarming, version pins and rollback.

@@ -32,16 +32,11 @@ describe("publish metadata", () => {
     assert.ok(fromSource, "constants.js must declare SERVER_VERSION");
     assert.equal(pkg.version, fromSource, "package.json version drifted from the server");
     assert.equal(server.version, fromSource, "server.json version drifted from the server");
-    assert.equal(
-      server.packages?.[0]?.version,
-      fromSource,
-      "the registry package entry drifted from the server",
-    );
+    assert.deepEqual(server.packages, [], "GitHub-only releases must not advertise an npm package");
   });
 
   it("names the package the registry points at", () => {
-    assert.equal(server.packages?.[0]?.registryType, "npm");
-    assert.equal(server.packages?.[0]?.identifier, pkg.name);
+    assert.deepEqual(server.packages, []);
     assert.match(server.name ?? "", /^[a-z0-9.-]+\/[a-z0-9.-]+$/);
     assert.equal(pkg.mcpName, server.name, "package.json mcpName must match the registry name");
   });
@@ -58,7 +53,7 @@ describe("publish metadata", () => {
     for (const entry of ["src/", "vendor/", "README.md", "LICENSE"]) {
       assert.ok(pkg.files?.includes(entry), `the published tarball must include ${entry}`);
     }
-    assert.equal(pkg.private, undefined, "a private package cannot be published");
+    assert.equal(pkg.private, true, "GitHub-only distribution must prevent accidental npm publication");
     assert.ok(pkg.bin?.["apple-native-engineer-mcp"], "the bin entry is how npx finds the server");
     assert.match(pkg.engines?.node ?? "", />=\s*20/);
     assert.ok(pkg.scripts?.prepack, "vendor/ must be staged on prepack, or the tarball cannot run");
@@ -98,13 +93,10 @@ describe("publish metadata", () => {
     assert.match(dockerfile, /USER\s+\w+/, "the image must not run as root");
   });
 
-  it("describes itself to Smithery without inventing configuration", () => {
-    const yaml = read("smithery.yaml");
-    assert.match(yaml, /^name:\s*apple-native-engineer$/m);
-    assert.match(yaml, /startCommand:[\s\S]*type:\s*stdio/);
-    assert.match(yaml, /apple-native-engineer-mcp/, "the start command must run the published package");
-    for (const variable of ["APPLE_NATIVE_PYTHON", "APPLE_NATIVE_TELEMETRY"]) {
-      assert.ok(yaml.includes(variable), `Smithery config must expose ${variable}`);
-    }
+  it("publishes through GitHub Releases without npm credentials", () => {
+    const workflow = fs.readFileSync(path.join(REPO_ROOT, ".github/workflows/publish.yml"), "utf8");
+    assert.match(workflow, /gh release create/);
+    assert.doesNotMatch(workflow, /npm publish|NPM_TOKEN|NODE_AUTH_TOKEN/);
+    assert.ok(fs.existsSync(path.join(PACKAGE_ROOT, "scripts/github-launcher.mjs")));
   });
 });

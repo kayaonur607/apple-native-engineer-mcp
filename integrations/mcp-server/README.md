@@ -15,9 +15,9 @@ Claude Desktop · Cursor · Codex · Cline · Zed · any MCP client
   apple-native-engineer  ──►  python3 tools/<auditor>/<script>.py --json
         │                          │
         │                          └── stable envelope (schema_version 2.0)
-        ├── 25 tools        (audits, documentation research and asset generation)
-        ├── 53 resources    (references, checklists, examples, SKILL.md)
-        └── 12 prompts      (the review workflows, parameterised)
+        ├── 25 tools        (audits, documentation, assets and diagnostics)
+        ├── 55 resources    (references, checklists, examples, SKILL.md)
+        └── 13 prompts      (the review workflows, parameterised)
 ```
 
 ## Why this exists
@@ -33,7 +33,7 @@ This server replaces opinion with evidence:
 | What is this project? | `inspect_apple_project` | targets, deployment floor, Swift version, architecture |
 | Is any of this wrong? | `audit_project` | 8 audits at once, merged and attributed |
 | Did *my change* break something? | `review_diff` | only the files in `git diff`, audited |
-| Will Apple reject it? | `generate_release_report` | a gate verdict with the blocking findings |
+| Which release checks are blocking? | `generate_release_report` | a gate verdict with the blocking findings |
 | Does it look native? | `lint_swiftui`, `audit_liquid_glass` | `SWU*` / `GLASS*` finding codes |
 | Is it accessible? | `audit_accessibility` | `A11Y*` codes with contrast ratios |
 | Is the privacy manifest valid? | `audit_privacy_manifest` | required-reason APIs and their declared codes |
@@ -41,37 +41,23 @@ This server replaces opinion with evidence:
 
 ## Install
 
-### npx — no clone, no install
+### GitHub-only distribution
 
-```bash
-npx -y apple-native-engineer-mcp --selftest
-```
+Clone the [GitHub repository](https://github.com/kayaonur607/apple-native-engineer-mcp), then follow the [installation and update guide](../../docs/UPDATES.md). No npm product publication or hosted endpoint is required. npm installs locked runtime dependencies only.
 
-Then point the client at it:
+Configure `node` with the absolute path to `integrations/mcp-server/scripts/github-launcher.mjs`. The launcher selects a published stable GitHub Release at startup, stages and smoke-tests it, then activates it atomically. Failed updates retain the working cached version. Sessions update on reconnect/restart.
 
-```json
-{
-  "mcpServers": {
-    "apple-native-engineer": {
-      "command": "npx",
-      "args": ["-y", "apple-native-engineer-mcp"]
-    }
-  }
-}
-```
-
-Requires Node 20+ and `python3` on `PATH`. The npm artifact vendors the auditors and the reference library,
-so it does not need the repository checkout.
+Read `apple-native://release` for the installed version and changelog. Use `APPLE_NATIVE_VERSION=mcp-v2.2.0` to pin or roll back; `APPLE_NATIVE_AUTO_UPDATE=off` disables checks.
 
 ### From this repository
 
 ```bash
 cd integrations/mcp-server
-npm install
-node src/index.js --selftest
+npm ci --ignore-scripts --no-audit --no-fund
+node scripts/github-launcher.mjs --selftest
 ```
 
-`npm install` is the only build step; there is no compilation and no bundling.
+`npm ci --ignore-scripts` is the only dependency setup step; there is no compilation and no bundling.
 
 ### Docker — for a shared or hosted endpoint
 
@@ -147,7 +133,7 @@ against your filesystem.
 
 ## Tools
 
-Twenty tools: fifteen 1:1 wrappers over a script you can run yourself, plus the audit/review entry points. If the MCP tool and the CLI ever
+Twenty-five tools: CLI wrappers, documentation research and the audit/review entry points. If the MCP tool and the CLI ever
 disagree, the CLI wins — that rule is why the server cannot drift.
 
 | Tool | What it answers | Backing script |
@@ -222,7 +208,7 @@ A tool that crashes still returns a valid envelope with `status: "fail"` and an 
 
 ## Capability modules
 
-Ten modules, gated by `APPLE_NATIVE_MODULES` (comma-separated, always includes `core`):
+Eleven modules, gated by `APPLE_NATIVE_MODULES` (comma-separated, always includes `core`):
 
 ```json
 { "env": { "APPLE_NATIVE_MODULES": "core,swift-engineering,privacy-security-audit" } }
@@ -240,16 +226,16 @@ available: they are knowledge, not capability. Full rules in [`docs/MODULES.md`]
 The knowledge base is exposed rather than pasted into prompts, so a client loads only what it needs.
 
 - `apple-native://skill` — the operating standard (`SKILL.md`)
-- `apple-native://references/<name>` — 31 guides, e.g. `apple-native://references/liquid-glass`
+- `apple-native://references/<name>` — 32 guides, e.g. `apple-native://references/liquid-glass`
 - `apple-native://checklists/<name>` — 12 review checklists
 - `apple-native://examples/<name>` — 9 worked examples
 
 ## Prompts
 
-Twelve workflows, available as slash commands in clients that support prompts. Each takes an optional
+Thirteen workflows, available as slash commands in clients that support prompts. Each takes an optional
 `project` path and an optional `focus` string.
 
-`apple-native` (the umbrella audit), `apple-native-design`, `apple-native-code`, `apple-native-review`,
+`apple-native-start` (developer/designer onboarding), `apple-native` (the umbrella audit), `apple-native-design`, `apple-native-code`, `apple-native-review`,
 `apple-native-privacy`, `apple-native-icon`, `apple-native-screenshots`, `apple-native-connect`,
 `apple-native-metadata`, `apple-native-widgets`, `apple-native-localization`, `apple-native-release`.
 
@@ -260,10 +246,11 @@ A test enforces it so the doubled prefix cannot come back.
 
 **This server does not want your data, and the code makes that checkable.**
 
-- No network calls are made by any audit. The only outbound request in the entire server is the optional App
-  Store Connect tool, which you must configure with your own credentials, and anonymous telemetry if you
-  explicitly enable it.
-- Nothing is uploaded, cached, or indexed. Findings are returned to the client and forgotten.
+- Local audits do not upload source. Documentation research contacts developer.apple.com; App Store
+  Connect reads contact Apple using your configured credentials. Anonymous telemetry sends aggregates
+  only when explicitly enabled.
+- Source is not uploaded by local audits. Documentation responses and release installations are cached locally. Findings are returned to the client, which has its own storage policy.
+- The GitHub launcher contacts GitHub for releases and installs locked npm dependencies during updates.
 - Telemetry is **off by default**. When enabled it records a closed set of five fields — `schema`, `tool`,
   `outcome`, `duration_bucket`, `day` — and nothing else. No path, file name, source text, finding message,
   prompt, credential, hostname, user name or stable identifier. Unknown fields are dropped by an allowlist,
@@ -318,10 +305,10 @@ credentials, and fails if any of it survives.
 ## Verify the install
 
 ```bash
-node src/index.js --selftest        # inventory: 25 tools, 53 resources, 12 prompts
+node src/index.js --selftest        # inventory: 25 tools, 55 resources, 13 prompts
 node src/index.js --doctor          # Node, Python, auditors, git, Xcode, credentials
 node src/index.js --telemetry-preview
-npm test                            # 51 protocol, CLI, diff, HTTP, metadata and telemetry tests
+npm test                            # protocol, CLI, diff, HTTP, update and telemetry tests
 ```
 
 `--doctor` exits 0 when the machine can run everything, 2 when something blocks it, and 1 when it can run but
@@ -343,17 +330,13 @@ src/constants.js   server identity, shared to keep the module graph acyclic
 src/resources.js   knowledge base indexing
 src/prompts.js     command files → MCP prompts
 src/telemetry.js   the closed event shape
-scripts/           vendor staging for npm publish
+scripts/           GitHub release launcher and development utilities
 test/              protocol tests via InMemoryTransport, real HTTP sockets, a throwaway git repo
 ```
 
-`npm run vendor` stages the auditors and the reference library into `vendor/` so the published tarball is
-self-contained. `runner.js` prefers the live repository during development and the staged copy in a published
-package, so both run the same code path. `vendor/` is generated and gitignored.
+The GitHub launcher runs the selected release's repository layout. `npm run vendor` remains a development utility for staging a self-contained tree; npm product publication is disabled with `private: true`.
 
-Releasing is written down in [`docs/PUBLISHING.md`](../../docs/PUBLISHING.md): which files carry the version, how
-to verify the packed tarball rather than the source tree, the `mcp-v*` tag that publishes with provenance, and the
-registry submissions that npm does not do for you.
+See [release procedure](../../docs/PUBLISHING.md) for version synchronization, validation, tags and the GitHub Release workflow. No npm publishing token or registry submission is required.
 
 ## Limits, stated plainly
 

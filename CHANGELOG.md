@@ -4,6 +4,24 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] — 2026-11-07
+
+### Added
+
+- Developer/designer onboarding with `/apple-native-start`, task routing, Apple HIG/API provenance, and explicit build/runtime evidence boundaries.
+- GitHub release launcher: checks published stable releases at MCP startup, installs into isolated version/commit directories, and activates only after a smoke test.
+- Offline fallback to the last working installation, atomic activation, concurrent update locking, version pinning and an automatic update opt-out.
+- `apple-native://release` exposes the installed version, release notes and update policy to the AI client. Connection instructions announce the version and relevant changes.
+- Reproducible MCP demonstration evidence and a commercial/video production plan.
+- Rewritten product README with measured audit/asset visuals, a 64-second animated, captioned usage video, GIF preview, raw stdio session and media checksums.
+
+### Changed
+
+- GitHub is the sole product distribution and release channel. npm publication is disabled; npm is used only to install locked runtime dependencies.
+- Version tags use `mcp-vMAJOR.MINOR.PATCH`. GitHub Release notes and this changelog describe each version.
+- Updates take effect on the next MCP connection/restart. Existing sessions and customer source trees are never replaced by the launcher.
+- Static audits no longer imply runtime validation or Apple approval.
+
 ## [2.1.0] — 2026-11-05
 
 The MCP server stops being a wrapper and becomes the product: sixteen tools, a transport for containers and

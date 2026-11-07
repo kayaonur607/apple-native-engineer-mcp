@@ -102,6 +102,30 @@ describe("apple-native-engineer MCP server", () => {
     assert.match(text, /apple-native-engineer MCP tools/);
   });
 
+  it("routes developer/designer onboarding with honest evidence boundaries", async () => {
+    const { messages } = await client.getPrompt({
+      name: "apple-native-start",
+      arguments: { focus: "Apple geliştiricisiyim ve tasarımcıyım" },
+    });
+    const text = messages[0].content.text;
+    assert.match(text, /Apple geliştiricisiyim ve tasarımcıyım/);
+    assert.match(text, /inspect_apple_api_availability/);
+    assert.match(text, /not Apple approval/);
+    const { contents } = await client.readResource({ uri: "apple-native://references/workflow-routing" });
+    assert.match(contents[0].text, /server's filesystem/);
+    assert.match(contents[0].text, /Runtime and visual review/);
+  });
+
+  it("exposes the current version and changes through the release resource", async () => {
+    const { SERVER_VERSION } = await import("../src/constants.js");
+    const { contents } = await client.readResource({ uri: "apple-native://release" });
+    const release = JSON.parse(contents[0].text);
+    assert.equal(release.version, SERVER_VERSION);
+    assert.match(release.notes, /GitHub release launcher/);
+    assert.match(release.update_policy, /restart/);
+    assert.ok(release.release_url.endsWith(`mcp-v${SERVER_VERSION}`));
+  });
+
   it("runs a real audit and returns a structured envelope", async () => {
     const result = await client.callTool({
       name: "inspect_apple_project",

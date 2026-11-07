@@ -12,8 +12,8 @@ How the pieces fit, and the rules that keep them honest.
 │  modules.js   capability gating (11 modules, 25 tools)                     │
 │  tools.js     tool registry, zod schemas, annotations, output schema       │
 │  runner.js    spawns python3, parses the envelope, maps exit codes         │
-│  resources.js 53 documents as apple-native:// URIs                         │
-│  prompts.js   12 slash commands as MCP prompts                             │
+│  resources.js 55 resources as apple-native:// URIs                         │
+│  prompts.js   13 slash commands as MCP prompts                             │
 │  telemetry.js opt-in, five-key schema, sanitiser-tested                    │
 └───────────────────────────────┬────────────────────────────────────────────┘
                                 │ subprocess: python3 tools/<tool>/<script>.py --json
@@ -48,13 +48,17 @@ the icon studio has its own PNG codec precisely so that the toolkit never grows 
 ## Where knowledge lives
 
 - `SKILL.md` — the standard an agent loads first.
-- `references/` — 31 guides; `whats-new-ios-27.md` is generated from the installed SDK.
+- `references/` — 32 guides; `whats-new-ios-27.md` is generated from the installed SDK.
 - `data/sf-symbols.json` — 9,649 symbols extracted from `CoreGlyphs.bundle`.
 - `docs/` — roadmap, modules, integrations, publishing, and the raw verification transcripts in `PROOF.md`.
 
 ## What is enforced in CI
 
 `./scripts/verify.sh` runs five stages: repository validation (links, counts, frontmatter), Python tests, MCP
-protocol tests, Swift compilation and snippet type-checking, and documentation claims against the SDK. The npm job
+protocol tests, Swift compilation and snippet type-checking, and documentation claims against the SDK. The GitHub checkout job
 packs the package, installs it in a clean directory and runs it. If a claim in this repository is not exercised by
 one of those, it is not a claim — it is a hope.
+
+## Versioned delivery
+
+The GitHub launcher discovers published stable Releases, stages each candidate in an isolated version/commit directory, installs locked dependencies and runs a smoke test before atomic activation. Failures keep the active installation. New connections use the updated version; existing sessions keep theirs. `release-info.js` exposes the installed version and changelog to the host AI. See [update policy](UPDATES.md) for pinning, trust and bootstrap boundaries.

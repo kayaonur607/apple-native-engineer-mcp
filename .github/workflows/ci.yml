@@ -84,33 +84,27 @@ jobs:
       - name: Type-check documented snippets
         run: python3 scripts/typecheck_snippets.py --strict
 
-  package:
-    name: npm package
+  distribution:
+    name: GitHub checkout installation
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: npm
-          cache-dependency-path: integrations/mcp-server/package-lock.json
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install dependencies
-        working-directory: integrations/mcp-server
-        run: npm ci
-      - name: Verify the vendored payload is current
+      - name: Install locked runtime and verify the checkout
         working-directory: integrations/mcp-server
         run: |
-          npm run vendor
-          node scripts/pack-vendor.mjs --check
-      - name: Pack, install in a clean directory and run
-        working-directory: integrations/mcp-server
+          npm ci --ignore-scripts --no-audit --no-fund
+          node src/index.js --selftest
+          node src/index.js --doctor
+      - name: Exercise launcher fallback and record protocol evidence
+        env:
+          APPLE_NATIVE_AUTO_UPDATE: "off"
+          APPLE_NATIVE_UPDATE_DIR: ${{ runner.temp }}/apple-native-release-cache
         run: |
-          npm pack --pack-destination "$RUNNER_TEMP"
-          mkdir -p "$RUNNER_TEMP/install" && cd "$RUNNER_TEMP/install"
-          npm init -y > /dev/null
-          npm install "$RUNNER_TEMP"/*.tgz
-          ./node_modules/.bin/apple-native-engineer-mcp --selftest
-          ./node_modules/.bin/apple-native-engineer-mcp --doctor
+          node integrations/mcp-server/scripts/github-launcher.mjs --selftest
+          node integrations/mcp-server/scripts/demo-evidence.mjs

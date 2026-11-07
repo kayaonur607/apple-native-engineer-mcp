@@ -17,10 +17,10 @@ Cursor supports native skill and context discovery through either of the followi
 
 ## 2. Installation Methods
 
-### Method A: Automated via Vercel Skills CLI
+### Method A: Local installer from the GitHub checkout
 ```bash
 # Add to current workspace
-npx skills add kayaonur607/apple-native-engineer-mcp -a cursor
+./scripts/install-skill.sh
 ```
 
 ### Method B: Manual Symlink
@@ -34,7 +34,7 @@ ln -s ~/Desktop/apple-native-engineer .cursor/skills/apple-native-engineer
 
 ## 3. The MCP server — the version that actually checks the code
 
-A `.cursorrules` file is advice. The MCP server is 16 tools that run the same audits a senior reviewer would, and
+A `.cursorrules` file is advice. The MCP server is 25 tools that run the same audits a senior reviewer would, and
 return finding codes instead of opinions. Cursor supports both, and they compose.
 
 Project config, `.cursor/mcp.json` (or `~/.cursor/mcp.json` for every workspace):
@@ -43,8 +43,8 @@ Project config, `.cursor/mcp.json` (or `~/.cursor/mcp.json` for every workspace)
 {
   "mcpServers": {
     "apple-native-engineer": {
-      "command": "npx",
-      "args": ["-y", "apple-native-engineer-mcp"],
+      "command": "node",
+      "args": ["/absolute/path/apple-native-engineer-mcp/integrations/mcp-server/scripts/github-launcher.mjs"],
       "env": { "APPLE_NATIVE_PYTHON": "python3" }
     }
   }
@@ -54,8 +54,8 @@ Project config, `.cursor/mcp.json` (or `~/.cursor/mcp.json` for every workspace)
 Restart Cursor, then check **Settings → MCP** for a green connection. The server registers three things beyond
 tools:
 
-- **12 prompts** become slash commands — type `/` and look for `apple-native-review`.
-- **53 resources** — ask for `apple-native://references/liquid-glass` by URI and Cursor reads the guide instead of
+- **13 prompts** become slash commands — type `/` and look for `apple-native-review`.
+- **55 resources** — ask for `apple-native://references/liquid-glass` by URI and Cursor reads the guide instead of
   you pasting it.
 - **Server instructions** — the operating loop arrives with the tools, not in your prompt.
 
@@ -92,3 +92,4 @@ Open Cursor Composer (`⌘-I` or `Ctrl-I`) and prompt:
 
 Design an adaptive navigation layout for our iPad app that supports 3-column NavigationSplitView and Inspector panel.
 ```
+Installation is from GitHub only. Replace `/absolute/path` with your checkout location. See the [update policy](../docs/UPDATES.md) for automatic updates, first-start prewarming, version pins and rollback.

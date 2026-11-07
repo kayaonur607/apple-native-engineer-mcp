@@ -1,492 +1,227 @@
 <p align="center">
-  <img src="assets/logo.svg" alt="apple-native-engineer-mcp" width="96" height="96">
+  <img src="assets/logo.svg" alt="Apple Native Engineer logo" width="80" height="80">
 </p>
 
 <p align="center">
-  <img src="assets/hero.svg" alt="apple-native-engineer-mcp — Apple's rules expressed as exit codes" width="100%">
+  <img src="assets/hero.svg" alt="Apple Native Engineer — Build native. Verify every claim." width="100%">
 </p>
 
 <p align="center">
+  <a href="https://github.com/kayaonur607/apple-native-engineer-mcp/releases"><img src="https://img.shields.io/badge/version-v2.2.0-75E0BD" alt="Source version v2.2.0"></a>
   <a href="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml"><img src="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/tests-194_passing-30D158" alt="194 tests">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT"></a>
-  <img src="https://img.shields.io/badge/protocol-MCP_1.32-8A2BE2" alt="MCP 1.32">
-  <img src="https://img.shields.io/badge/Swift-6.x-F05138" alt="Swift 6">
-  <img src="https://img.shields.io/badge/iOS-26_|_27-1C1C1E" alt="iOS 26 / 27">
+  <img src="https://img.shields.io/badge/tests-205_passing-75E0BD" alt="205 tests">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-9BAAC0" alt="MIT license"></a>
 </p>
 
 <p align="center">
-  <strong>AI writes iOS apps that compile and still look wrong.</strong><br>
-  Hardcoded colours that vanish in Dark Mode, fixed font sizes that break Dynamic Type, deprecated navigation,<br>
-  fake glass, missing privacy manifests. This project turns Apple's rules into checks an agent has to pass.
+  <strong>An Apple development and design toolkit for your AI assistant.</strong><br>
+  Research Apple APIs. Review SwiftUI. Generate and validate assets.<br>
+  Turn release preparation into a traceable engineering workflow.
 </p>
 
 <p align="center">
-  <sub>
-  <b>194 tests</b> · <b>5/5 local verification stages</b> · <b>162 snippets parsed</b> · <b>129 API claims checked against the SDK</b> · <b>9,649 SF Symbols</b> · <b>25 MCP tools</b><br>
-  local run on 2026-11-06; see exact commands and scope — see <a href="#proof">Proof</a> and <a href="docs/PROOF.md">docs/PROOF.md</a>
-  </sub>
+  <a href="#watch-the-workflow">Watch the workflow</a> ·
+  <a href="#install-from-github">Install</a> ·
+  <a href="#what-you-can-do">Capabilities</a> ·
+  <a href="#versions-and-automatic-updates">Updates</a> ·
+  <a href="docs/PROOF.md">Verification evidence</a>
 </p>
 
----
+Apple Native Engineer connects a compatible MCP client to **25 MCP tools**, **55 resources** and **13 prompts**. It combines local Python checks, Apple documentation research and reusable engineering guidance. Your AI client supplies the model and writes the code; this server supplies tools and evidence.
 
-## Install
+Independent software. Not affiliated with, employed by, or endorsed by Apple. Static results do not guarantee App Store approval or runtime correctness.
 
-```bash
-npx -y apple-native-engineer-mcp --selftest   # 25 tools, 53 resources, 12 prompts
-npx -y apple-native-engineer-mcp --doctor     # Node, Python, Xcode, SDK, auditors
-```
+## Watch the workflow
 
-With Node 20+ and Python 3.10+ installed, configure an MCP client: point it at `npx apple-native-engineer-mcp` and nothing else. No clone or credentials for local audits. The package bundles auditors, not a Python runtime. Prefer a checkout? `git clone`, `cd integrations/mcp-server && npm install`.
+[![Watch the real MCP walkthrough: connection, project inspection, linting, icon production and version notes](assets/demo/video-poster.png)](assets/demo/usage-demo.mp4)
+
+**[Watch the 64-second usage video](assets/demo/usage-demo.mp4)** · [Animated preview](assets/demo/usage-preview.gif) · [Raw MCP session](assets/demo/session.json) · [Checksums](assets/demo/SHA256SUMS)
+
+The video is an animated, captioned walkthrough built from **real stdio MCP requests and responses**. It shows connection and inventory discovery, developer/designer onboarding, project inspection, SwiftUI checks, icon production, asset verification and release notes. It has no audio. It uses animated signal flow, staged finding cards, an icon fan-out and moving validation indicators. It is an evidence-based motion graphic, not an AI chat or simulator screen recording.
+
+The projects are public test fixtures. Legacy and clean are separate implementations; the comparison does not claim that the MCP automatically rewrote an application. The icon step does create real PNG files and `Contents.json`.
 
 <details>
-<summary><b>Client configuration and the other entry points</b></summary>
+<summary>View the animated walkthrough here</summary>
 
-```json
-{
-  "mcpServers": {
-    "apple-native-engineer": {
-      "command": "npx",
-      "args": ["-y", "apple-native-engineer-mcp"]
-    }
-  }
-}
-```
-
-As an agent skill (no server, no tools): `npx skills add kayaonur607/apple-native-engineer-mcp`.
-
-As a CLI on any machine with Python 3.10+: `python3 tools/swiftui-linter/lint_swiftui.py .`
+![Eight chapters rendered from a recorded MCP session](assets/demo/usage-preview.gif)
 
 </details>
 
----
+## What you can do
 
-## What this actually is
+| Your task | What the toolkit provides | What you get |
+| --- | --- | --- |
+| Understand an unfamiliar app | Project inspection and eight coordinated audits | Targets, deployment floors, architecture signals and attributed findings |
+| Design a native screen | HIG research, reference guides and design workflows | Source-backed design decisions for the host AI to implement |
+| Review SwiftUI changes | Lint, accessibility heuristics, Liquid Glass and diff review | Finding codes, severity, file/line and remediation hints |
+| Check API compatibility | Apple symbol search, documentation and availability tools | Apple source URLs, retrieval timestamps and platform availability |
+| Produce App Store assets | Icon generation/verification and screenshot composition | Xcode icon slots and marketing compositions around supplied captures |
+| Prepare a listing | Metadata, ASO and App Store Review checks | Character budgets, risky claims and review findings |
+| Prepare a release | Weighted release readiness report | A verdict, score and explicit uninspected or blocking items |
 
-**One MCP server that refuses to let an agent declare an Apple app finished without evidence.** Three layers, in
-the order you meet them:
+The toolkit contains **18 CLI tools**, **32 reference guides**, **12 checklists** and **9 worked examples**. Capabilities are grouped into eleven modules; disabled tools are absent from the connected inventory. See the [capability matrix](docs/ROADMAP.md) and [module controls](docs/MODULES.md).
 
-**1. An MCP server.** Twenty-five tools over stdio or Streamable HTTP: project inspection, one-call audits, diff
-review, SwiftUI lint, accessibility, Liquid Glass, SF Symbols, privacy manifests, widgets, metadata, assets and a
-weighted release gate. Every result is a typed envelope with finding codes — not prose.
+## Evidence: source code → findings
 
-**2. Eighteen CLI tools.** The Python CLI behind those tools. Static audits run without Xcode or a build, and a human can run the exact same command the agent runs. Shared implementations keep CLI and MCP behavior aligned.
+![Real SwiftUI audit comparison: legacy fixture with 14 violations; clean reference with zero violations](assets/demo/audit-comparison.png)
 
-**3. A standard.** [`SKILL.md`](SKILL.md) plus 31 reference guides: what "native" means, which APIs are legacy,
-what to refuse. The server enforces the parts that can be checked; the skill explains the parts that need judgment.
+`lint_swiftui` reports **14 violations across seven Swift files** in the legacy fixture. The clean reference reports **zero violations across six Swift files**, retaining one informational finding. These are two separate, real tool runs captured in [session.json](assets/demo/session.json).
 
-Capabilities are grouped into **eleven modules**, selected with `APPLE_NATIVE_MODULES`. All are exposed by default;
-select `core,swift-engineering` for a smaller local tool inventory. ASC credentials are read only when called. What is implemented, partial and not started is
-listed in [`docs/ROADMAP.md`](docs/ROADMAP.md).
+The useful output is the evidence behind the status: a finding code, severity, source location, message and fix hint. The AI can use those findings to make a change, then call `review_diff` to check the changed files. Compiler, device and visual checks remain separate.
 
-> [!IMPORTANT]
-> The validation counts are checked by `./scripts/verify.sh`: 194 tests, a link and count validator, a real
-> Swift compile of the fixtures, a parse of documented snippets and SDK type-checks of supported complete examples. See [Proof](#proof).
+## Evidence: master artwork → Xcode assets
 
----
+![One 1024-pixel master converted into eighteen PNG icon slots and independently verified](assets/demo/icon-pipeline.png)
 
-## The failure this fixes
+`prepare_icon_assets` converts one opaque **1024 × 1024 PNG** into **18 icon slots plus `Contents.json`**. `verify_icon_set` then reads the generated set and reports **18 verified, zero missing, zero wrong-size files** in this recorded run.
 
-Ask a model for an iOS settings screen. You get something like this — and it compiles:
+This is asset preparation from supplied artwork. It does not generate original icon artwork. The solid-colour master shown here is a test fixture, not a customer design or a finished brand asset.
 
-```swift
-Text("Account")
-    .foregroundColor(Color(hex: "#8E8E93"))   // invisible in Dark Mode, and not a real API
-    .frame(width: 320)                        // truncates at AX3 text sizes
-Button { save() } label: { Image(systemName: "checkmark") }
-    .frame(width: 30, height: 30)             // half the 44pt minimum tap target
-```
+## Install from GitHub
 
-The invented `Color(hex:)` initializer fails unless your project defines it; the layout and accessibility problems can still compile. The bugs live where a compiler does not look: contrast ratios, Dynamic
-Type, hit targets, localisation, platform availability.
-
-Three specific failure modes this repository removes:
-
-| Failure | What it looks like in practice | What stops it |
-| :--- | :--- | :--- |
-| **Invented API** | `.spring(response: dampingRatio:)` — a label SwiftUI does not have. Looks plausible, does not compile. | 96 documented modifiers verified against 21,998 SDK symbols |
-| **Invisible breakage** | A colour that works in Light Mode and disappears in Dark; text that clips at accessibility sizes. | WCAG maths and Dynamic Type rules, with the number in the finding |
-| **False completion** | "Done — the settings screen is finished." No evidence, no gate, no verdict. | A release gate that returns `BLOCKED` instead of a compliment |
-
----
-
-## How it works
-
-<p align="center">
-  <img src="assets/architecture.svg" alt="Agent → MCP server → auditors → release gate" width="100%">
-</p>
-
-The agent asks in natural language. The server maps that to a script, the script produces a **finding list**, and
-every finding carries a stable code, a severity, a file and line, a fix hint and a documentation link. The release
-gate combines seven configured gates into a verdict and score.
-
-There is deliberately **one implementation**: the MCP tools shell out to the same CLI this README documents. The same audit code runs from MCP and the terminal.
-
----
-
-## Quickstart
+Requires **Git, Node 20+, npm and Python 3.10+**. Xcode is required for Apple builds and simulator work; the static auditors do not require it.
 
 ```bash
 git clone https://github.com/kayaonur607/apple-native-engineer-mcp.git
-cd apple-native-engineer-mcp
-
-make doctor   # is this machine ready? (Python, Node, Xcode, SDK)
-make demo     # 30 seconds: the audits on a deliberately broken app
-make verify   # everything CI runs, including 194 tests and a real Swift compile
+cd apple-native-engineer-mcp/integrations/mcp-server
+npm ci --ignore-scripts --no-audit --no-fund
+node scripts/github-launcher.mjs --selftest
 ```
 
-What `make demo` shows, trimmed:
+GitHub is the sole product distribution and release channel. npm installs the locked SDK dependencies; this product is not published to npm. No hosted service, developer account or AI API key is required for local static checks. Your MCP client may have its own model or subscription requirements.
 
-```
-1/4 · What is this project?            → iOS 16 floor, no @Observable, NavigationView, no tests
-2/4 · What is wrong with the SwiftUI?  → 14 findings, 3 of them errors
-3/4 · Would the App Store accept it?   → icon is 512×512 with alpha — rejected
-4/4 · The verdict                      → BLOCKED, 19/100
-```
-
-Then the same gate on a project that follows the rules: **CONFIGURED STATIC CHECKS PASSED, 100/100**.
-
-### Use it as an MCP server (recommended)
-
-```bash
-cd integrations/mcp-server && npm install
-node src/index.js --selftest   # 25 tools · 53 resources · 12 prompts
-```
-
-Or without cloning anything:
-
-```bash
-npx -y apple-native-engineer-mcp --selftest
-```
-
-For a shared endpoint or a container, the same server speaks Streamable HTTP:
-`node src/index.js --http` serves `POST /mcp` plus a `GET /health` probe, loopback-bound and origin-checked by
-default.
+Configure your MCP client with the **absolute path** to the launcher:
 
 ```json
 {
   "mcpServers": {
     "apple-native-engineer": {
       "command": "node",
-      "args": ["/absolute/path/to/apple-native-engineer-mcp/integrations/mcp-server/src/index.js"]
+      "args": ["/absolute/path/apple-native-engineer-mcp/integrations/mcp-server/scripts/github-launcher.mjs"],
+      "env": {
+        "APPLE_NATIVE_PYTHON": "python3"
+      }
     }
   }
 }
 ```
 
-Add that to `claude_desktop_config.json` or `.cursor/mcp.json`. Details: [`integrations/`](integrations/).
+Replace `/absolute/path` with your checkout location. First installation or an update can take several minutes. Prewarm the cache with `--selftest` before connecting clients with short startup timeouts. See the [complete installation and update guide](docs/UPDATES.md).
 
-### Use it as a skill (no server)
+Client guides: [Claude Code](integrations/claude-code.md) · [Claude Desktop](integrations/mcp-server/README.md) · [Cursor](integrations/cursor.md) · [Codex](integrations/codex.md) · [GitHub Copilot](integrations/github-copilot.md) · [Gemini CLI](integrations/gemini-cli.md) · [OpenCode](integrations/opencode.md).
+
+## Start with a goal
+
+Use `/apple-native-start` in clients that expose MCP prompts, or describe the work naturally:
+
+```text
+I am an Apple developer and designer. Inspect this project and its deployment
+versions, research the relevant HIG guidance, then improve the settings screen.
+Show the findings and the checks you actually ran.
+```
+
+```text
+Apple geliştiricisiyim ve tasarımcıyım. Önce projeyi ve hedef sürümlerini incele.
+Ana ekranı Apple HIG kaynaklarına göre geliştir; değişikliklerden sonra gerçek
+kontrolleri çalıştır ve kalan eksikleri açıkça belirt.
+```
+
+The workflow asks only for information needed to proceed, uses the user's language, researches API availability and distinguishes static checks from builds and runtime observations. The host client controls prompt discovery and execution; typing a sentence does not force every AI client to invoke a specific prompt.
+
+### A typical development loop
+
+1. **Inspect:** call `inspect_apple_project` to establish the actual project and deployment targets.
+2. **Research:** retrieve the relevant Apple documentation and HIG pages; cite their returned URLs and timestamps.
+3. **Implement:** let the host AI make the authorized code/design changes using the project and relevant connected tools.
+4. **Review:** run `review_diff` for changed Swift files; investigate findings and false positives.
+5. **Validate:** build and exercise the relevant UI when those capabilities are available. For release work, run `generate_release_report` and list remaining blockers.
+
+![Workflow: GitHub release launcher selects a version; local MCP tools return evidence to the AI client](assets/architecture.svg)
+
+## The tool inventory
+
+| Area | MCP tools |
+| --- | --- |
+| Project and edit loop | `inspect_apple_project`, `audit_project`, `review_diff`, `check_environment` |
+| SwiftUI and experience | `lint_swiftui`, `audit_accessibility`, `audit_liquid_glass`, `check_localization`, `validate_widgets` |
+| Design system | `validate_sf_symbols`, `forge_design_tokens` |
+| Apple research | `search_apple_documentation`, `read_apple_documentation`, `inspect_apple_api_availability`, `find_apple_guidelines` |
+| Privacy and store review | `audit_privacy_manifest`, `audit_app_store_review`, `validate_app_metadata`, `analyze_app_store_optimization` |
+| App Store assets | `validate_app_icon`, `prepare_icon_assets`, `verify_icon_set`, `compose_marketing_screenshots` |
+| Release and account inspection | `generate_release_report`, `app_store_connect` |
+
+`audit_project` combines eight existing auditors and attributes each finding to its producer. `review_diff` checks changed Swift files against the SwiftUI, accessibility and Liquid Glass auditors. Both use the same Python tools available directly from the CLI.
+
+The local SF Symbols catalogue contains **9,649 symbols**, with per-platform availability data. Documentation tools contact Apple's documentation service when called. App Store Connect is read-only and requires your own credentials.
+
+### Knowledge and workflows
+
+| Surface | What the AI can read |
+| --- | --- |
+| `apple-native://skill` | The bundled engineering/design operating standard |
+| `apple-native://release` | Installed version, release notes and update policy |
+| `apple-native://references/<name>` | Relevant technical and design references |
+| `apple-native://checklists/<name>` | Review and submission checklists |
+| `apple-native://examples/<name>` | Worked implementation examples |
+
+Thirteen prompts cover onboarding, design, code, review, privacy, icons, screenshots, Connect, metadata, widgets, localization and releases. External Figma, simulator, image or repository tools are used only when the host exposes them; this server does not bundle every third-party integration.
+
+## Versions and automatic updates
+
+**Current source version: v2.2.0.** See [CHANGELOG.md](CHANGELOG.md) for the version history and [GitHub Releases](https://github.com/kayaonur607/apple-native-engineer-mcp/releases) for published versions. A local tag or changelog entry is not a published release.
+
+The GitHub launcher checks published stable releases **when the MCP process starts**. It stages the candidate in a separate version/commit directory, installs locked dependencies, validates its version and runs an inventory smoke test before atomically activating it.
+
+- Existing sessions continue on their current version. Updates apply on reconnect/restart.
+- Failed downloads or installations preserve the active cached version.
+- Startup instructions ask the AI to announce its version and relevant changes; the client controls presentation.
+- `APPLE_NATIVE_VERSION=mcp-v2.2.0` pins a published version or permits rollback.
+- `APPLE_NATIVE_AUTO_UPDATE=off` disables the update check.
+- Automatic updates include new stable major versions unless a version is pinned.
+
+The bootstrap launcher is kept in your original checkout. Changes to the launcher itself require updating that checkout explicitly. Direct `node src/index.js` runs and separately copied skills do not gain automatic updates. Full details: [update policy and failure handling](docs/UPDATES.md).
+
+## Verification and reproducibility
+
+The local verification suite contains **205 tests: 128 Python tests and 77 MCP/Node tests**. The MCP tests include protocol calls, HTTP behaviour, module isolation, update staging, offline fallback, failed-install preservation, concurrent updates, version pins and telemetry sanitization.
 
 ```bash
-npx skills add kayaonur607/apple-native-engineer-mcp
+./scripts/verify.sh
 ```
 
-### Use the CLI directly (no AI at all)
+The recorded local run passed all five stages. Swift validation parsed **162 documented snippets**: **73 type-checked**, while **89 were classified as fragments**. Documentation checks verified 127 modifiers against the installed SDK and explicitly allowlisted two. A parse pass is not a full build of every example application.
+
+Read the [verification transcript and limits](docs/PROOF.md). GitHub Actions reports the result of each pushed revision independently.
+
+To regenerate the usage evidence and media:
 
 ```bash
-python3 tools/project-inspector/inspect_project.py .
-python3 tools/swiftui-linter/lint_swiftui.py .
-python3 tools/release-readiness/generate_report.py . --metadata metadata.json --icon AppIcon-1024.png
+node integrations/mcp-server/scripts/record-demo.mjs
+python3 scripts/render-demo-media.py
 ```
 
-Python 3.10+, standard library, nothing to install. Audit entry points support `--json`, `--strict` and `--color`.
+The recorder uses a real MCP client over stdio. The renderer requires Pillow and ffmpeg **for media authoring only**. The MCP runtime does not depend on them. See the [media provenance and chapter guide](assets/demo/README.md).
 
----
+## Privacy, permissions and boundaries
 
-## What it catches
+| Topic | Behaviour |
+| --- | --- |
+| Customer source | Local auditors read source and return findings to the configured client. The updater does not upload it. The client's own model/data policy is separate. |
+| Network access | GitHub release checks/clones and locked dependency downloads during updates; Apple documentation and App Store Connect when called; optional telemetry only when enabled. |
+| Writes | Icon, token, screenshot and report tools can write requested output files. Audit tools are read-only. App Store Connect operations are GET-only. |
+| Telemetry | Off by default. Optional local/anonymous telemetry uses a closed five-field event schema; no source, paths or prompts. |
+| Update trust | Stable releases published by this GitHub repository's maintainers. TLS, GitHub ownership and the lockfile are the trust boundary; publisher-signature verification is not implemented. |
+| Hosted access | No public hosted service. An HTTP server sees its own filesystem; it cannot read a customer's laptop by receiving a local path. |
 
-Eighteen auditors, 100+ finding codes. The ones that matter most:
+A static audit can miss defects and produce false positives. VoiceOver traversal, Dynamic Type layouts, motion, Dark Mode, RTL and device-specific behaviour need actual runtime review. Only Apple can approve an App Store submission. No revenue, time-saving or customer performance claim is implied by fixture results.
 
-| Area | Example finding | Tool |
-| :--- | :--- | :--- |
-| **SwiftUI correctness** | `.foregroundColor` deprecated, `NavigationView`, `onChange(of:perform:)`, `AnyView` in rows | [`swiftui-linter`](tools/swiftui-linter/) |
-| **Accessibility** | `#C7C7CC` on white is **1.68:1** (needs 4.5:1); 30pt tap target; unlabelled icon button | [`accessibility-auditor`](tools/accessibility-auditor/) |
-| **Liquid Glass** | iOS 26 `glassEffect` on an iOS 17 target without a guard; `.ultraThinMaterial` + `.blur` imitation | [`liquid-glass-auditor`](tools/liquid-glass-auditor/) |
-| **SF Symbols** | A symbol that does not exist (with the three closest real names), or one newer than your deployment target | [`sf-symbols-catalog`](tools/sf-symbols-catalog/) |
-| **Privacy** | Required-Reason API used but undeclared, or declared with a reason code Apple does not accept | [`privacy-auditor`](tools/privacy-auditor/) |
-| **Localisation** | `Text(verbatim:)`, UIKit strings that are never looked up, `.padding(.left)` that ignores RTL | [`localization-checker`](tools/localization-checker/) |
-| **Widgets** | Missing Dynamic Island regions, no `NSSupportsLiveActivities`, no `supportedFamilies` | [`widget-validator`](tools/widget-validator/) |
-| **App Store assets** | Icon is 512×512, or has an alpha channel, or screenshots match no accepted slot | [`asset-validator`](tools/asset-validator/) |
-| **Release decision** | Seven weighted gates; a gate with no input is `NOT INSPECTED` → `BLOCKED` | [`release-readiness`](tools/release-readiness/) |
+Read [SECURITY.md](SECURITY.md) for the threat model and reporting process.
 
-The complete list, with finding codes and exit codes, is in the [tool table](#the-18-cli-tools).
+## Documentation and contribution
 
-<p align="center">
-  <img src="assets/terminal-review.svg" alt="app-store-review output on the fixture project" width="100%">
-</p>
+[Operating standard](SKILL.md) · [Architecture](docs/ARCHITECTURE.md) · [Platform workflow](docs/PLATFORM-WORKFLOW.md) · [Ecosystem](docs/ECOSYSTEM.md) · [Brand assets](docs/BRANDING.md) · [Capability roadmap](docs/ROADMAP.md) · [Release procedure](docs/PUBLISHING.md) · [Commercial pilot and video plan](docs/COMMERCIAL-LAUNCH.md) · [Contributing](CONTRIBUTING.md).
 
-<p align="center"><sub>Not a mock-up: the card is rendered from the command's own output — <code>python3 tools/app-store-review/review.py tests/fixtures/legacy-app</code> — by <code>scripts/render_terminal_card.py</code>. Regenerate with <code>make evidence</code>.</sub></p>
+New checks should include a finding code, a defect fixture and regression coverage. Keep claims tied to reproducible evidence. Run `./scripts/verify.sh` before proposing a release.
 
----
-
-## Design rules it enforces
-
-These are the rules that separate "looks like iOS" from "is iOS":
-
-| Never | Always | Enforced by |
-| :--- | :--- | :--- |
-| Hardcoded hex, `Color.white` | Semantic colours, asset colours, `.primary` | `SWU001`, `SWU013`, `A11Y001` |
-| `.font(.system(size:))` | Text styles that scale with Dynamic Type | `SWU012`, `A11Y010` |
-| `.frame(width:)` on text | `.frame(maxWidth:)`, `ViewThatFits`, layout priority | `SWU005` |
-| `scaleEffect(0)` | Springs from 0.9–0.95 | `SWU009` |
-| `.ultraThinMaterial` + `.blur` | `.glassEffect(_:in:)` on iOS 26+, behind `#available` | `LG001`, `LG010` |
-| `.padding(.left)` | `.padding(.leading)` / `.horizontal` | `L10N010` |
-| An icon with alpha | Opaque 1024×1024 PNG | `ASSET004` |
-| A privacy manifest from memory | `PrivacyInfo.xcprivacy` with valid reason codes | `PRIV001`, `PRIV010` |
-
----
-
-## The 18 CLI tools
-
-| Tool | The question it answers | Codes |
-| :--- | :--- | :--- |
-| [`project-inspector`](tools/project-inspector/) | What is this project, what does it target, what debt does it carry? | `PROJ*` |
-| [`privacy-auditor`](tools/privacy-auditor/) | Are Required-Reason APIs declared with **valid** reason codes? | `PRIV*` |
-| [`asset-validator`](tools/asset-validator/) | Is the icon an opaque 1024×1024 PNG, and do screenshots match a slot? | `ASSET*` |
-| [`metadata-validator`](tools/metadata-validator/) | Does the listing fit App Store Connect's character limits? | `META*` |
-| [`localization-checker`](tools/localization-checker/) | Which strings can never be translated, and what breaks in RTL? | `L10N*` |
-| [`widget-validator`](tools/widget-validator/) | Do the widget, Dynamic Island and Live Activity actually work? | `WID*` |
-| [`swiftui-linter`](tools/swiftui-linter/) | 20 rules: deprecated API, hardcoded styling, identity churn. | `SWU*` |
-| [`accessibility-auditor`](tools/accessibility-auditor/) | Real WCAG contrast maths, Dynamic Type, 44pt targets, VoiceOver. | `A11Y*` |
-| [`liquid-glass-auditor`](tools/liquid-glass-auditor/) | Liquid Glass adopted correctly — or imitated with fake stacks? | `LG*` |
-| [`sf-symbols-catalog`](tools/sf-symbols-catalog/) | Does this symbol exist, and does it exist on *your* deployment target? | `SFC*` |
-| [`design-token-forge`](tools/design-token-forge/) | Token JSON → SwiftUI tokens + `.xcassets`, with contrast checks. | `TOK*` |
-| [`screenshot-studio`](tools/screenshot-studio/) | Capture from a simulator, compose marketing frames, validate the slot. | `SHOT*` |
-| [`app-store-connect`](tools/app-store-connect/) | Read-only ASC: apps, versions, builds, listing copy, screenshot sets. No silent mock. | `ASC*` |
-| [`release-readiness`](tools/release-readiness/) | Weighted verdict across every gate — the only one that blocks. | `REL*` |
-| [`apple-docs-research`](tools/apple-docs-research/) | What does Apple actually say, and on which OS does this API exist? | `DOC*` |
-| [`app-store-review`](tools/app-store-review/) | Which guideline would a reviewer cite, and where is the evidence? | `RVW*` |
-| [`aso-engine`](tools/aso-engine/) | Which characters are wasted, which claims are risky, what should the keywords be? | `ASO*` |
-| [`icon-studio`](tools/icon-studio/) | One 1024 master → 18 valid slots, verified; or preview it small. | `ICON*` |
-
-**What is genuinely different here**, compared with the usual "Apple docs RAG" MCP server:
-
-- **SF Symbol availability from the real catalogue.** 9,649 symbols extracted from `CoreGlyphs.bundle`, each mapped
-  to the OS release that introduced it. The tool tells you whether a symbol exists on *your* deployment target and
-  suggests the closest real name when you typo.
-- **Liquid Glass detection, verified against the SDK.** The auditor knows `.glassEffect(_:in:)`,
-  `GlassEffectContainer`, `.glassEffectID`, `.scrollEdgeEffectStyle` and `.buttonStyle(.glass)` are iOS 26+, that
-  `Glass` has exactly `.regular`, `.clear`, `.identity` with `.tint()` and `.interactive()`, and that the API is
-  unavailable on visionOS.
-- **A conservative static release gate.** A gate with no input is `NOT INSPECTED`, scores zero and forces
-  `BLOCKED`. A missing metadata file is not a passing metadata file.
-- **Contrast maths, not contrast guesses.** Every ratio is computed from the WCAG relative luminance formula, in
-  both appearances, and printed as a number.
-
----
-
-## The 25 MCP tools
-
-`audit_project` · `review_diff` · `check_environment` · `inspect_apple_project` · `audit_privacy_manifest` ·
-`validate_app_icon` · `validate_app_metadata` · `check_localization` · `validate_widgets` · `lint_swiftui` ·
-`audit_accessibility` · `audit_liquid_glass` · `validate_sf_symbols` · `forge_design_tokens` ·
-`generate_release_report` · `app_store_connect` · `search_apple_documentation` · `read_apple_documentation` ·
-`inspect_apple_api_availability` · `find_apple_guidelines` · `prepare_icon_assets` · `verify_icon_set` ·
-`analyze_app_store_optimization` · `compose_marketing_screenshots` · `audit_app_store_review`
-
-Two of them change how an agent works rather than just what it can check:
-
-- **`audit_project`** runs eight audits concurrently and returns one envelope where every finding is tagged with
-  the audit that produced it. One call instead of eight round trips.
-- **`review_diff`** reads `git diff`, keeps the changed Swift files and audits only those. It is the tool for an
-  edit loop: seconds instead of a full sweep, and findings grouped by file.
-
-Neither is a second implementation — both compose the same scripts the CLI runs.
-
-Built on the official `@modelcontextprotocol/sdk` (v1.32) rather than a hand-rolled JSON-RPC loop. That buys:
-
-- **Structured output.** Every result carries a versioned envelope — `schema_version`, `status`, `summary`,
-  `findings[]`, `data{}` — validated against a declared `outputSchema`, so clients get typed fields.
-- **Honest errors.** A missing path returns `isError: true` with a machine-readable code, never a stack trace.
-- **53 resources.** The 31 guides, 12 checklists, 9 examples and `SKILL.md`, addressable as `apple-native://`
-  URIs. The agent loads the design standard on demand instead of you pasting it into the prompt.
-- **12 prompts.** Every slash command (`/apple-native`, `/apple-native-design`, `/apple-native-release`, …) is a
-  first-class MCP prompt with a `project` argument and an optional `focus`.
-- **Capability annotations.** Audit tools are `readOnlyHint: true, destructiveHint: false`. Four output-capable tools are marked writable and potentially destructive
-  because destinations may be overwritten. App Store Connect remains read-only.
-- **Capability modules.** Eleven modules, enabled with `APPLE_NATIVE_MODULES`. A SwiftUI developer can disable the
-  App Store Connect capability; a privacy reviewer can run `core,privacy-security-audit` and nothing else. A
-  disabled tool is absent from `tools/list` and returns an error if called — never a silent empty result. See
-  [`docs/MODULES.md`](docs/MODULES.md).
-- **Local audits.** Source audits make no network calls. Telemetry is off by default; when you turn it on it records
-  five fields — tool, outcome, duration bucket, day, schema — and an allowlist drops everything else.
-  `--telemetry-preview` prints the exact bytes, and a test feeds it paths and prompts to prove they do not survive.
-
----
-
-## The knowledge base
-
-| Section | Count | What is in it |
-| :--- | ---: | :--- |
-| [`SKILL.md`](SKILL.md) | — | The operating standard: decision tables, refusal rules, definition of done |
-| [`references/`](references/) | 31 reference guides | HIG, Liquid Glass, SwiftUI, StoreKit 2, SwiftData, privacy, performance, visionOS |
-| [`checklists/`](checklists/) | 12 checklists | Review protocols for a PR, a design review or a submission |
-| [`examples/`](examples/) | 9 worked examples | Navigation, adaptive layout, animation, Live Activities, paywalls |
-| [`commands/`](commands/) | 12 commands | Slash-command specs that drive the tools |
-
-Written against **iOS 26 / 27 and macOS 26 / 27**, with an iOS 17 floor for code that has to run on older devices.
-Liquid Glass, `@Observable`, Swift Testing and String Catalogs are the defaults; `NavigationView`,
-`ObservableObject`, `foregroundColor` and fixed font sizes are called out as legacy.
-
-`references/whats-new-ios-27.md` is generated from the installed SDK, not recalled: every row is a declaration the
-compiler sees annotated `@available(iOS 27.0, …)`.
-
----
-
-## Proof
-
-The recorded local run is linked in [the audit report](docs/AUDIT-2026-11-06.md). `./scripts/verify.sh` runs five stages and fails if any of them
-disagrees with the documentation:
-
-| Stage | Result | How it is measured |
-| :--- | :--- | :--- |
-| Repository validation | **pass** | Frontmatter, 20 required paths, every internal link, and selected inventory counts checked against the filesystem |
-| Python tests | **128 pass** | `python3 -m unittest` locally; CI is configured for 3.10 / 3.12 / 3.13 |
-| MCP protocol tests | **66 pass** | A real `Client` ↔ `McpServer` pair over the SDK's in-memory transport, a real HTTP socket, a throwaway git repo, the publish metadata, and hostile telemetry payloads |
-| Swift compilation | **pass** | `swiftc -typecheck` on both fixtures, `swiftc -parse` on all 162 documented snippets, and a full type-check of 73 of them against the SDK each one targets — iOS or visionOS |
-| Apple documentation | **optional network capability** | Search, read, availability and HIG pages fetched from developer.apple.com with a source URL and fetch time |
-| Documentation claims | **pass** | 129 taught modifiers looked up in 21,998 SDK symbols; 64 iOS 27 declarations generated from the SDK |
-
-Both directions are tested, which is the point:
-
-- the **clean** fixture must produce **zero** findings across all auditors (fixture regression check)
-- the **legacy** fixture must trip **every** rule it was built for (fixture regression check)
-
-`docs/PROOF.md` holds the raw terminal transcripts, including the check that found 14 occurrences of an invalid
-`dampingRatio:` argument label across six guides.
-
-### How a claim gets into this repository
-
-1. It is written as a rule, a docstring or a reference guide.
-2. A tool implements it and emits a stable finding code.
-3. A fixture reproduces the defect and a test asserts the code fires.
-4. CI runs the test on every push.
-
-If a rule cannot survive step 3, it does not ship.
-
----
-
-## Performance
-
-The audits run before a build exists, so they must cost less than the thing they check. Measured with
-`make benchmark` on a synthetic 500-file / 7,500-line project:
-
-| Tool | Wall time |
-| :--- | ---: |
-| project-inspector | 82 ms |
-| privacy-auditor | 107 ms |
-| swiftui-linter | 88 ms |
-| accessibility-auditor | 76 ms |
-| localization-checker | 116 ms |
-| liquid-glass-auditor | 78 ms |
-| sf-symbols-catalog | 80 ms |
-| release-readiness (runs the suite internally) | 317 ms |
-| **all eight** | **922 ms** |
-
-≈123 ms per 1,000 lines of Swift for the whole suite. No network, no Xcode, no build products — cheap enough to run
-on every agent turn instead of once a day in CI.
-
----
-
-## Compatibility
-
-| | Supported |
-| :--- | :--- |
-| OS targets | iOS 17–27, iPadOS, macOS 14–27, watchOS 10+, visionOS 1+ |
-| Language | Swift 6.x (the tools also audit Swift 5-mode projects) |
-| Xcode | 26+ for the Liquid Glass checks; the Python tools need no Xcode at all |
-| Python | 3.10, 3.12, 3.13 (standard library only) |
-| Node | 20, 22 (MCP server) |
-| Clients | Claude Desktop, Claude Code, Cursor, Codex, GitHub Copilot, Gemini CLI, OpenCode, any MCP client |
-
-### Optional: live App Store Connect
-
-Read-only, and it refuses to pretend:
-
-```bash
-export ASC_KEY_ID=XXXXXXXXXX
-export ASC_ISSUER_ID=00000000-0000-0000-0000-000000000000
-export ASC_PRIVATE_KEY_PATH=~/.appstoreconnect/AuthKey_XXXXXXXXXX.p8
-python3 -m pip install cryptography      # required for ES256 signing
-
-python3 tools/app-store-connect/cli.py verify
-```
-
-No credentials? A hard error that names the missing variables. `--mock` exists, is explicit, and says so in its
-output. There is no silent fallback to synthetic data.
-
----
-
-## Evidence boundaries and platform coverage
-
-The release verdict is **configured static checks only**. It does not prove a successful build, working purchase flow,
-VoiceOver behavior, signing, entitlement correctness, App Store acceptance or ASO performance. Regex findings are review
-signals; contrast checks use assumed backgrounds, not rendered pixels. Review false positives in context.
-
-For a recorded Xcode test run, use `python3 scripts/collect_xcode_evidence.py TestResults.xcresult`.
-This optional local CLI reads `xcresulttool` output, rejects empty/failed runs and reports skipped tests. It does not
-run builds or feed the static gate automatically. Its parser has contract tests; no real app test bundle was exercised
-in this revision. See [platform and developer workflow](docs/PLATFORM-WORKFLOW.md),
-[optional ecosystem integrations](docs/ECOSYSTEM.md), and [current audit evidence](docs/AUDIT-2026-11-06.md).
-
-iOS and iPadOS have the deepest fixture coverage. macOS, watchOS and visionOS have reference guidance and shared
-source checks; they do not have equivalent end-to-end app coverage. tvOS requires manual focus, remote and layout
-review. See the platform matrix before applying iPhone-specific rules to another platform.
-
-## Non-goals
-
-- **Not a build system.** It never runs `xcodebuild` to produce your app; it checks what breaks *before* and
-  *after* the build.
-- **Not a documentation search engine.** Apple's docs are better at being Apple's docs. This is opinionated
-  engineering review.
-- **Not a code generator.** `design-token-forge` emits tokens, not screens.
-- **Not official.** Independent project, MIT licensed, not affiliated with or endorsed by Apple. Apple's
-  guidelines are referenced for interoperability under nominative fair use.
-
----
-
-## Repository layout
-
-```
-apple-native-engineer-mcp/
-├── SKILL.md                     # the standard an agent loads first
-├── tools/                       # 18 CLI tools
-│   └── lib/apple_native/        #   shared report contract, Swift scanner, colour maths, Xcode parser
-├── integrations/mcp-server/     # official-SDK MCP server (tools + resources + prompts)
-├── references/  checklists/  examples/  commands/
-├── data/sf-symbols.json         # 9,649 SF Symbols with per-OS availability
-├── tests/                       # 128 Python tests + two fixture projects
-├── scripts/                     # verify, doctor, demo, benchmark, generators
-├── docs/PROOF.md                # raw verification transcripts
-├── docs/PUBLISHING.md           # release runbook: version, tag, npm, registries
-└── .github/workflows/ci.yml     # repository · python ×3 · mcp · swift
-```
-
----
-
-## Security
-
-| Question | Answer |
-| :--- | :--- |
-| Does it upload my source? | No. Audit tools read files locally and print JSON to stdout. |
-| What talks to the network? | Documentation and App Store Connect when called (anonymous telemetry can also send events to an explicitly configured endpoint): `developer.apple.com` (documentation research) and `api.appstoreconnect.apple.com` (read-only App Store Connect). |
-| How are credentials stored? | `ASC_*` environment variables or a `.p8` path for App Store Connect; the parked macOS app is not included in this branch. Never in tool results, never in logs. |
-| Telemetry? | Off by default. `APPLE_NATIVE_TELEMETRY=local` or `anonymous` writes a closed five-key event; a test feeds the sanitiser hostile payloads and fails if anything else escapes. `--telemetry-preview` prints the exact bytes first. |
-| Can a tool modify my account? | Not today: the App Store Connect client only issues GET requests. Any write capability would arrive as its own module with a preview → approve → apply → read-back flow. |
-| What about secrets in the repo? | `.env`, `*.p8`, `*.pem` are git-ignored; documentation is validated for leaked personal paths in CI. |
-
-The full threat model and reporting process are in [SECURITY.md](SECURITY.md). Modules let you disable the
-network-facing capabilities entirely: `APPLE_NATIVE_MODULES=core,swift-engineering`.
-
----
-
-## Contributing
-
-New rules need three things: a finding code, a fixture that reproduces the defect, and a test that proves the code
-fires — plus one that proves the clean fixture stays silent. See [CONTRIBUTING.md](CONTRIBUTING.md).
-`./scripts/verify.sh` is the gate.
-
-## License
-
-[MIT](LICENSE) © apple-native-engineer-mcp contributors
+[MIT License](LICENSE). Apple, Swift, SwiftUI and related marks belong to their respective owners.

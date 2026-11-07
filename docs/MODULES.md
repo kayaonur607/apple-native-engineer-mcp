@@ -25,8 +25,8 @@ app-store-connect         app_store_connect
 {
   "mcpServers": {
     "apple-native-engineer": {
-      "command": "npx",
-      "args": ["-y", "apple-native-engineer-mcp"],
+      "command": "node",
+      "args": ["/absolute/path/apple-native-engineer-mcp/integrations/mcp-server/scripts/github-launcher.mjs"],
       "env": {
         "APPLE_NATIVE_MODULES": "core,swift-engineering,privacy-security-audit"
       }
@@ -45,8 +45,8 @@ app-store-connect         app_store_connect
 Inspect the state at any time:
 
 ```bash
-npx -y apple-native-engineer-mcp --modules   # registry + what is enabled
-npx -y apple-native-engineer-mcp --selftest  # enabled tools, resources, prompts
+node /absolute/path/apple-native-engineer-mcp/integrations/mcp-server/scripts/github-launcher.mjs --modules   # registry + what is enabled
+node /absolute/path/apple-native-engineer-mcp/integrations/mcp-server/scripts/github-launcher.mjs --selftest  # enabled tools, resources, prompts
 ```
 
 ## Rules the implementation guarantees
@@ -77,3 +77,5 @@ users never want, and one that implies holding a private key. Modules let the sa
 The core also stays honest about what it is not: there is no image generation, no browser automation, no telemetry
 by default. Adding a module is the only way to add a capability, and every module has to justify its dependencies
 in review.
+
+See [GitHub update policy](UPDATES.md).

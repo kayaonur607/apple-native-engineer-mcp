@@ -17,7 +17,7 @@ cd integrations/mcp-server && npm install && cd ../..
 ```
 
 <!-- proof:begin -->
-Recorded by `./scripts/update_proof.py` on 2026-11-06. Re-run it after any change that could affect these numbers.
+Recorded by `./scripts/update_proof.py` on 2026-11-07. Re-run it after any change that could affect these numbers.
 
 ```
 ▸ Repository structure and links
@@ -26,20 +26,21 @@ Recorded by `./scripts/update_proof.py` on 2026-11-06. Re-run it after any chang
   ✓ validation passed: 0 warning(s)
 
 ▸ Python tests (shared library + tools)
-................................................................................................................................
+........................................................................................................................
 ----------------------------------------------------------------------
-Ran 128 tests in 3.903s
+Ran 120 tests in 3.871s
 
+OK
 
 ▸ MCP protocol tests
-ℹ tests 66
-ℹ suites 13
-ℹ pass 66
+ℹ tests 72
+ℹ suites 14
+ℹ pass 72
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 1783.208625
+ℹ duration_ms 706.986125
 
 ▸ Swift compilation (fixtures + documentation snippets)
   SDK: iPhoneSimulator27.2.sdk
@@ -55,14 +56,14 @@ Ran 128 tests in 3.903s
 
 ▸ Documentation API claims
 SDK index:        21,998 symbols from iPhoneSimulator27.2.sdk
-Documents:        40
+Documents:        41
 Modifiers taught: 129
 Verified:         127
 Allowlisted:      2
 Unverified:       0
 
 ────────────────────────────────────────────
-  passed: 5   failed: 0   skipped: 0   56s
+  passed: 5   failed: 0   skipped: 0   55s
 ────────────────────────────────────────────
 ```
 <!-- proof:end -->
@@ -103,7 +104,7 @@ Island, a valid privacy manifest, an opaque 1024×1024 icon and three screenshot
 $ python3 tools/release-readiness/generate_report.py <repo>/tests/fixtures/clean-app \
     --metadata metadata.json --icon AppIcon-1024.png --screenshots screenshots
 
-  Verdict:      READY FOR SUBMISSION (historical output; current verdict wording is CONFIGURED STATIC CHECKS PASSED)
+  Verdict:      READY FOR SUBMISSION (historical; current wording: CONFIGURED STATIC CHECKS PASSED)
   Score:        100/100
 ```
 
@@ -204,7 +205,9 @@ The first run of this check found two real bugs in the fixture itself: a missing
 
 ---
 
-## 5. The MCP server is protocol-tested, not just "smoke-tested"
+## 5. Historical MCP examples (v2.1.0)
+
+The examples below record earlier runs; the current verification transcript is in §1. Current version, inventory and recorded demo are available through `--selftest` and [the raw stdio session](../assets/demo/session.json).
 
 `npm test` drives a real SDK `Client` against a real `McpServer` over an in-memory transport, binds a real HTTP
 socket for the Streamable HTTP transport, and builds a throwaway git repository for `review_diff`:

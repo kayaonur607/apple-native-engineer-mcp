@@ -5,9 +5,9 @@ MCP server runs the audits — but you should know which is which before you ins
 
 | | Skill | MCP server |
 | :--- | :--- | :--- |
-| **What it is** | A `SKILL.md` the agent reads | A process exposing 16 tools, 53 resources, 12 prompts |
+| **What it is** | A `SKILL.md` the agent reads | A process exposing 25 tools, 55 resources, 13 prompts |
 | **What it can do** | Advise | *Check*: run the audits, return finding codes, fail |
-| **Install** | copy or symlink one directory | `npx -y apple-native-engineer-mcp` |
+| **Install** | copy or symlink one directory | `node /absolute/path/apple-native-engineer-mcp/integrations/mcp-server/scripts/github-launcher.mjs` |
 | **Works offline** | yes | yes — no network call in any audit |
 | **Needs** | nothing | Node 20+, `python3` 3.10+ |
 | **Client support** | agents that read the Agent Skills standard | any MCP client |
@@ -38,8 +38,8 @@ A generic stdio server; anything that speaks MCP accepts this shape.
 {
   "mcpServers": {
     "apple-native-engineer": {
-      "command": "npx",
-      "args": ["-y", "apple-native-engineer-mcp"],
+      "command": "node",
+      "args": ["/absolute/path/apple-native-engineer-mcp/integrations/mcp-server/scripts/github-launcher.mjs"],
       "env": { "APPLE_NATIVE_PYTHON": "python3" }
     }
   }
@@ -82,3 +82,5 @@ auditors, the guides, git, Xcode and credentials, and tells you which one is mis
 Telemetry is off unless you set it, records five fields, and `--telemetry-preview` prints the exact bytes. There is
 no default collector, so there is nothing to opt out of. The full posture is in [SECURITY.md](../SECURITY.md) and
 [mcp-server/README.md](mcp-server/README.md#privacy).
+
+Installation is from GitHub only. Replace `/absolute/path` with your checkout location. See the [update policy](../docs/UPDATES.md) for automatic updates, first-start prewarming, version pins and rollback.

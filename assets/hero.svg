@@ -1,17 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="440" viewBox="0 0 1200 440" role="img" aria-labelledby="title desc">
-<title id="title">Apple Native Engineer MCP</title><desc id="desc">Local source audits, explicit capabilities and inspectable evidence for Apple development.</desc>
-<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#101f2b"/><stop offset="1" stop-color="#080f17"/></linearGradient></defs>
-<rect width="1200" height="440" rx="28" fill="url(#bg)"/>
-<g fill="none" stroke="#75edbe" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"><path d="m99 65-18 23 18 23m65-46 18 23-18 23m-53-23 13 14 23-29"/></g>
-<g font-family="Helvetica,Arial,sans-serif">
-<text x="214" y="96" font-size="16" letter-spacing="3" fill="#75edbe">LOCAL FIRST · EVIDENCE LED</text>
-<text x="72" y="191" font-size="51" font-weight="700" letter-spacing="-1.5" fill="#f1f7fa">Apple Native Engineer</text>
-<text x="74" y="240" font-size="25" fill="#bdcbd5">Inspect the source. Understand the findings.</text>
-<text x="74" y="278" font-size="25" fill="#bdcbd5">Verify the app on its own platform.</text>
-<path d="M74 321H1126" stroke="#29404e"/>
-<text x="74" y="369" font-size="17" fill="#75edbe">SWIFT + SWIFTUI</text>
-<text x="310" y="369" font-size="17" fill="#bdcbd5">PRIVACY + ACCESSIBILITY</text>
-<text x="635" y="369" font-size="17" fill="#bdcbd5">APP STORE TOOLING</text>
-<rect x="953" y="349" width="173" height="34" rx="17" stroke="#75edbe" fill="#142b29"/>
-<text x="1039" y="372" font-size="16" text-anchor="middle" fill="#e2fff1">CLI + MCP + SKILL</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="560" viewBox="0 0 1600 560" role="img" aria-label="Apple Native Engineer. Build native. Verify every claim.">
+<rect width="1600" height="560" rx="28" fill="#0b1018"/>
+<path d="M1100 0L1600 500M1000 0L1560 560M1200 0L1600 400" stroke="#75e0bd" stroke-opacity=".12" stroke-width="2"/>
+<g font-family="-apple-system,BlinkMacSystemFont,Arial,sans-serif">
+<text x="80" y="90" fill="#75e0bd" font-size="23" letter-spacing="4">APPLE NATIVE ENGINEER / v2.2.0</text>
+<text x="74" y="220" fill="#edf3fb" font-size="94" font-weight="700">Build native.</text>
+<text x="74" y="328" fill="#edf3fb" font-size="94" font-weight="700">Verify every claim.</text>
+<text x="80" y="400" fill="#a2b1c6" font-size="29">Apple research, SwiftUI review and asset workflows for your AI.</text>
+<rect x="80" y="448" width="230" height="53" rx="26" fill="#192c29"/>
+<text x="110" y="482" fill="#75e0bd" font-size="22">25 MCP TOOLS</text>
+<text x="350" y="482" fill="#a2b1c6" font-size="22">LOCAL EXECUTION</text>
+<text x="650" y="482" fill="#a2b1c6" font-size="22">GITHUB RELEASES</text>
+<text x="1400" y="300" fill="#75e0bd" font-size="155" text-anchor="middle">✓</text>
 </g></svg>

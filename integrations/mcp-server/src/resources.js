@@ -10,6 +10,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { REPO_ROOT } from "./runner.js";
+import { releaseInformation } from "./release-info.js";
 
 const SECTIONS = [
   { dir: "references", prefix: "references", title: "Reference guide" },
@@ -51,6 +52,11 @@ function listMarkdown(dir) {
 
 /** @param {import('@modelcontextprotocol/sdk/server/mcp.js').McpServer} server */
 export function registerResources(server) {
+  server.registerResource("release", "apple-native://release", {
+    title: "Installed version and release notes",
+    description: "Current MCP version, GitHub release notes and automatic update policy.",
+    mimeType: "application/json",
+  }, async uri => ({ contents: [{ uri: uri.href, mimeType: "application/json", text: JSON.stringify(releaseInformation(), null, 2) }] }));
   // The skill document itself.
   const skillPath = path.join(REPO_ROOT, "SKILL.md");
   if (fs.existsSync(skillPath)) {
@@ -99,7 +105,7 @@ export function registerResources(server) {
 
 /** Exposed for tests and for `--list-resources` diagnostics. */
 export function resourceInventory() {
-  const items = [{ uri: "apple-native://skill", file: "SKILL.md" }];
+  const items = [{ uri: "apple-native://release", file: "CHANGELOG.md" }, { uri: "apple-native://skill", file: "SKILL.md" }];
   for (const section of SECTIONS) {
     for (const filename of listMarkdown(section.dir)) {
       items.push({

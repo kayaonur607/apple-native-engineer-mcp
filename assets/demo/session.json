@@ -1,0 +1,524 @@
+{
+  "recorded_at": "2026-11-07T14:09:52.099Z",
+  "fixture_only": true,
+  "format": "Real MCP stdio session; rendered transcript playback, not a desktop screen recording.",
+  "comparison": "Legacy and clean are separate fixtures. This session does not automatically rewrite Swift code.",
+  "events": [
+    {
+      "title": "Connect a real MCP client",
+      "method": "initialize",
+      "params": {
+        "transport": "stdio",
+        "command": "node integrations/mcp-server/src/index.js"
+      },
+      "duration_ms": 128,
+      "response": {
+        "server": {
+          "name": "apple-native-engineer",
+          "version": "2.2.0"
+        },
+        "tools": 25,
+        "resources": 55,
+        "prompts": 13
+      }
+    },
+    {
+      "title": "Start as a developer or designer",
+      "method": "prompts/get",
+      "params": {
+        "name": "apple-native-start",
+        "arguments": {
+          "focus": "Review a native Apple interface"
+        }
+      },
+      "duration_ms": 1,
+      "response": {
+        "description": "Start as an Apple developer, designer, or team: discover capabilities and turn an idea into an evidence-backed workflow.",
+        "messages": [
+          {
+            "role": "user",
+            "content": {
+              "type": "text",
+              "text": "Apply the following Apple Native Engineer workflow to the current working directory.\n\nEmphasis for this run: Review a native Apple interface.\nUse the apple-native-engineer MCP tools to gather evidence before advising;\nquote the finding codes you relied on and end with concrete next steps.\n---\n# Start with Apple Native Engineer\n\nRespond in the user's language. Act as an independent Apple-platform engineering and design assistant; never claim to work for Apple or imply endorsement.\n\n## Understand the intent\n\nWhen the user says “I am an Apple developer” or “I am a designer” (including “Apple geliştiricisiyim” and “tasarımcıyım”), acknowledge the role and move toward their concrete task. Infer information already supplied. Ask only for a missing goal, platform, or project location that changes the next action. A role introduction alone does not authorize source edits or account operations.\n\n- Existing project: run `check_environment` and `inspect_apple_project` before choosing checks. Use the actual deployment targets, not the newest OS by assumption.\n- New app: establish the user problem, primary journey and supported platforms; propose a small runnable slice before implementation.\n- Design work: establish the screen and its states, then read the relevant HIG guidance. Cover loading, empty, error, success, Dark Mode, Dynamic Type, RTL and reduced motion where applicable.\n- Release work: gather the icon, metadata and real screenshots, run the relevant validators, then `generate_release_report`. Missing inputs remain uninspected.\n\n## Discover and use capabilities\n\nRead `apple-native://references/workflow-routing` and the relevant reference resources. Discover the tools actually exposed by this connection. Disabled modules are unavailable; do not call or promise them. The MCP provides deterministic checks and documentation, while the host AI produces reasoning and code. It does not include an LLM subscription.\n\nUse `search_apple_documentation` to locate APIs, `read_apple_documentation` for declarations and `inspect_apple_api_availability` for deployment compatibility. Use `find_apple_guidelines` for design decisions. Cite Apple's returned source URLs and retrieval timestamps. If retrieval fails, distinguish local guidance from freshly verified documentation.\n\nIf the host exposes Figma, simulator, build, browser, image or other MCP tools/skills, discover and apply only those relevant to the task and within the user's authorization. Never claim that this server installs, controls or bundles every external integration. If unavailable, explain the missing capability and continue independent work.\n\n## Deliver evidence\n\nRun `review_diff` after source changes. Separate static findings from compiler results, runtime observations and human visual review. A passing static release report is not Apple approval or proof of runtime accessibility.\n\nReturn a concise professional report: outcome, changed files, checks actually run, Apple sources, remaining blockers, and the next concrete action. For demonstrations, identify fixtures as fixtures and marketing compositions as compositions. Never fabricate a simulator run, recording, customer result, speedup or revenue claim."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "title": "Inspect the project before giving advice",
+      "method": "tools/call",
+      "params": {
+        "name": "inspect_apple_project",
+        "arguments": {
+          "path": "<repository>/tests/fixtures/legacy-app"
+        }
+      },
+      "duration_ms": 50,
+      "response": {
+        "content": [
+          {
+            "type": "text",
+            "text": "project-inspector · WARN\ntarget: <repository>/tests/fixtures/legacy-app\nfindings: 7 (0 critical, 0 error, 5 warning, 2 info)\n  WARNING PROJ003 — iOS deployment target is 16; anything below 17.0 blocks modern SwiftUI APIs (@Observable, .spring(duration:bounce:), SwiftData).\n  WARNING PROJ005 — Project builds with Swift 5.9; Swift 6 language mode enables compile-time data-race safety.\n  WARNING PROJ006 — No test target sources found.\n  WARNING PROJ007 — Combine-based ObservableObject state without any @Observable usage.\n  WARNING PROJ008 — NavigationView is deprecated since iOS 16.\n  INFO PROJ009 — No PrivacyInfo.xcprivacy present. Required if the app (or a bundled SDK) uses Required-Reason APIs or tracks users.\n  INFO PROJ010 — No String Catalog (.xcstrings) found.\n\n{\n  \"schema_version\": \"2.0\",\n  \"tool\": \"project-inspector\",\n  \"tool_version\": \"2.0.0\",\n  \"target\": \"<repository>/tests/fixtures/legacy-app\",\n  \"status\": \"warn\",\n  \"summary\": {\n    \"critical\": 0,\n    \"error\": 0,\n    \"warning\": 5,\n    \"info\": 2,\n    \"total\": 7\n  },\n  \"findings\": [\n    {\n      \"code\": \"PROJ003\",\n      \"severity\": \"warning\",\n      \"message\": \"iOS deployment target is 16; anything below 17.0 blocks modern SwiftUI APIs (@Observable, .spring(duration:bounce:), SwiftData).\",\n      \"hint\": \"Raise IPHONEOS_DEPLOYMENT_TARGET to 17.0 or later, or use @available guards.\",\n      \"docs\": \"https://developer.apple.com/documentation/xcode/configuring-a-multiplatform-app-target\"\n    },\n    {\n      \"code\": \"PROJ005\",\n      \"severity\": \"warning\",\n      \"message\": \"Project builds with Swift 5.9; Swift 6 language mode enables compile-time data-race safety.\",\n      \"hint\": \"Adopt SWIFT_VERSION = 6.0 and fix strict-concurrency diagnostics module by module.\",\n      \"docs\": \"https://www.swift.org/migration/documentation/swift-6-concurrency-migration-guide/\"\n    },\n    {\n      \"code\": \"PROJ006\",\n      \"severity\": \"warning\",\n      \"message\": \"No test target sources found.\",\n      \"hint\": \"Add a Swift Testing target (import Testing) — it is the default for new Xcode projects.\"\n    },\n    {\n      \"code\": \"PROJ007\",\n      \"severity\": \"warning\",\n      \"message\": \"Combine-based ObservableObject state without any @Observable usage.\",\n      \"hint\": \"Migrate view models to @Observable to avoid whole-view invalidation on every @Published write.\",\n      \"docs\": \"https://developer.apple.com/documentation/observation/migrating-from-the-observable-object-protocol-to-the-observable-macro\"\n    },\n    {\n      \"code\": \"PROJ008\",\n      \"severity\": \"warning\",\n      \"message\": \"NavigationView is deprecated since iOS 16.\",\n      \"hint\": \"Replace with NavigationStack (or NavigationSplitView for multi-column layouts).\"\n    },\n    {\n      \"code\": \"PROJ009\",\n      \"severity\": \"info\",\n      \"message\": \"No PrivacyInfo.xcprivacy present. Required if the app (or a bundled SDK) uses Required-Reason APIs or tracks users.\",\n      \"hint\": \"Run tools/privacy-auditor/audit_privacy.py for a per-API breakdown.\"\n    },\n    {\n      \"code\": \"PROJ010\",\n      \"severity\": \"info\",\n      \"message\": \"No String Catalog (.xcstrings) found.\",\n      \"hint\": \"String Catalogs are the supported localization format since Xcode 15.\"\n    }\n  ],\n  \"data\": {\n    \"project_kind\": \"swift-package\",\n    \"targets\": [\n      \"LegacyApp\"\n    ],\n    \"deployment_targets\": {\n      \"iOS\": \"16\",\n      \"macOS\": \"14\"\n    },\n    \"swift_versions\": [\n      \"5.9\"\n    ],\n    \"swift_files\": 7,\n    \"swift_lines\": 184,\n    \"test_files\": 0,\n    \"frameworks\": [\n      \"SwiftUI\",\n      \"UIKit\",\n      \"WidgetKit\",\n      \"ActivityKit\",\n      \"Combine\",\n      \"AVFoundation\"\n    ],\n    \"architecture\": [\n      \"Combine ObservableObject\"\n    ],\n    \"string_catalogs\": 0,\n    \"privacy_manifests\": 0,\n    \"spm_dependencies\": false,\n    \"cocoapods\": false,\n    \"bundle_ids\": []\n  }\n}"
+          }
+        ],
+        "structuredContent": {
+          "schema_version": "2.0",
+          "tool": "project-inspector",
+          "tool_version": "2.0.0",
+          "target": "<repository>/tests/fixtures/legacy-app",
+          "status": "warn",
+          "summary": {
+            "critical": 0,
+            "error": 0,
+            "warning": 5,
+            "info": 2,
+            "total": 7
+          },
+          "findings": [
+            {
+              "code": "PROJ003",
+              "severity": "warning",
+              "message": "iOS deployment target is 16; anything below 17.0 blocks modern SwiftUI APIs (@Observable, .spring(duration:bounce:), SwiftData).",
+              "hint": "Raise IPHONEOS_DEPLOYMENT_TARGET to 17.0 or later, or use @available guards.",
+              "docs": "https://developer.apple.com/documentation/xcode/configuring-a-multiplatform-app-target"
+            },
+            {
+              "code": "PROJ005",
+              "severity": "warning",
+              "message": "Project builds with Swift 5.9; Swift 6 language mode enables compile-time data-race safety.",
+              "hint": "Adopt SWIFT_VERSION = 6.0 and fix strict-concurrency diagnostics module by module.",
+              "docs": "https://www.swift.org/migration/documentation/swift-6-concurrency-migration-guide/"
+            },
+            {
+              "code": "PROJ006",
+              "severity": "warning",
+              "message": "No test target sources found.",
+              "hint": "Add a Swift Testing target (import Testing) — it is the default for new Xcode projects."
+            },
+            {
+              "code": "PROJ007",
+              "severity": "warning",
+              "message": "Combine-based ObservableObject state without any @Observable usage.",
+              "hint": "Migrate view models to @Observable to avoid whole-view invalidation on every @Published write.",
+              "docs": "https://developer.apple.com/documentation/observation/migrating-from-the-observable-object-protocol-to-the-observable-macro"
+            },
+            {
+              "code": "PROJ008",
+              "severity": "warning",
+              "message": "NavigationView is deprecated since iOS 16.",
+              "hint": "Replace with NavigationStack (or NavigationSplitView for multi-column layouts)."
+            },
+            {
+              "code": "PROJ009",
+              "severity": "info",
+              "message": "No PrivacyInfo.xcprivacy present. Required if the app (or a bundled SDK) uses Required-Reason APIs or tracks users.",
+              "hint": "Run tools/privacy-auditor/audit_privacy.py for a per-API breakdown."
+            },
+            {
+              "code": "PROJ010",
+              "severity": "info",
+              "message": "No String Catalog (.xcstrings) found.",
+              "hint": "String Catalogs are the supported localization format since Xcode 15."
+            }
+          ],
+          "data": {
+            "project_kind": "swift-package",
+            "targets": [
+              "LegacyApp"
+            ],
+            "deployment_targets": {
+              "iOS": "16",
+              "macOS": "14"
+            },
+            "swift_versions": [
+              "5.9"
+            ],
+            "swift_files": 7,
+            "swift_lines": 184,
+            "test_files": 0,
+            "frameworks": [
+              "SwiftUI",
+              "UIKit",
+              "WidgetKit",
+              "ActivityKit",
+              "Combine",
+              "AVFoundation"
+            ],
+            "architecture": [
+              "Combine ObservableObject"
+            ],
+            "string_catalogs": 0,
+            "privacy_manifests": 0,
+            "spm_dependencies": false,
+            "cocoapods": false,
+            "bundle_ids": []
+          }
+        }
+      }
+    },
+    {
+      "title": "Find concrete SwiftUI issues",
+      "method": "tools/call",
+      "params": {
+        "name": "lint_swiftui",
+        "arguments": {
+          "path": "<repository>/tests/fixtures/legacy-app"
+        }
+      },
+      "duration_ms": 34,
+      "response": {
+        "content": [
+          {
+            "type": "text",
+            "text": "swiftui-linter · FAIL\ntarget: <repository>/tests/fixtures/legacy-app\nfindings: 14 (0 critical, 3 error, 8 warning, 3 info)\n  WARNING SWU001 — Hardcoded hex colour breaks Dark Mode and Increase Contrast. (App/LegacyContentView.swift:16)\n  WARNING SWU002 — .foregroundColor(_:) is deprecated since iOS 17. (App/LegacyContentView.swift:16)\n  ERROR SWU003 — NavigationView is deprecated since iOS 16. (App/LegacyContentView.swift:11)\n  WARNING SWU004 — Single-parameter onChange(of:perform:) is deprecated since iOS 17. (App/LegacyContentView.swift:46)\n  WARNING SWU005 — Fixed width on Text truncates at large Dynamic Type sizes. (App/LegacyContentView.swift:14)\n  ERROR SWU006 — UIScreen.main.bounds is not multi-window, Stage Manager or visionOS safe. (App/LegacyContentView.swift:27)\n  INFO SWU007 — lineLimit(1) can clip localised copy. (App/LegacyContentView.swift:36)\n  WARNING SWU009 — Scaling from zero looks mechanical and breaks spring physics. (App/LegacyContentView.swift:23)\n  WARNING SWU010 — Deprecated .animation(_:) without a value animates every change in the subtree. (App/LegacyContentView.swift:24)\n  INFO SWU012 — Fixed point size bypasses Dynamic Type. (App/LegacyContentView.swift:15)\n  … 4 more finding(s)\n\n{\n  \"schema_version\": \"2.0\",\n  \"tool\": \"swiftui-linter\",\n  \"tool_version\": \"2.0.0\",\n  \"target\": \"<repository>/tests/fixtures/legacy-app\",\n  \"status\": \"fail\",\n  \"summary\": {\n    \"critical\": 0,\n    \"error\": 3,\n    \"warning\": 8,\n    \"info\": 3,\n    \"total\": 14\n  },\n  \"findings\": [\n    {\n      \"code\": \"SWU001\",\n      \"severity\": \"warning\",\n      \"message\": \"Hardcoded hex colour breaks Dark Mode and Increase Contrast.\",\n      \"file\": \"App/LegacyContentView.swift\",\n      \"line\": 16,\n      \"hint\": \"Define the colour in an asset catalogue or use a semantic colour (.primary, Color(.systemBackground)).\",\n      \"docs\": \"https://developer.apple.com/documentation/uikit/appearance_customization/supporting_dark_mode_in_your_interface\"\n    },\n    {\n      \"code\": \"SWU002\",\n      \"severity\": \"warning\",\n      \"message\": \".foregroundColor(_:) is deprecated since iOS 17.\",\n      \"file\": \"App/LegacyContentView.swift\",\n      \"line\": 16,\n      \"hint\": \"Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.\",\n      \"docs\": \"https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)\"\n    },\n    {\n      \"code\": \"SWU003\",\n      \"severity\": \"error\",\n      \"message\": \"NavigationView is deprecated since iOS 16.\",\n      \"file\": \"App/LegacyContentView.swift\",\n      \"line\": 11,\n      \"hint\": \"Use NavigationStack with typed navigation paths, or NavigationSplitView for multi-column layouts.\",\n      \"docs\": \"https://developer.apple.com/documentation/swiftui/navigationstack\"\n    },\n    {\n      \"code\": \"SWU004\",\n      \"severity\": \"warning\",\n      \"message\": \"Single-parameter onChange(of:perform:) is deprecated since iOS 17.\",\n      \"file\": \"App/LegacyContentView.swift\",\n      \"line\": 46,\n      \"hint\": \"Use .onChange(of: value) { oldValue, newValue in ... } or the zero-parameter overload.\",\n      \"docs\": \"https://developer.apple.com/documentation/swiftui/view/onchange(of:initial:_:)\"\n    },\n    {\n      \"code\": \"SWU005\",\n      \"severity\": \"warning\",\n      \"message\": \"Fixed width on Text truncates at large Dynamic Type sizes.\",\n      \"file\": \"App/LegacyContentView.swift\",\n      \"line\": 14,\n      \"hint\": \"Constrain with .frame(maxWidth:), .fixedSize(horizontal: false, vertical: true) or a layout priority.\",\n      \"docs\": \"https://developer.apple.com/documentation/swiftui/view/fixedsize(horizontal:vertical:)\"\n    },\n    {\n      \"code\": \"SWU006\",\n      \"severity\": \"error\",\n      \"message\": \"UIScreen.main.bounds is not multi-window, Stage Manager or visionOS safe.\",\n      \"file\": \"App/LegacyContentView.swift\",\n      \"line\": 27,\n      \"hint\": \"Read the size from a GeometryReader, containerRelativeFrame, or the scene's window size.\",\n      \"docs\": \"https://developer.apple.com/documentation/swiftui/geometryproxy\"\n    },\n    {\n      \"code\": \"SWU007\",\n      \"severity\": \"info\",\n      \"message\": \"lineLimit(1) can clip localised copy.\",\n      \"file\": \"App/LegacyContentView.swift\",\n      \"line\": 36,\n      \"hint\": \"Pair with .minimumScaleFactor(0.8) or allow two lines for longer translations.\"\n    },\n    {\n      \"code\": \"SWU009\",\n      \"severity\": \"warning\",\n      \"message\": \"Scaling from zero looks mechanical and breaks spring physics.\",\n      \"file\": \"App/LegacyContentView.swift\",\n      \"line\": 23,\n      \"hint\": \"Animate scale from 0.9–0.95 with a spring; the eye reads zero as a glitch, not a transition.\",\n      \"docs\": \"https://developer.apple.com/documentation/swiftui/animation/spring(duration:bounce:blendduration:)\"\n    },\n    {\n      \"code\": \"SWU010\",\n      \"severity\": \"warning\",\n      \"message\": \"Deprecated .animation(_:) without a value animates every change in the subtree.\",\n      \"file\": \"App/LegacyContentView.swift\",\n      \"line\": 24,\n      \"hint\": \"Use .animation(.spring, value: someState) so only the intended change animates.\",\n      \"docs\": \"https://developer.apple.com/documentation/swiftui/view/animation(_:value:)\"\n    },\n    {\n      \"code\": \"SWU012\",\n      \"severity\": \"info\",\n      \"message\": \"Fixed point size bypasses Dynamic Type.\",\n      \"file\": \"App/LegacyContentView.swift\",\n      \"line\": 15,\n      \"hint\": \"Prefer text styles (.body, .headline) or .font(.system(.body, design: .rounded)) with relative sizing.\",\n      \"docs\": \"https://developer.apple.com/documentation/swiftui/font/textstyle\"\n    },\n    {\n      \"code\": \"SWU014\",\n      \"severity\": \"error\",\n      \"message\": \"try! crashes the process on any thrown error.\",\n      \"file\": \"App/LegacyContentView.swift\",\n      \"line\": 28,\n      \"hint\": \"Use do/catch, or surface the failure as view state.\"\n    },\n    {\n      \"code\": \"SWU015\",\n      \"severity\": \"info\",\n      \"message\": \"AnyView erases type identity and defeats SwiftUI's diffing.\",\n      \"file\": \"App/LegacyContentView.swift\",\n      \"line\": 39,\n      \"hint\": \"Return concrete types, use @ViewBuilder, or generic parameters instead.\",\n      \"docs\": \"https://developer.apple.com/documentation/swiftui/anyview\"\n    },\n    {\n      \"code\": \"SWU018\",\n      \"severity\": \"warning\",\n      \"message\": \"ForEach over a range with dynamic content loses identity.\",\n      \"file\": \"App/LegacyContentView.swift\",\n      \"line\": 34,\n      \"hint\": \"Iterate over the model collection so SwiftUI can match rows across updates.\"\n    },\n    {\n      \"code\": \"SWU011\",\n      \"severity\": \"warning\",\n      \"message\": \"ObservableObject invalidates the whole view on every @Published write.\",\n      \"file\": \"App/LegacyModel.swift\",\n      \"line\": 11,\n      \"hint\": \"Migrate to @Observable and let SwiftUI track the exact properties each view reads.\",\n      \"docs\": \"https://developer.apple.com/documentation/observation/migrating-from-the-observable-object-protocol-to-the-observable-macro\"\n    }\n  ],\n  \"data\": {\n    \"scanned_files\": 7,\n    \"rules\": 20,\n    \"violations\": 14\n  }\n}"
+          }
+        ],
+        "structuredContent": {
+          "schema_version": "2.0",
+          "tool": "swiftui-linter",
+          "tool_version": "2.0.0",
+          "target": "<repository>/tests/fixtures/legacy-app",
+          "status": "fail",
+          "summary": {
+            "critical": 0,
+            "error": 3,
+            "warning": 8,
+            "info": 3,
+            "total": 14
+          },
+          "findings": [
+            {
+              "code": "SWU001",
+              "severity": "warning",
+              "message": "Hardcoded hex colour breaks Dark Mode and Increase Contrast.",
+              "file": "App/LegacyContentView.swift",
+              "line": 16,
+              "hint": "Define the colour in an asset catalogue or use a semantic colour (.primary, Color(.systemBackground)).",
+              "docs": "https://developer.apple.com/documentation/uikit/appearance_customization/supporting_dark_mode_in_your_interface"
+            },
+            {
+              "code": "SWU002",
+              "severity": "warning",
+              "message": ".foregroundColor(_:) is deprecated since iOS 17.",
+              "file": "App/LegacyContentView.swift",
+              "line": 16,
+              "hint": "Use .foregroundStyle(_:), which composes correctly with gradients and ShapeStyle.",
+              "docs": "https://developer.apple.com/documentation/swiftui/view/foregroundstyle(_:)"
+            },
+            {
+              "code": "SWU003",
+              "severity": "error",
+              "message": "NavigationView is deprecated since iOS 16.",
+              "file": "App/LegacyContentView.swift",
+              "line": 11,
+              "hint": "Use NavigationStack with typed navigation paths, or NavigationSplitView for multi-column layouts.",
+              "docs": "https://developer.apple.com/documentation/swiftui/navigationstack"
+            },
+            {
+              "code": "SWU004",
+              "severity": "warning",
+              "message": "Single-parameter onChange(of:perform:) is deprecated since iOS 17.",
+              "file": "App/LegacyContentView.swift",
+              "line": 46,
+              "hint": "Use .onChange(of: value) { oldValue, newValue in ... } or the zero-parameter overload.",
+              "docs": "https://developer.apple.com/documentation/swiftui/view/onchange(of:initial:_:)"
+            },
+            {
+              "code": "SWU005",
+              "severity": "warning",
+              "message": "Fixed width on Text truncates at large Dynamic Type sizes.",
+              "file": "App/LegacyContentView.swift",
+              "line": 14,
+              "hint": "Constrain with .frame(maxWidth:), .fixedSize(horizontal: false, vertical: true) or a layout priority.",
+              "docs": "https://developer.apple.com/documentation/swiftui/view/fixedsize(horizontal:vertical:)"
+            },
+            {
+              "code": "SWU006",
+              "severity": "error",
+              "message": "UIScreen.main.bounds is not multi-window, Stage Manager or visionOS safe.",
+              "file": "App/LegacyContentView.swift",
+              "line": 27,
+              "hint": "Read the size from a GeometryReader, containerRelativeFrame, or the scene's window size.",
+              "docs": "https://developer.apple.com/documentation/swiftui/geometryproxy"
+            },
+            {
+              "code": "SWU007",
+              "severity": "info",
+              "message": "lineLimit(1) can clip localised copy.",
+              "file": "App/LegacyContentView.swift",
+              "line": 36,
+              "hint": "Pair with .minimumScaleFactor(0.8) or allow two lines for longer translations."
+            },
+            {
+              "code": "SWU009",
+              "severity": "warning",
+              "message": "Scaling from zero looks mechanical and breaks spring physics.",
+              "file": "App/LegacyContentView.swift",
+              "line": 23,
+              "hint": "Animate scale from 0.9–0.95 with a spring; the eye reads zero as a glitch, not a transition.",
+              "docs": "https://developer.apple.com/documentation/swiftui/animation/spring(duration:bounce:blendduration:)"
+            },
+            {
+              "code": "SWU010",
+              "severity": "warning",
+              "message": "Deprecated .animation(_:) without a value animates every change in the subtree.",
+              "file": "App/LegacyContentView.swift",
+              "line": 24,
+              "hint": "Use .animation(.spring, value: someState) so only the intended change animates.",
+              "docs": "https://developer.apple.com/documentation/swiftui/view/animation(_:value:)"
+            },
+            {
+              "code": "SWU012",
+              "severity": "info",
+              "message": "Fixed point size bypasses Dynamic Type.",
+              "file": "App/LegacyContentView.swift",
+              "line": 15,
+              "hint": "Prefer text styles (.body, .headline) or .font(.system(.body, design: .rounded)) with relative sizing.",
+              "docs": "https://developer.apple.com/documentation/swiftui/font/textstyle"
+            },
+            {
+              "code": "SWU014",
+              "severity": "error",
+              "message": "try! crashes the process on any thrown error.",
+              "file": "App/LegacyContentView.swift",
+              "line": 28,
+              "hint": "Use do/catch, or surface the failure as view state."
+            },
+            {
+              "code": "SWU015",
+              "severity": "info",
+              "message": "AnyView erases type identity and defeats SwiftUI's diffing.",
+              "file": "App/LegacyContentView.swift",
+              "line": 39,
+              "hint": "Return concrete types, use @ViewBuilder, or generic parameters instead.",
+              "docs": "https://developer.apple.com/documentation/swiftui/anyview"
+            },
+            {
+              "code": "SWU018",
+              "severity": "warning",
+              "message": "ForEach over a range with dynamic content loses identity.",
+              "file": "App/LegacyContentView.swift",
+              "line": 34,
+              "hint": "Iterate over the model collection so SwiftUI can match rows across updates."
+            },
+            {
+              "code": "SWU011",
+              "severity": "warning",
+              "message": "ObservableObject invalidates the whole view on every @Published write.",
+              "file": "App/LegacyModel.swift",
+              "line": 11,
+              "hint": "Migrate to @Observable and let SwiftUI track the exact properties each view reads.",
+              "docs": "https://developer.apple.com/documentation/observation/migrating-from-the-observable-object-protocol-to-the-observable-macro"
+            }
+          ],
+          "data": {
+            "scanned_files": 7,
+            "rules": 20,
+            "violations": 14
+          }
+        },
+        "isError": true
+      }
+    },
+    {
+      "title": "Check the clean reference implementation",
+      "method": "tools/call",
+      "params": {
+        "name": "lint_swiftui",
+        "arguments": {
+          "path": "<repository>/tests/fixtures/clean-app"
+        }
+      },
+      "duration_ms": 34,
+      "response": {
+        "content": [
+          {
+            "type": "text",
+            "text": "swiftui-linter · PASS\ntarget: <repository>/tests/fixtures/clean-app\nfindings: 1 (0 critical, 0 error, 0 warning, 1 info)\n  INFO SWU021 — No violations across 6 Swift file(s).\n\n{\n  \"schema_version\": \"2.0\",\n  \"tool\": \"swiftui-linter\",\n  \"tool_version\": \"2.0.0\",\n  \"target\": \"<repository>/tests/fixtures/clean-app\",\n  \"status\": \"pass\",\n  \"summary\": {\n    \"critical\": 0,\n    \"error\": 0,\n    \"warning\": 0,\n    \"info\": 1,\n    \"total\": 1\n  },\n  \"findings\": [\n    {\n      \"code\": \"SWU021\",\n      \"severity\": \"info\",\n      \"message\": \"No violations across 6 Swift file(s).\"\n    }\n  ],\n  \"data\": {\n    \"scanned_files\": 6,\n    \"rules\": 20,\n    \"violations\": 0\n  }\n}"
+          }
+        ],
+        "structuredContent": {
+          "schema_version": "2.0",
+          "tool": "swiftui-linter",
+          "tool_version": "2.0.0",
+          "target": "<repository>/tests/fixtures/clean-app",
+          "status": "pass",
+          "summary": {
+            "critical": 0,
+            "error": 0,
+            "warning": 0,
+            "info": 1,
+            "total": 1
+          },
+          "findings": [
+            {
+              "code": "SWU021",
+              "severity": "info",
+              "message": "No violations across 6 Swift file(s)."
+            }
+          ],
+          "data": {
+            "scanned_files": 6,
+            "rules": 20,
+            "violations": 0
+          }
+        }
+      }
+    },
+    {
+      "title": "Convert one master into Xcode icon assets",
+      "method": "tools/call",
+      "params": {
+        "name": "prepare_icon_assets",
+        "arguments": {
+          "source": "<repository>/tests/fixtures/clean-app/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png",
+          "out": "<repository>/.swiftwork/video-demo/AppIcon.appiconset"
+        }
+      },
+      "duration_ms": 1486,
+      "response": {
+        "content": [
+          {
+            "type": "text",
+            "text": "icon-studio · PASS\ntarget: <repository>/tests/fixtures/clean-app/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png\nfindings: 1 (0 critical, 0 error, 0 warning, 1 info)\n  INFO ICON010 — Wrote 18 PNG slots and Contents.json to <repository>/.swiftwork/video-demo/AppIcon.appiconset.\n\n{\n  \"schema_version\": \"2.0\",\n  \"tool\": \"icon-studio\",\n  \"tool_version\": \"2.0.0\",\n  \"target\": \"<repository>/tests/fixtures/clean-app/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png\",\n  \"status\": \"pass\",\n  \"summary\": {\n    \"critical\": 0,\n    \"error\": 0,\n    \"warning\": 0,\n    \"info\": 1,\n    \"total\": 1\n  },\n  \"findings\": [\n    {\n      \"code\": \"ICON010\",\n      \"severity\": \"info\",\n      \"message\": \"Wrote 18 PNG slots and Contents.json to <repository>/.swiftwork/video-demo/AppIcon.appiconset.\",\n      \"hint\": \"Open the asset catalogue in Xcode to confirm the slots resolve.\"\n    }\n  ],\n  \"data\": {\n    \"output\": \"<repository>/.swiftwork/video-demo/AppIcon.appiconset\",\n    \"slots\": 18,\n    \"files\": [\n      \"AppIcon-iphone-20@2x.png\",\n      \"AppIcon-iphone-20@3x.png\",\n      \"AppIcon-iphone-29@2x.png\",\n      \"AppIcon-iphone-29@3x.png\",\n      \"AppIcon-iphone-40@2x.png\",\n      \"AppIcon-iphone-40@3x.png\",\n      \"AppIcon-iphone-60@2x.png\",\n      \"AppIcon-iphone-60@3x.png\",\n      \"AppIcon-ipad-20@1x.png\",\n      \"AppIcon-ipad-20@2x.png\",\n      \"AppIcon-ipad-29@1x.png\",\n      \"AppIcon-ipad-29@2x.png\",\n      \"AppIcon-ipad-40@1x.png\",\n      \"AppIcon-ipad-40@2x.png\",\n      \"AppIcon-ipad-76@1x.png\",\n      \"AppIcon-ipad-76@2x.png\",\n      \"AppIcon-ipad-83.5@2x.png\",\n      \"AppIcon-ios-marketing-1024@1x.png\"\n    ],\n    \"master\": {\n      \"width\": 1024,\n      \"height\": 1024,\n      \"has_alpha\": false\n    }\n  }\n}"
+          }
+        ],
+        "structuredContent": {
+          "schema_version": "2.0",
+          "tool": "icon-studio",
+          "tool_version": "2.0.0",
+          "target": "<repository>/tests/fixtures/clean-app/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png",
+          "status": "pass",
+          "summary": {
+            "critical": 0,
+            "error": 0,
+            "warning": 0,
+            "info": 1,
+            "total": 1
+          },
+          "findings": [
+            {
+              "code": "ICON010",
+              "severity": "info",
+              "message": "Wrote 18 PNG slots and Contents.json to <repository>/.swiftwork/video-demo/AppIcon.appiconset.",
+              "hint": "Open the asset catalogue in Xcode to confirm the slots resolve."
+            }
+          ],
+          "data": {
+            "output": "<repository>/.swiftwork/video-demo/AppIcon.appiconset",
+            "slots": 18,
+            "files": [
+              "AppIcon-iphone-20@2x.png",
+              "AppIcon-iphone-20@3x.png",
+              "AppIcon-iphone-29@2x.png",
+              "AppIcon-iphone-29@3x.png",
+              "AppIcon-iphone-40@2x.png",
+              "AppIcon-iphone-40@3x.png",
+              "AppIcon-iphone-60@2x.png",
+              "AppIcon-iphone-60@3x.png",
+              "AppIcon-ipad-20@1x.png",
+              "AppIcon-ipad-20@2x.png",
+              "AppIcon-ipad-29@1x.png",
+              "AppIcon-ipad-29@2x.png",
+              "AppIcon-ipad-40@1x.png",
+              "AppIcon-ipad-40@2x.png",
+              "AppIcon-ipad-76@1x.png",
+              "AppIcon-ipad-76@2x.png",
+              "AppIcon-ipad-83.5@2x.png",
+              "AppIcon-ios-marketing-1024@1x.png"
+            ],
+            "master": {
+              "width": 1024,
+              "height": 1024,
+              "has_alpha": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "title": "Verify the generated icon set",
+      "method": "tools/call",
+      "params": {
+        "name": "verify_icon_set",
+        "arguments": {
+          "path": "<repository>/.swiftwork/video-demo/AppIcon.appiconset"
+        }
+      },
+      "duration_ms": 34,
+      "response": {
+        "content": [
+          {
+            "type": "text",
+            "text": "icon-studio · PASS\ntarget: <repository>/.swiftwork/video-demo/AppIcon.appiconset\nfindings: 1 (0 critical, 0 error, 0 warning, 1 info)\n  INFO ICON023 — 18 slots verified.\n\n{\n  \"schema_version\": \"2.0\",\n  \"tool\": \"icon-studio\",\n  \"tool_version\": \"2.0.0\",\n  \"target\": \"<repository>/.swiftwork/video-demo/AppIcon.appiconset\",\n  \"status\": \"pass\",\n  \"summary\": {\n    \"critical\": 0,\n    \"error\": 0,\n    \"warning\": 0,\n    \"info\": 1,\n    \"total\": 1\n  },\n  \"findings\": [\n    {\n      \"code\": \"ICON023\",\n      \"severity\": \"info\",\n      \"message\": \"18 slots verified.\"\n    }\n  ],\n  \"data\": {\n    \"slots\": 18,\n    \"missing\": 0,\n    \"wrong_size\": 0\n  }\n}"
+          }
+        ],
+        "structuredContent": {
+          "schema_version": "2.0",
+          "tool": "icon-studio",
+          "tool_version": "2.0.0",
+          "target": "<repository>/.swiftwork/video-demo/AppIcon.appiconset",
+          "status": "pass",
+          "summary": {
+            "critical": 0,
+            "error": 0,
+            "warning": 0,
+            "info": 1,
+            "total": 1
+          },
+          "findings": [
+            {
+              "code": "ICON023",
+              "severity": "info",
+              "message": "18 slots verified."
+            }
+          ],
+          "data": {
+            "slots": 18,
+            "missing": 0,
+            "wrong_size": 0
+          }
+        }
+      }
+    },
+    {
+      "title": "Read the installed version and changes",
+      "method": "resources/read",
+      "params": {
+        "uri": "apple-native://release"
+      },
+      "duration_ms": 1,
+      "response": {
+        "contents": [
+          {
+            "uri": "apple-native://release",
+            "mimeType": "application/json",
+            "text": "{\n  \"version\": \"2.2.0\",\n  \"release_url\": \"https://github.com/kayaonur607/apple-native-engineer-mcp/releases/tag/mcp-v2.2.0\",\n  \"notes\": \"## [2.2.0] — 2026-11-07\\n\\n### Added\\n\\n- Developer/designer onboarding with `/apple-native-start`, task routing, Apple HIG/API provenance, and explicit build/runtime evidence boundaries.\\n- GitHub release launcher: checks published stable releases at MCP startup, installs into isolated version/commit directories, and activates only after a smoke test.\\n- Offline fallback to the last working installation, atomic activation, concurrent update locking, version pinning and an automatic update opt-out.\\n- `apple-native://release` exposes the installed version, release notes and update policy to the AI client. Connection instructions announce the version and relevant changes.\\n- Reproducible MCP demonstration evidence and a commercial/video production plan.\\n- Rewritten product README with measured audit/asset visuals, a 64-second captioned usage video, GIF preview, raw stdio session and media checksums.\\n\\n### Changed\\n\\n- GitHub is the sole product distribution and release channel. npm publication is disabled; npm is used only to install locked runtime dependencies.\\n- Version tags use `mcp-vMAJOR.MINOR.PATCH`. GitHub Release notes and this changelog describe each version.\\n- Updates take effect on the next MCP connection/restart. Existing sessions and customer source trees are never replaced by the launcher.\\n- Static audits no longer imply runtime validation or Apple approval.\",\n  \"update_policy\": \"GitHub launcher checks published stable releases on MCP restart. Running sessions keep their current version. Direct src/index.js runs do not auto-update.\"\n}"
+          }
+        ]
+      }
+    }
+  ],
+  "generated_icon_files": [
+    "AppIcon-ios-marketing-1024@1x.png",
+    "AppIcon-ipad-20@1x.png",
+    "AppIcon-ipad-20@2x.png",
+    "AppIcon-ipad-29@1x.png",
+    "AppIcon-ipad-29@2x.png",
+    "AppIcon-ipad-40@1x.png",
+    "AppIcon-ipad-40@2x.png",
+    "AppIcon-ipad-76@1x.png",
+    "AppIcon-ipad-76@2x.png",
+    "AppIcon-ipad-83.5@2x.png",
+    "AppIcon-iphone-20@2x.png",
+    "AppIcon-iphone-20@3x.png",
+    "AppIcon-iphone-29@2x.png",
+    "AppIcon-iphone-29@3x.png",
+    "AppIcon-iphone-40@2x.png",
+    "AppIcon-iphone-40@3x.png",
+    "AppIcon-iphone-60@2x.png",
+    "AppIcon-iphone-60@3x.png",
+    "Contents.json"
+  ]
+}

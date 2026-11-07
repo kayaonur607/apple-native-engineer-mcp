@@ -36,11 +36,11 @@ ln -s ~/Desktop/apple-native-engineer .gemini/skills/apple-native-engineer
 
 ## 3. The MCP server — tools, prompts and `@`-addressable resources
 
-The skill is instructions. The MCP server adds 16 tools that run the audits, and Gemini CLI maps its 12 prompts to
-slash commands and its 53 resources to `@` references.
+The skill is instructions. The MCP server adds 25 tools that run the audits, and Gemini CLI maps its 13 prompts to
+slash commands and its 55 resources to `@` references.
 
 ```bash
-gemini mcp add apple-native-engineer npx -y apple-native-engineer-mcp
+gemini mcp add apple-native-engineer node /absolute/path/apple-native-engineer-mcp/integrations/mcp-server/scripts/github-launcher.mjs
 ```
 
 Add `-s user` for `~/.gemini/settings.json` instead of the project scope, and `--trust` only if you accept
@@ -50,8 +50,8 @@ bypassing per-call confirmation. By hand, it is the usual `mcpServers` block:
 {
   "mcpServers": {
     "apple-native-engineer": {
-      "command": "npx",
-      "args": ["-y", "apple-native-engineer-mcp"],
+      "command": "node",
+      "args": ["/absolute/path/apple-native-engineer-mcp/integrations/mcp-server/scripts/github-launcher.mjs"],
       "env": { "APPLE_NATIVE_PYTHON": "python3" },
       "timeout": 120000
     }
@@ -84,3 +84,4 @@ Once linked, the skill is automatically indexed. When asking the agent about App
 
 > Create a production-grade Liquid Glass card component in SwiftUI with continuous squircle corners.
 ```
+Installation is from GitHub only. Replace `/absolute/path` with your checkout location. See the [update policy](../docs/UPDATES.md) for automatic updates, first-start prewarming, version pins and rollback.

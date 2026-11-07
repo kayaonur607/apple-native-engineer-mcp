@@ -27,7 +27,7 @@ Key Mandates:
 
 ## 2. The MCP server — agent mode with real checks
 
-Custom instructions are advice Copilot may follow. The MCP server is 16 tools that run the audits and return
+Custom instructions are advice Copilot may follow. The MCP server is 25 tools that run the audits and return
 finding codes, and VS Code's agent mode supports it directly.
 
 This repository already ships a portable `.mcp.json` at the root, which VS Code offers as a workspace
@@ -38,8 +38,8 @@ configuration. To write it by hand, use `.vscode/mcp.json` — note that this fi
   "servers": {
     "apple-native-engineer": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "apple-native-engineer-mcp"],
+      "command": "node",
+      "args": ["/absolute/path/apple-native-engineer-mcp/integrations/mcp-server/scripts/github-launcher.mjs"],
       "env": { "APPLE_NATIVE_PYTHON": "python3" }
     }
   }
@@ -47,7 +47,7 @@ configuration. To write it by hand, use `.vscode/mcp.json` — note that this fi
 ```
 
 Or use the guided flow: **Chat: Open Customizations → MCP Servers → Add Server → Command (stdio)**, and enter
-`npx -y apple-native-engineer-mcp`. Choose **Workspace** to share it with the repository, or **Copilot Global** to
+`node /absolute/path/apple-native-engineer-mcp/integrations/mcp-server/scripts/github-launcher.mjs`. Choose **Workspace** to share it with the repository, or **Copilot Global** to
 write `~/.copilot/mcp-config.json` for every project.
 
 Inside a session:
@@ -79,3 +79,4 @@ In VS Code or Xcode, prompt GitHub Copilot Chat:
 
 @workspace Audit our iPad navigation architecture for multi-column split view and Stage Manager adaptability.
 ```
+Installation is from GitHub only. Replace `/absolute/path` with your checkout location. See the [update policy](../docs/UPDATES.md) for automatic updates, first-start prewarming, version pins and rollback.

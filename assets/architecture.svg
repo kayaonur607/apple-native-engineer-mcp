@@ -1,92 +1,13 @@
-<svg width="1200" height="400" viewBox="0 0 1200 400" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="How apple-native-engineer works: agent, MCP server, auditors, project, verdict">
-  <defs>
-    <linearGradient id="aBg" x1="0" y1="0" x2="1200" y2="400" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#0B0E14"/>
-      <stop offset="1" stop-color="#090A0E"/>
-    </linearGradient>
-    <linearGradient id="aStroke" x1="0" y1="0" x2="1200" y2="400" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#2B3444"/>
-      <stop offset="1" stop-color="#161B24"/>
-    </linearGradient>
-    <linearGradient id="flow" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#0A84FF"/>
-      <stop offset="0.5" stop-color="#5E5CE6"/>
-      <stop offset="1" stop-color="#BF5AF2"/>
-    </linearGradient>
-    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0 0L10 5L0 10z" fill="#4C586E"/>
-    </marker>
-    <pattern id="aGrid" width="32" height="32" patternUnits="userSpaceOnUse">
-      <path d="M32 0H0V32" stroke="#FFFFFF" stroke-opacity="0.02"/>
-    </pattern>
-  </defs>
-
-  <rect width="1200" height="400" rx="22" fill="url(#aBg)"/>
-  <rect width="1200" height="400" rx="22" fill="url(#aGrid)"/>
-  <rect x="0.75" y="0.75" width="1198.5" height="398.5" rx="21.25" stroke="#FFFFFF" stroke-opacity="0.07" stroke-width="1.5"/>
-
-  <g font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif">
-    <text x="60" y="58" font-size="12.5" font-weight="600" letter-spacing="2.2" fill="#6E7A8F">HOW IT WORKS</text>
-    <text x="60" y="88" font-size="17" font-weight="500" fill="#9AA6BA">The agent asks, the auditors answer, the gate decides.</text>
-  </g>
-
-  <!-- connectors -->
-  <g stroke="#4C586E" stroke-width="1.5" stroke-dasharray="4 5">
-    <line x1="322" y1="180" x2="372" y2="180" marker-end="url(#arrow)"/>
-    <line x1="586" y1="180" x2="636" y2="180" marker-end="url(#arrow)"/>
-    <line x1="850" y1="180" x2="900" y2="180" marker-end="url(#arrow)"/>
-  </g>
-
-  <!-- box 1: agent -->
-  <g>
-    <rect x="60" y="110" width="260" height="140" rx="14" fill="#0E1118" stroke="#232B39"/>
-    <text x="84" y="140" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="600" letter-spacing="1.6" fill="#5E6B80">01 · CLIENT</text>
-    <text x="84" y="172" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="17" font-weight="600" fill="#E8ECF3">Your AI agent</text>
-    <text x="84" y="198" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12.5" fill="#8492A6">Claude · Cursor · Codex</text>
-    <text x="84" y="218" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12.5" fill="#8492A6">Gemini · Copilot · any MCP</text>
-  </g>
-
-  <!-- box 2: mcp server -->
-  <g>
-    <rect x="376" y="110" width="210" height="140" rx="14" fill="#0E1118" stroke="#232B39"/>
-    <text x="398" y="140" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="600" letter-spacing="1.6" fill="#5E6B80">02 · PROTOCOL</text>
-    <text x="398" y="172" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="17" font-weight="600" fill="#E8ECF3">MCP server</text>
-    <text x="398" y="198" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12.5" fill="#8492A6">13 tools</text>
-    <text x="398" y="218" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12.5" fill="#8492A6">52 resources · 12 prompts</text>
-  </g>
-
-  <!-- box 3: auditors -->
-  <g>
-    <rect x="640" y="110" width="210" height="140" rx="14" fill="#0E1118" stroke="#283246"/>
-    <text x="662" y="140" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="600" letter-spacing="1.6" fill="#5E6B80">03 · EXECUTION</text>
-    <text x="662" y="172" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="17" font-weight="600" fill="#E8ECF3">18 CLI tools</text>
-    <text x="662" y="198" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12.5" fill="#8492A6">Python 3 · stdlib only</text>
-    <text x="662" y="218" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12.5" fill="#8492A6">1–120 ms each</text>
-  </g>
-
-  <!-- box 4: verdict -->
-  <g>
-    <rect x="904" y="110" width="236" height="140" rx="14" fill="#0E1118" stroke="#2A3B33"/>
-    <text x="926" y="140" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="600" letter-spacing="1.6" fill="#5E6B80">04 · DECISION</text>
-    <text x="926" y="172" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="17" font-weight="600" fill="#E8ECF3">Release gate</text>
-    <g font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="11.5">
-      <rect x="926" y="188" width="86" height="22" rx="6" fill="#30D158" fill-opacity="0.14" stroke="#30D158" stroke-opacity="0.4"/>
-      <text x="938" y="203" fill="#6FE08A">READY</text>
-      <rect x="1022" y="188" width="96" height="22" rx="6" fill="#FF453A" fill-opacity="0.12" stroke="#FF453A" stroke-opacity="0.38"/>
-      <text x="1034" y="203" fill="#FF7A70">BLOCKED</text>
-    </g>
-    <text x="926" y="232" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11.5" fill="#6E7A8F">weighted · uninspected ≠ passing</text>
-  </g>
-
-  <!-- bottom band -->
-  <g>
-    <rect x="60" y="288" width="1080" height="72" rx="12" fill="#0C1017" stroke="#1E2634" stroke-dasharray="0"/>
-    <rect x="60" y="288" width="4" height="72" rx="2" fill="url(#flow)"/>
-    <text x="88" y="316" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12.5" font-weight="600" fill="#A9B4C6">
-      Every answer is the same versioned envelope — status · summary · findings[] · data{}
-    </text>
-    <text x="88" y="340" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="11.5" fill="#6B7789">
-      {"status":"fail","findings":[{"code":"SWU003","severity":"error","file":"App/HomeView.swift","line":42}]}
-    </text>
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="550" viewBox="0 0 1600 550" role="img" aria-label="GitHub releases feed the local version launcher. AI client calls local MCP tools and receives findings. Builds and runtime checks are separate.">
+<rect width="1600" height="550" rx="24" fill="#0b1018"/>
+<g font-family="-apple-system,BlinkMacSystemFont,Arial,sans-serif">
+<text x="60" y="65" fill="#75e0bd" font-size="22" letter-spacing="2">HOW THE WORKFLOW FITS TOGETHER</text>
+<text x="60" y="115" fill="#a2b1c6" font-size="26">Versioned delivery. Local tools. Explicit evidence.</text>
+<g fill="#141d2a" stroke="#29374b" stroke-width="2"><rect x="60" y="185" width="330" height="165" rx="18"/><rect x="445" y="185" width="330" height="165" rx="18"/><rect x="830" y="185" width="330" height="165" rx="18"/><rect x="1215" y="185" width="325" height="165" rx="18"/></g>
+<g fill="#edf3fb" font-size="27" font-weight="600"><text x="90" y="235">GitHub Releases</text><text x="475" y="235">Local launcher</text><text x="860" y="235">AI + MCP client</text><text x="1245" y="235">Local MCP tools</text></g>
+<g fill="#a2b1c6" font-size="21"><text x="90" y="282">Published stable versions</text><text x="90" y="315">Changelog per release</text><text x="475" y="282">Stage + smoke-test</text><text x="475" y="315">Activate on restart</text><text x="860" y="282">Reason and implement</text><text x="860" y="315">Invoke available tools</text><text x="1245" y="282">Inspect, research, verify</text><text x="1245" y="315">Return structured results</text></g>
+<g fill="#75e0bd" font-size="36"><text x="400" y="278">→</text><text x="785" y="278">→</text><text x="1170" y="278">⇄</text></g>
+<path d="M60 395H1540" stroke="#29374b"/>
+<text x="60" y="445" fill="#edf3fb" font-size="25">Evidence returned: finding codes · file/line · source URLs · asset validation · release verdict</text>
+<text x="60" y="493" fill="#a2b1c6" font-size="22">Separate proof still required: compilation, device behaviour, visual accessibility and App Store approval.</text>
+</g></svg>

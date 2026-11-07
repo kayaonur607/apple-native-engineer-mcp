@@ -1,6 +1,6 @@
 {
   "name": "apple-native-engineer-mcp",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "mcpName": "io.github.kayaonur607/apple-native-engineer",
   "description": "MCP server for Apple-platform engineering: 14 verifiable audits (SwiftUI, Liquid Glass, accessibility, privacy manifest, localisation, widgets, App Store) plus the reference knowledge base as resources, for any MCP client.",
   "license": "MIT",
@@ -53,10 +53,14 @@
     "telemetry:preview": "node src/index.js --telemetry-preview",
     "vendor": "node scripts/pack-vendor.mjs",
     "prepack": "node scripts/pack-vendor.mjs",
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "demo:evidence": "node scripts/demo-evidence.mjs",
+    "start:github": "node scripts/github-launcher.mjs",
+    "demo:record": "node scripts/record-demo.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
     "zod": "^4.6.7"
-  }
+  },
+  "private": true
 }

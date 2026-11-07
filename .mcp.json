@@ -2,7 +2,9 @@
   "mcpServers": {
     "apple-native-engineer": {
       "command": "node",
-      "args": ["integrations/mcp-server/src/index.js"],
+      "args": [
+        "integrations/mcp-server/scripts/github-launcher.mjs"
+      ],
       "env": {
         "APPLE_NATIVE_PYTHON": "python3"
       }

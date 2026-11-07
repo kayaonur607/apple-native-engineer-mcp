@@ -36,6 +36,7 @@ export const VENDORED = [
   "examples",
   "commands",
   "SKILL.md",
+  "CHANGELOG.md",
   "LICENSE",
   "README.md",
 ];

@@ -104,3 +104,9 @@ are present. `.p8` keys are gitignored at the repository root.
 The server has two runtime dependencies (`@modelcontextprotocol/sdk`, `zod`) and the auditors use the Python
 standard library only; `cryptography` is required solely for `app_store_connect`. That is the whole supply chain,
 by design — every additional dependency is an auditor that cannot run offline.
+
+## Automatic update trust
+
+The optional GitHub launcher checks published stable Releases at startup and executes the selected repository code locally. It contacts GitHub and the dependency registry; it never needs customer source code for the update. Treat repository release permissions as code-execution permissions. The launcher checks the tag/package version and inventory, uses lockfile integrity for dependencies, and stages before atomic activation. It does not implement publisher-signature verification. Enable GitHub immutable releases and protect maintainer access.
+
+Set `APPLE_NATIVE_AUTO_UPDATE=off` to stop release checks, or `APPLE_NATIVE_VERSION` to pin a published version. Pinning prevents automatic major upgrades. A failed install retains the active cache; startup smoke tests cannot exclude runtime regressions. The host client's own data policy still applies to any returned findings. Full details: [update policy](docs/UPDATES.md).

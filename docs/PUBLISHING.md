@@ -1,144 +1,49 @@
-# Publishing
+# GitHub release procedure
 
-Everything a maintainer has to do by hand, in order, with the command that proves each step worked. The point of
-writing it down is that a release has one path: if a step is not here, it is not part of releasing.
+GitHub is the sole product distribution channel. `package.json` is private to block accidental npm publication. npm installs the locked MCP runtime dependencies; no `NPM_TOKEN`, npm publication, Smithery submission or hosted server is needed.
 
-Nothing here is automated by choice. Two steps — the npm token and the registry submission — belong to a human
-account, and pretending otherwise produces a workflow that fails halfway.
+## Prepare a version
 
----
+Choose a SemVer patch/minor/major according to compatibility. Keep these versions synchronized:
 
-## 0. Preconditions, once per machine
+- `integrations/mcp-server/package.json` and `package-lock.json` (root and root package)
+- `integrations/mcp-server/src/constants.js`
+- `integrations/mcp-server/server.json` (repository metadata; no registry package)
+- `SKILL.md` metadata
 
-| Requirement | Check |
-| :--- | :--- |
-| Node 20+ | `node --version` |
-| Python 3.10+ | `python3 --version` |
-| An npm account with publish rights to `apple-native-engineer-mcp` | `npm whoami` |
-| `NPM_TOKEN` set as a repository secret | GitHub → Settings → Secrets → Actions |
-
-`NPM_TOKEN` must be a **granular automation token** scoped to this package. A classic token works, but it carries
-write access to every package you own, which is a larger blast radius than a release needs.
-
----
-
-## 1. Decide the version
-
-The MCP server versions independently of the reference library, and its tag prefix is `mcp-v`:
-
-| Change | Bump |
-| :--- | :--- |
-| A new tool, transport, or flag | minor (`2.1.0` → `2.2.0`) |
-| A fix inside an existing tool's behaviour | patch (`2.1.0` → `2.1.1`) |
-| A removed tool, a renamed argument, an envelope change | major (`2.1.0` → `3.0.0`) |
-
-The version lives in three files and a test fails if they disagree:
-
-```
-integrations/mcp-server/package.json     "version"
-integrations/mcp-server/server.json      "version" and packages[0].version
-integrations/mcp-server/src/constants.js SERVER_VERSION
-```
-
-Update all three, then:
+Add a dated `## [VERSION]` section to [CHANGELOG.md](../CHANGELOG.md) with user-visible additions, fixes and breaking changes. Update the README counts if the inventory or test count changed.
 
 ```bash
-cd integrations/mcp-server
-npm install --package-lock-only     # the lockfile carries the version too
-node --test test/metadata.test.js   # proves the three agree
+./scripts/verify.sh
+node integrations/mcp-server/scripts/demo-evidence.mjs
+node scripts/release-notes.mjs mcp-v2.2.0
 ```
 
----
+## Publish
 
-## 2. Prove the release
+Commit the verified changes, then push the release commit and tag:
 
 ```bash
-cd <repository root>
-./scripts/verify.sh                 # 5 stages, must print "passed: 5 failed: 0"
-cd integrations/mcp-server && npm test
+git tag -a mcp-v2.2.0 -m "Apple Native Engineer v2.2.0"
+git push origin HEAD
+git push origin mcp-v2.2.0
 ```
 
-Then check the artifact itself, not the source tree. This is the step that catches a `vendor/` that did not stage:
+`.github/workflows/publish.yml` runs all verification gates on macOS, checks that tag and package version agree, extracts the exact changelog section, then creates a GitHub Release. A tag alone is not an update: clients discover only published stable Releases.
+
+Before the first release, enable [immutable releases](https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/establish-provenance-and-integrity/prevent-release-changes) in the repository settings and ensure the Actions token can create releases. Do not move or reuse published tags. CI does not claim to verify publisher signatures or install an authorization/billing service.
+
+Watch the release workflow and confirm the public artifact:
 
 ```bash
-cd integrations/mcp-server
-npm pack --pack-destination /tmp
-rm -rf /tmp/install-check && mkdir /tmp/install-check && cd /tmp/install-check
-npm init -y > /dev/null
-npm install /tmp/apple-native-engineer-mcp-<version>.tgz
-./node_modules/.bin/apple-native-engineer-mcp --version      # must print the new version
-./node_modules/.bin/apple-native-engineer-mcp --doctor       # must not report a missing auditor
-./node_modules/.bin/apple-native-engineer-mcp --selftest     # 25 tools, 53 resources, 12 prompts
+gh run list --workflow publish.yml --limit 3
+gh release view mcp-v2.2.0
 ```
 
-A run that only succeeds in the repository has proven nothing about what users install.
+Then test the public path using a fresh temporary `APPLE_NATIVE_UPDATE_DIR` and the GitHub launcher. Confirm its `--version`, `--selftest` and `apple-native://release` report the published version. Customer auto-update is live only after this succeeds.
 
----
+## Rollback and repair
 
-## 3. Tag and publish
+Users can pin a known version with `APPLE_NATIVE_VERSION=mcp-v2.2.0` and reconnect. A failed installation preserves the cached working version. For a bad published release, publish a new patch and explain the regression; do not edit a tag's source. A runtime regression can pass the startup smoke test, so report it transparently and provide a pin immediately.
 
-The workflow at `.github/workflows/publish.yml` runs on an `mcp-v*` tag: it re-runs the tests, re-stages
-`vendor/`, publishes with npm provenance, then installs the published tarball in a clean directory and runs
-`--selftest` against it. If any of that fails, the release failed — even if npm already has the package.
-
-```bash
-git tag mcp-v2.1.0
-git push origin mcp-v2.1.0
-```
-
-Watch it: **Actions → Publish**. Provenance is why `--provenance` is in the workflow: it attaches a signed
-statement that the tarball was built from this commit by this workflow, which is the only supply-chain claim that
-is worth anything to a user.
-
-Emergency manual publish (only if Actions is down):
-
-```bash
-cd integrations/mcp-server
-npm publish --access public --provenance
-```
-
-A published version cannot be unpublished after 72 hours. If the release is wrong, publish a patch — do not
-`npm unpublish`.
-
----
-
-## 4. Submit to the registries
-
-Publishing to npm makes the package installable. It does not make it *findable*. These submissions are manual
-and each has its own review.
-
-| Registry | What to submit | Notes |
-| :--- | :--- | :--- |
-| Official MCP registry | `integrations/mcp-server/server.json` | `mcpName` in `package.json` must equal `server.json`'s `name`; a test enforces that |
-| Smithery | `integrations/mcp-server/smithery.yaml` | The config schema exposes only the Python interpreter and the telemetry mode |
-| Glama / mcp.so / PulseMCP | the repository URL and the package name | They index from npm; no manifest needed |
-| Docker Hub | `docker build -f integrations/mcp-server/Dockerfile -t <user>/apple-native-engineer .` | Build context is the repository root |
-
-For the official registry, the manifest is validated against
-`https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json`; the `$schema` key in `server.json`
-points at it. Re-read that schema before a major release rather than assuming it is stable.
-
----
-
-## 5. After publishing
-
-```bash
-npx -y apple-native-engineer-mcp@latest --selftest
-```
-
-Then, and only then, move the `Unreleased` section of `CHANGELOG.md` into a dated release and update the version
-in the README badge if the test count moved.
-
----
-
-## Rollback
-
-| Situation | Action |
-| :--- | :--- |
-| The tarball is broken | Publish a patch with the fix. Deprecate the bad version: `npm deprecate apple-native-engineer-mcp@<version> "broken vendored tools; use <fixed>"` |
-| The registry manifest is wrong | Re-submit; the registry reads `server.json` from the tagged commit |
-| The Docker image is wrong | Re-tag the image only. The npm artifact and the image share source, not version tags |
-| A tool regressed | Revert the commit, bump a patch, publish. Never edit a published tarball |
-
-`npm deprecate` is the honest tool for a bad release: it keeps the install working for anyone who pinned it, while
-telling every new install what to use instead.
+Details: [installation and update policy](UPDATES.md).

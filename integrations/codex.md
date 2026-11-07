@@ -17,13 +17,13 @@ OpenAI Codex discovers skills using the canonical Agent Skills directory structu
 
 ## 2. Installation Methods
 
-### Method A: Automated via Vercel Skills CLI
+### Method A: Local installer from the GitHub checkout
 ```bash
 # Project-level install
-npx skills add kayaonur607/apple-native-engineer-mcp -a codex
+./scripts/install-skill.sh
 
 # Global install
-npx skills add kayaonur607/apple-native-engineer-mcp -g -a codex
+./scripts/install-skill.sh
 ```
 
 ### Method B: Manual Symlink / Directory Copy
@@ -41,22 +41,20 @@ ln -s ~/Desktop/apple-native-engineer ~/.agents/skills/apple-native-engineer
 
 ## 3. The MCP server — stronger than the skill
 
-The skill is instructions. The MCP server is instructions **plus 16 tools that actually check the code**, 53
-resources and 12 prompts. If Codex is your daily client, use both: the skill sets policy, the server enforces it.
+The skill is instructions. The MCP server is instructions **plus 25 tools that actually check the code**, 53
+resources and 13 prompts. If Codex is your daily client, use both: the skill sets policy, the server enforces it.
 
 ```bash
-codex mcp add apple-native-engineer -- npx -y apple-native-engineer-mcp
+codex mcp add apple-native-engineer -- node /absolute/path/apple-native-engineer-mcp/integrations/mcp-server/scripts/github-launcher.mjs
 ```
 
 Or in `~/.codex/config.toml` (project-scoped: `.codex/config.toml`, trusted projects only):
 
 ```toml
 [mcp_servers.apple-native-engineer]
-command = "npx"
-args = ["-y", "apple-native-engineer-mcp"]
-# Every tool is read-only, so this never prompts for writes.
-default_tools_approval_mode = "writes"
-startup_timeout_sec = 20
+command = "node"
+args = ["/absolute/path/apple-native-engineer-mcp/integrations/mcp-server/scripts/github-launcher.mjs"]
+startup_timeout_sec = 600
 tool_timeout_sec = 120
 
 [mcp_servers.apple-native-engineer.env]
@@ -87,3 +85,6 @@ $ codex "Review ContentView.swift for Apple HIG compliance and touch target size
 
 $ codex "Design a native Liquid Glass card using SwiftUI materials and squircle continuous corners."
 ```
+Installation is from GitHub only. Replace `/absolute/path` with your checkout location. See the [update policy](../docs/UPDATES.md) for automatic updates, first-start prewarming, version pins and rollback.
+
+Codex MCP configuration reference: [official documentation](https://learn.chatgpt.com/docs/extend/mcp?surface=cli).
