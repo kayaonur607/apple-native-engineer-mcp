@@ -1,0 +1,10 @@
+{
+  "en-US": {
+    "01-today": {"headline": "Plan your day in a minute", "subhead": "Focus, done and up next at a glance"},
+    "02-insights": {"headline": "See your week clearly", "subhead": "Progress you can feel"}
+  },
+  "tr-TR": {
+    "01-today": {"headline": "Gününü bir dakikada planla", "subhead": "Odak, tamamlananlar ve sıradakiler tek bakışta"},
+    "02-insights": {"headline": "Haftanı net gör", "subhead": "Hissedilen ilerleme"}
+  }
+}

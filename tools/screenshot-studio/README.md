@@ -1,15 +1,16 @@
 # Screenshot Studio
 
-Capture from a booted simulator and validate App Store slots.
+Capture App Store screenshots in the Simulator, audit them against Apple's slots, and compose localized marketing frames rendered natively on macOS.
 
 Part of [apple-native-engineer-mcp](../../README.md). Exposed over MCP as a matching tool.
 
 ## Usage
 
 ```bash
-python3 tools/screenshot-studio/screenshot_studio.py --out shot.png
-python3 tools/screenshot-studio/screenshot_studio.py --screenshots ./shots
-python3 tools/screenshot-studio/compose_marketing.py --screenshots ./shots --out ./frames --headline "Plan your week"
+python3 tools/screenshot-studio/capture_batch.py plan.json --out shots --dry-run
+python3 tools/screenshot-studio/capture_batch.py plan.json --out shots
+python3 tools/screenshot-studio/screenshot_studio.py --screenshots ./shots --platforms ios,ipados
+python3 tools/screenshot-studio/compose_marketing.py --screenshots ./shots --out ./frames --captions captions.json --render
 ```
 
 Every tool accepts `--json` (stable envelope, see below), `--strict` (warnings become failures) and
@@ -17,18 +18,22 @@ Every tool accepts `--json` (stable envelope, see below), `--strict` (warnings b
 
 ## What it checks
 
-- booted simulator discovery via `xcrun simctl`
-- capture and immediate dimension validation
-- slot matching for iPhone 6.9"/6.7"/6.5", iPad 13", Watch, Vision Pro
-- marketing composition at exact App Store dimensions (SVG, screenshot embedded), optional rasterisation
+- `capture_batch.py`: devices × locales × light/dark in the Simulator, 9:41 status bar, `-AppleLanguages`/`-AppleLocale`, per-screen launch arguments or deep links, `manifest.json` provenance
+- Simulator PNGs carry alpha; captures are flattened to opaque RGB natively (App Store Connect rejects alpha)
+- slot table from `data/app-store-specs.json` (Apple's published specification, dated): iPhone Duo, 6.9"–3.5", iPad 13"–9.7", Mac, Apple TV, Vision Pro, every Watch size
+- per-locale sets: 1–10 per size, mixed orientations, one Watch size across locales, required sets per platform
+- `compose_marketing.py`: localized captions, drawn device frame with Dynamic Island, right-to-left layout, SVG plus native CoreGraphics/San Francisco PNG at the exact slot size
 
 ## Findings
 
 | Code | Meaning |
 | :--- | :--- |
-| `SHOT002` | no booted simulator |
-| `SHOT004` | capture failed |
 | `SHOT011` | dimensions match no slot |
+| `SHOT013` | alpha channel (rejected) |
+| `SHOT021` | more than 10 in a set |
+| `SHOT022` | required set missing |
+| `SHOT115` | locale fell back to other copy |
+| `CAP032` | capture still has alpha |
 
 ## Output contract
 

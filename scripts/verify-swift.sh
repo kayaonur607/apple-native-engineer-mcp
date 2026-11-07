@@ -72,6 +72,7 @@ fi
 
 compile "fixture: clean-app/App"        ${APP_FILES[@]+"${APP_FILES[@]}"}
 compile "fixture: clean-app/Widgets"    tests/fixtures/clean-app/Widgets/*.swift
+compile "example: screenshot-pipeline" examples/screenshot-pipeline/PlannerDemoApp.swift
 
 # 2. Documentation snippets (syntax only) -----------------------------------
 SNIPPET_DIR="$WORK/snippets"
