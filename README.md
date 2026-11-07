@@ -1,9 +1,5 @@
 <p align="center">
-  <img src="assets/logo.svg" alt="Apple Native Engineer logo" width="80" height="80">
-</p>
-
-<p align="center">
-  <img src="assets/hero.svg" alt="Apple Native Engineer — Build native. Verify every claim." width="100%">
+  <img src="assets/repository-cover.png" alt="Apple Native Engineer — Native tools. Inspectable evidence. Free and open source." width="100%">
 </p>
 
 <p align="center">
