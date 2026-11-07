@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "Habits",
+    "slug": "habits",
+    "version": "1.0.0",
+    "ios": {
+      "supportsTablet": true
+    },
+    "plugins": ["expo-camera", "expo-location"]
+  }
+}

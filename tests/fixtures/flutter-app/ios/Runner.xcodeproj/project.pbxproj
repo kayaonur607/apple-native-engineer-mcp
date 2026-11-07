@@ -1,0 +1,29 @@
+// !$*UTF8*$!
+{
+	objects = {
+		97C146E61CF9000F007C117D /* Project object */ = {
+			isa = PBXProject;
+			developmentRegion = en;
+			knownRegions = (
+				en,
+				Base,
+			);
+		};
+		97C146ED1CF9000F007C117D /* Runner */ = {
+			isa = PBXNativeTarget;
+			name = Runner;
+		};
+		97C147071CF9000F007C117D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = ABCDE12345;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = dev.example.habits;
+				SDKROOT = iphoneos;
+			};
+			name = Release;
+		};
+	};
+}
