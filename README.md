@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/kayaonur607/apple-native-engineer-mcp/releases"><img src="https://img.shields.io/badge/version-v2.5.0-75E0BD" alt="Source version v2.5.0"></a>
+  <a href="https://github.com/kayaonur607/apple-native-engineer-mcp/releases"><img src="https://img.shields.io/badge/version-v2.5.1-75E0BD" alt="Source version v2.5.1"></a>
   <a href="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml"><img src="https://github.com/kayaonur607/apple-native-engineer-mcp/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/tests-254_passing-75E0BD" alt="254 tests">
   <img src="https://img.shields.io/badge/platforms-iOS_·_iPadOS_·_iPhone_Duo_·_macOS_·_watchOS_·_tvOS_·_visionOS-9BAAC0" alt="Platforms">
@@ -270,14 +270,14 @@ Store-wide guides: [product page assets](references/app-store-product-page-asset
 
 ## Versions and automatic updates
 
-**Current source version: v2.5.0.** See [CHANGELOG.md](CHANGELOG.md) and
+**Current source version: v2.5.1.** See [CHANGELOG.md](CHANGELOG.md) and
 [GitHub Releases](https://github.com/kayaonur607/apple-native-engineer-mcp/releases).
 
 The GitHub launcher checks published stable releases **when the MCP process starts**, stages the candidate in a
 separate directory, installs locked dependencies, runs an inventory smoke test and only then activates it.
 Existing sessions keep their version; failed updates keep the working one.
 
-- `APPLE_NATIVE_VERSION=mcp-v2.5.0` pins a version or rolls back.
+- `APPLE_NATIVE_VERSION=mcp-v2.5.1` pins a version or rolls back.
 - `APPLE_NATIVE_AUTO_UPDATE=off` disables the update check.
 
 Full policy: [docs/UPDATES.md](docs/UPDATES.md).

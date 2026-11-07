@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
   "name": "io.github.kayaonur607/apple-native-engineer",
   "description": "Apple-platform design engineering for AI agents (Swift, Flutter, React Native, Expo, Capacitor, MAUI, KMP): HIG research, audits, Simulator screenshots with native marketing frames, App Store specs, and archive/TestFlight/notarization plans.",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "websiteUrl": "https://github.com/kayaonur607/apple-native-engineer-mcp",
   "repository": {
     "url": "https://github.com/kayaonur607/apple-native-engineer-mcp",

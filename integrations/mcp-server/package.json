@@ -1,6 +1,6 @@
 {
   "name": "apple-native-engineer-mcp",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "mcpName": "io.github.kayaonur607/apple-native-engineer",
   "description": "MCP server for Apple-platform design engineering in Swift, Flutter, React Native, Expo, Capacitor, .NET MAUI and KMP: HIG research, audits, Simulator screenshots with native marketing frames, App Store specs, release gate and distribution plans.",
   "license": "MIT",
