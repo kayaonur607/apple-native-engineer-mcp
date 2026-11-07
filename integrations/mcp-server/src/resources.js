@@ -18,6 +18,13 @@ const SECTIONS = [
   { dir: "examples", prefix: "examples", title: "Production example" },
 ];
 
+const DATA_RESOURCES = [
+  ["app-store-specs", "app-store-specs.json", "Apple App Store asset specifications",
+    "Screenshot slots, app preview and icon specifications transcribed from Apple, with source URLs and date."],
+  ["hig-catalog", "hig-catalog.json", "Human Interface Guidelines index",
+    "Every HIG page with its section, title, abstract and URL, from Apple's table of contents."],
+];
+
 const CONTENT_TYPES = {
   ".md": "text/markdown",
   ".json": "application/json",
@@ -57,6 +64,14 @@ export function registerResources(server) {
     description: "Current MCP version, GitHub release notes and automatic update policy.",
     mimeType: "application/json",
   }, async uri => ({ contents: [{ uri: uri.href, mimeType: "application/json", text: JSON.stringify(releaseInformation(), null, 2) }] }));
+  // Apple's published specifications and HIG index, as data the client can read directly.
+  for (const [name, file, title, description] of DATA_RESOURCES) {
+    const absolute = path.join(REPO_ROOT, "data", file);
+    if (!fs.existsSync(absolute)) continue;
+    server.registerResource(`data-${name}`, `apple-native://data/${name}`, {
+      title, description, mimeType: "application/json",
+    }, async (uri) => ({ contents: [{ uri: uri.href, mimeType: "application/json", text: fs.readFileSync(absolute, "utf8") }] }));
+  }
   // The skill document itself.
   const skillPath = path.join(REPO_ROOT, "SKILL.md");
   if (fs.existsSync(skillPath)) {
@@ -106,6 +121,9 @@ export function registerResources(server) {
 /** Exposed for tests and for `--list-resources` diagnostics. */
 export function resourceInventory() {
   const items = [{ uri: "apple-native://release", file: "CHANGELOG.md" }, { uri: "apple-native://skill", file: "SKILL.md" }];
+  for (const [name, file] of DATA_RESOURCES) {
+    if (fs.existsSync(path.join(REPO_ROOT, "data", file))) items.push({ uri: `apple-native://data/${name}`, file: `data/${file}` });
+  }
   for (const section of SECTIONS) {
     for (const filename of listMarkdown(section.dir)) {
       items.push({

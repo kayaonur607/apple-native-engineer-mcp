@@ -56,8 +56,9 @@ export const MODULES = [
   {
     id: "apple-docs-research",
     label: "Apple documentation",
-    description: "Live research against developer.apple.com: search, read, availability and HIG pages.",
+    description: "Live research against developer.apple.com: search, read, availability, HIG pages and an offline HIG index.",
     tools: [
+      "search_apple_guidelines",
       "search_apple_documentation",
       "read_apple_documentation",
       "inspect_apple_api_availability",
@@ -82,8 +83,16 @@ export const MODULES = [
   {
     id: "app-store-assets",
     label: "App Store assets",
-    description: "Icon and screenshot validation.",
-    tools: ["validate_app_icon", "prepare_icon_assets", "verify_icon_set", "compose_marketing_screenshots"],
+    description: "Apple's asset specs, icons, Simulator screenshot capture, screenshot audit and native marketing frames.",
+    tools: [
+      "get_app_store_specs",
+      "validate_app_icon",
+      "prepare_icon_assets",
+      "verify_icon_set",
+      "capture_screenshots",
+      "audit_screenshots",
+      "compose_marketing_screenshots",
+    ],
     defaultEnabled: true,
   },
   {
@@ -91,6 +100,13 @@ export const MODULES = [
     label: "Release readiness",
     description: "The weighted gate that can return BLOCKED instead of a compliment.",
     tools: ["generate_release_report"],
+    defaultEnabled: true,
+  },
+  {
+    id: "distribution",
+    label: "Distribution",
+    description: "Archive, ExportOptions, App Store/TestFlight upload and Developer ID notarization plans. Executes nothing.",
+    tools: ["plan_distribution"],
     defaultEnabled: true,
   },
   {

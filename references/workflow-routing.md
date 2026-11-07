@@ -4,14 +4,18 @@ This guide routes intent to the server's existing capabilities. Discover the cur
 
 | User goal | First action | Evidence to collect |
 | --- | --- | --- |
+| Build a new app from an idea | `/apple-native-start`, then `inspect_apple_project` once a project exists | Platforms, deployment floor, first runnable slice, build result |
 | Understand an existing app | `inspect_apple_project`, then `audit_project` | Targets, deployment floors, attributed finding codes |
-| Design a native screen | `find_apple_guidelines`, read design references | HIG source URLs, screen states, semantic type/colour decisions |
+| Design a native screen | `/apple-native-new-screen`; `search_apple_guidelines` → `find_apple_guidelines` | HIG source URLs, screen states, semantic type/colour decisions |
+| Platform-specific work | `/apple-native-ios`, `-ipados`, `-macos`, `-watchos`, `-tvos`, `-visionos`, `-iphone-duo` | Platform reference, verified API availability, captures on that platform |
 | Implement or fix SwiftUI | Inspect project, research API availability | Actual build result, `review_diff`, runtime observations where available |
 | Choose SF Symbols | `validate_sf_symbols` | Symbol existence and platform availability |
 | Create a design system | `forge_design_tokens` | Generated SwiftUI and asset files; validate the resulting app |
-| Prepare App Store assets | Icon tools, screenshot composition | Validated dimensions; label compositions and preserve real captures |
+| App icon | `get_app_store_specs`, `prepare_icon_assets`, `verify_icon_set` | Per-platform icon canvas, generated slots, verification |
+| App Store screenshots | `/apple-native-screenshots`: `capture_screenshots` → `audit_screenshots` → `compose_marketing_screenshots` | Real captures with manifest, opaque PNGs at slot sizes, per-locale coverage |
 | Review store listing | Metadata, ASO and App Store review tools | Character budgets and findings; no invented market data |
 | Prepare a release | `generate_release_report` | Gate verdict, uninspected items, separate runtime checklist |
+| Ship a build | `/apple-native-distribute`: `plan_distribution` | Preflight findings, ExportOptions, approved commands and their results |
 | Diagnose setup | `check_environment` | Missing runtimes, Xcode and credentials; never print secret values |
 
 ## Evidence hierarchy

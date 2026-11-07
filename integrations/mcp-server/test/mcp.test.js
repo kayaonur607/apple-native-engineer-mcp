@@ -121,7 +121,7 @@ describe("apple-native-engineer MCP server", () => {
     const { contents } = await client.readResource({ uri: "apple-native://release" });
     const release = JSON.parse(contents[0].text);
     assert.equal(release.version, SERVER_VERSION);
-    assert.match(release.notes, /GitHub release launcher/);
+    assert.ok(release.notes.startsWith(`## [${SERVER_VERSION}]`), "notes are the installed version's changelog section");
     assert.match(release.update_policy, /restart/);
     assert.ok(release.release_url.endsWith(`mcp-v${SERVER_VERSION}`));
   });

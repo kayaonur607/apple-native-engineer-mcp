@@ -428,6 +428,25 @@ export const TOOL_SPECS = [
       runTool("tools/apple-docs-research/apple_docs.py", ["guidelines", args.page]),
   },
   {
+    name: "search_apple_guidelines",
+    title: "Search the Human Interface Guidelines",
+    description:
+      "Finds the right Human Interface Guidelines pages offline from Apple's HIG table of contents (158 pages: " +
+      "platforms incl. iPhone Duo, foundations, patterns, components, inputs, technologies), ranked by relevance, " +
+      "with titles, abstracts and URLs. Then call find_apple_guidelines with a slug to read the live page.",
+    inputSchema: {
+      query: z.string().optional().describe("Topic, e.g. 'tab bar', 'tvos focus', 'onboarding', 'widgets'"),
+      section: z.string().optional().describe("Getting started, Foundations, Patterns, Components, Inputs or Technologies"),
+      limit: z.number().int().min(1).max(50).optional(),
+    },
+    run: async (args) => {
+      const cliArgs = ["guidelines-search", args.query ?? ""];
+      if (args.section) cliArgs.push("--section", args.section);
+      if (args.limit) cliArgs.push("--limit", String(args.limit));
+      return runTool("tools/apple-docs-research/apple_docs.py", cliArgs);
+    },
+  },
+  {
     name: "prepare_icon_assets",
     annotations: LOCAL_WRITE,
     title: "Prepare app icon assets",
@@ -471,28 +490,133 @@ export const TOOL_SPECS = [
     },
   },
   {
+    name: "get_app_store_specs",
+    title: "Get Apple's App Store asset specifications",
+    description:
+      "Returns Apple's published screenshot slots (every iPhone, iPad, Mac, Apple TV, Vision Pro and Watch size, " +
+      "with which sets are required and their fallbacks), app preview video rules and app icon sizes per platform, " +
+      "with the source URLs and the date they were transcribed. Call this before planning captures or artwork.",
+    inputSchema: {
+      platforms: z
+        .array(z.enum(["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"]))
+        .optional()
+        .describe("Limit screenshot slots to these platforms"),
+    },
+    run: async (args) => {
+      const cliArgs = ["--specs"];
+      if (args.platforms?.length) cliArgs.push("--platforms", args.platforms.join(","));
+      return runTool("tools/screenshot-studio/screenshot_studio.py", cliArgs);
+    },
+  },
+  {
+    name: "capture_screenshots",
+    annotations: { ...LOCAL_WRITE, idempotentHint: false },
+    title: "Capture App Store screenshots in the Simulator",
+    description:
+      "Drives the iOS/iPadOS/tvOS/visionOS/watchOS Simulator from a JSON plan: for every device × locale × " +
+      "appearance × screen it boots the simulator, sets the 9:41 status bar, applies light/dark, (re)installs the " +
+      "app, launches it with -AppleLanguages/-AppleLocale plus the screen's launch arguments or deep link, and " +
+      "saves a PNG to <out>/<locale>/<device>/<screen>.png. Captures are flattened to opaque RGB and validated " +
+      "against Apple's slots; manifest.json records provenance. Devices may be simulator names or slot ids from " +
+      "get_app_store_specs (e.g. 'iphone-6.9'). Use dry_run first to show the exact commands. Real captures only.",
+    inputSchema: {
+      plan: z.string().describe("Path to the capture plan JSON (bundle_id, devices, locales, appearances, screens, app)"),
+      out: z.string().describe("Output root directory"),
+      dry_run: z.boolean().optional().describe("Print the simctl commands without executing anything"),
+    },
+    run: async (args) => {
+      const cliArgs = [resolveTarget(args.plan), "--out", resolveOutput(args.out)];
+      if (args.dry_run) cliArgs.push("--dry-run");
+      return runTool("tools/screenshot-studio/capture_batch.py", cliArgs, { timeoutMs: 1_800_000 });
+    },
+  },
+  {
+    name: "audit_screenshots",
+    title: "Audit App Store screenshots",
+    description:
+      "Validates a screenshot folder (locale subfolders allowed) against Apple's specification: exact slot sizes, " +
+      "no alpha channel, 1–10 per device size, one orientation per set, one Apple Watch size across locales, and " +
+      "— when platforms are given — the sets Apple requires for each platform.",
+    inputSchema: {
+      path: z.string().describe("Screenshots directory"),
+      platforms: z
+        .array(z.enum(["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"]))
+        .optional()
+        .describe("Platforms the app ships on, to check required sets"),
+    },
+    run: async (args) => {
+      const cliArgs = ["--screenshots", resolveTarget(args.path)];
+      if (args.platforms?.length) cliArgs.push("--platforms", args.platforms.join(","));
+      return runTool("tools/screenshot-studio/screenshot_studio.py", cliArgs);
+    },
+  },
+  {
     name: "compose_marketing_screenshots",
     annotations: LOCAL_WRITE,
     title: "Compose marketing screenshots",
     description:
-      "Lays real simulator screenshots into App Store marketing frames (background, headline, subheadline) as " +
-      "exact-size SVG, optionally rasterised when a renderer is installed. Refuses to invent screens: it only " +
-      "composes images you actually captured.",
+      "Lays real screenshots into App Store marketing frames: background, localized headline and subheadline, " +
+      "an optional drawn device frame (with Dynamic Island on iPhone), right-to-left layout for Arabic/Hebrew. " +
+      "Always writes editable SVG; with render=true it also writes opaque RGB PNGs at the exact slot size, drawn " +
+      "natively on macOS with CoreGraphics and the San Francisco system font. Locale subfolders are mirrored. " +
+      "Refuses to invent screens: it only composes images you actually captured.",
     inputSchema: {
-      screenshots: z.string().describe("Directory of real screenshots"),
+      screenshots: z.string().describe("Directory of real screenshots (e.g. the capture_screenshots output)"),
       out: z.string().describe("Directory to write compositions into"),
-      headline: z.string().optional().describe("Headline copy"),
-      subhead: z.string().optional().describe("Supporting line"),
-      theme: z.enum(["dark", "light", "warm"]).optional().describe("Colour theme (default: dark)"),
-      render: z.boolean().optional().describe("Also rasterise to PNG when a renderer is available"),
+      captions: z
+        .string()
+        .optional()
+        .describe('Captions JSON: {"en-US": {"01-home": {"headline": "…", "subhead": "…"}}, "*": {"*": {…}}}'),
+      headline: z.string().optional().describe("Headline when no caption matches"),
+      subhead: z.string().optional().describe("Supporting line when no caption matches"),
+      theme: z.enum(["dark", "light", "warm", "blue", "graphite"]).optional().describe("Colour theme (default: dark)"),
+      layout: z.enum(["caption-top", "caption-bottom"]).optional(),
+      frame: z.enum(["auto", "device", "none"]).optional().describe("Device bezel (auto: iPhone/iPad portrait)"),
+      align: z.enum(["center", "left"]).optional(),
+      canvas: z.string().optional().describe("WxH override, e.g. 1290x2796"),
+      render: z.boolean().optional().describe("Also write App Store-ready PNGs"),
     },
     run: async (args) => {
       const cliArgs = ["--screenshots", resolveTarget(args.screenshots), "--out", resolveOutput(args.out)];
+      if (args.captions) cliArgs.push("--captions", resolveTarget(args.captions));
       if (args.headline) cliArgs.push("--headline", args.headline);
       if (args.subhead) cliArgs.push("--subhead", args.subhead);
-      if (args.theme) cliArgs.push("--theme", args.theme);
+      for (const key of ["theme", "layout", "frame", "align", "canvas"]) {
+        if (args[key]) cliArgs.push(`--${key}`, args[key]);
+      }
       if (args.render) cliArgs.push("--render");
       return runTool("tools/screenshot-studio/compose_marketing.py", cliArgs);
+    },
+  },
+  {
+    name: "plan_distribution",
+    annotations: LOCAL_WRITE,
+    title: "Plan archive, upload and notarization",
+    description:
+      "Preflights a project for distribution and returns the exact ordered commands: xcodebuild archive, export " +
+      "or direct upload, altool validate/upload, and for Developer ID notarytool, stapler and spctl. Flags missing " +
+      "team, version/build number, export-compliance key, Hardened Runtime, App Sandbox, debug entitlements, " +
+      "privacy manifest and app icon. Generates ExportOptions.plist (written only when write_export_options is " +
+      "set). Never builds, uploads or contacts Apple; run steps marked requires_approval only with the user's consent.",
+    inputSchema: {
+      path: OPTIONAL_PATH,
+      method: z
+        .enum(["app-store", "testflight-internal", "release-testing", "enterprise", "debugging", "developer-id", "mac-app-store"])
+        .optional()
+        .describe("Distribution method (default app-store)"),
+      scheme: z.string().optional().describe("Scheme to archive"),
+      platform: z.enum(["iOS", "macOS", "tvOS", "visionOS", "watchOS"]).optional().describe("Override detection"),
+      upload: z.boolean().optional().describe("App Store methods: upload during export (destination=upload)"),
+      write_export_options: z.string().optional().describe("Write ExportOptions.plist to this path"),
+    },
+    run: async (args) => {
+      const cliArgs = [resolveTarget(args.path)];
+      if (args.method) cliArgs.push("--method", args.method);
+      if (args.scheme) cliArgs.push("--scheme", args.scheme);
+      if (args.platform) cliArgs.push("--platform", args.platform);
+      if (args.upload) cliArgs.push("--upload");
+      if (args.write_export_options) cliArgs.push("--write-export-options", resolveOutput(args.write_export_options));
+      return runTool("tools/distribution/plan_distribution.py", cliArgs);
     },
   },
   {
